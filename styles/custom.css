@@ -302,6 +302,31 @@ body {
     }
 }
 
+/* Progress Circles */
+.progress-circle {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid #e9ecef;
+    background: #f8f9fa;
+    transition: all 0.2s ease;
+}
+
+.progress-circle.learned {
+    background: #10b981;
+    border-color: #10b981;
+}
+
+.progress-circle.review {
+    background: #f59e0b;
+    border-color: #f59e0b;
+}
+
+.progress-circle.current {
+    border-color: #6c757d;
+    border-width: 3px;
+}
+
 /* Review Stack */
 .review-stack {
     min-height: 60px;

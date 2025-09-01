@@ -32,81 +32,15 @@
     <!-- Main Content -->
     <main class="main-content">
         <div class="container py-4">
-            <!-- Overall Progress -->
+            <!-- Learning Level Progress -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
-                    <h2 class="h6 text-muted mb-3">Overall Progress</h2>
-                    <div class="text-center mb-3">
-                        <div class="display-4 text-primary mb-1" id="learnedCount">0</div>
-                        <div class="text-muted">Words Learned</div>
+                    <h2 class="h6 text-muted mb-3">Learning Level</h2>
+                    <div id="difficultyLevels" class="d-flex justify-content-center gap-3 mb-3">
+                        <!-- Difficulty badges will be populated here -->
                     </div>
-                    <div class="progress mb-3" style="height: 12px;">
-                        <div id="mainProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
-                    </div>
-                    <div class="d-flex justify-content-between small text-muted">
-                        <span>0%</span>
-                        <span id="progressText">0 of 30 words</span>
-                        <span>100%</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Stats Cards -->
-            <div class="row g-3 mb-4">
-                <div class="col-6">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center">
-                            <div class="text-primary mb-2">
-                                <i class="bi bi-book fs-3"></i>
-                            </div>
-                            <div class="display-6 mb-1" id="reviewCount">0</div>
-                            <div class="small text-muted">For Review</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-6">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-body text-center">
-                            <div class="text-warning mb-2">
-                                <i class="bi bi-fire fs-3"></i>
-                            </div>
-                            <div class="display-6 mb-1" id="streakCount">0</div>
-                            <div class="small text-muted">Day Streak</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Categories Progress -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h2 class="h6 text-muted mb-3">Learning Progress Over Time</h2>
-                    <div id="progressChart" style="height: 200px;"></div>
-                </div>
-            </div>
-
-            <!-- Category Mastery -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h2 class="h6 text-muted mb-3">Category Mastery</h2>
-                    <div id="categoryChart" style="height: 250px;"></div>
-                </div>
-            </div>
-
-            <!-- Learning Streak Calendar -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h2 class="h6 text-muted mb-3">Learning Activity</h2>
-                    <div id="streakCalendar" style="height: 120px;"></div>
-                </div>
-            </div>
-
-            <!-- Categories Progress -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h2 class="h6 text-muted mb-3">Categories Word Cloud</h2>
-                    <div id="categoryWordCloud" style="height: 300px;">
-                        <!-- Word cloud will be populated here -->
+                    <div id="levelProgress" class="text-center">
+                        <!-- Level progress info will be populated here -->
                     </div>
                 </div>
             </div>

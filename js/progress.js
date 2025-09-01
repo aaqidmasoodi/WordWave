@@ -12,10 +12,7 @@ class ProgressManager {
         
         // Delay D3 chart creation to ensure DOM is fully loaded
         setTimeout(() => {
-            this.createProgressChart();
-            this.createCategoryChart();
-            this.createStreakCalendar();
-            this.createCategoryWordCloud();
+            // D3 charts removed - keeping library for future use
         }, 100);
     }
 
@@ -26,27 +23,46 @@ class ProgressManager {
         const streak = this.userData.streak;
         const completionPercent = totalWords > 0 ? Math.round((learnedWords / totalWords) * 100) : 0;
 
-        // Update main stats
-        document.getElementById('learnedCount').textContent = learnedWords;
-        document.getElementById('reviewCount').textContent = reviewWords;
-        document.getElementById('streakCount').textContent = streak;
-        document.getElementById('streakDisplay').textContent = `🔥 ${streak}`;
+        // These elements may not exist anymore, so check before updating
+        const learnedCountElement = document.getElementById('learnedCount');
+        const reviewCountElement = document.getElementById('reviewCount');
+        const streakCountElement = document.getElementById('streakCount');
+        const streakDisplayElement = document.getElementById('streakDisplay');
+        const mainProgressElement = document.getElementById('mainProgress');
+        const progressTextElement = document.getElementById('progressText');
 
-        // Update progress bar
-        const progressBar = document.getElementById('mainProgress');
-        progressBar.style.width = `${completionPercent}%`;
-        progressBar.className = 'progress-bar';
-        
-        if (completionPercent < 30) {
-            progressBar.classList.add('bg-warning');
-        } else if (completionPercent < 70) {
-            progressBar.classList.add('bg-info');
-        } else {
-            progressBar.classList.add('bg-success');
+        if (learnedCountElement) {
+            learnedCountElement.textContent = learnedWords;
         }
 
-        // Update progress text
-        document.getElementById('progressText').textContent = `${learnedWords} of ${totalWords} words`;
+        if (reviewCountElement) {
+            reviewCountElement.textContent = reviewWords;
+        }
+
+        if (streakCountElement) {
+            streakCountElement.textContent = streak;
+        }
+
+        if (streakDisplayElement) {
+            streakDisplayElement.textContent = `🔥 ${streak}`;
+        }
+
+        if (mainProgressElement) {
+            mainProgressElement.style.width = `${completionPercent}%`;
+            mainProgressElement.className = 'progress-bar';
+            
+            if (completionPercent < 30) {
+                mainProgressElement.classList.add('bg-warning');
+            } else if (completionPercent < 70) {
+                mainProgressElement.classList.add('bg-info');
+            } else {
+                mainProgressElement.classList.add('bg-success');
+            }
+        }
+
+        if (progressTextElement) {
+            progressTextElement.textContent = `${learnedWords} of ${totalWords} words`;
+        }
     }
 
     updateCategoriesProgress() {

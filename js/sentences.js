@@ -3,7 +3,31 @@ class SentenceManager {
         this.currentSentenceIndex = 0;
         this.userData = window.app.userData;
         this.sessionSentences = this.generateSessionSentences();
+        this.sessionResults = []; // Track swipe results
+        this.loadSessionState();
         this.init();
+    }
+
+    loadSessionState() {
+        const savedState = localStorage.getItem('sentenceSession');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            // Only restore if it's the same session (same sentences)
+            if (state.sessionLength === this.sessionSentences.length) {
+                this.currentSentenceIndex = state.currentIndex || 0;
+                this.sessionResults = state.results || [];
+            }
+        }
+    }
+
+    saveSessionState() {
+        const state = {
+            currentIndex: this.currentSentenceIndex,
+            results: this.sessionResults,
+            sessionLength: this.sessionSentences.length,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('sentenceSession', JSON.stringify(state));
     }
 
     generateSessionSentences() {
@@ -83,6 +107,7 @@ class SentenceManager {
             this.showNoSentencesMessage();
         } else {
             this.displayCurrentSentence();
+            this.displayNextSentence();
             this.updateProgress();
             this.updateReviewStack();
             this.setupEventListeners();
@@ -129,9 +154,46 @@ class SentenceManager {
         this.updateProgress();
     }
 
+    displayNextSentence() {
+        const nextIndex = (this.currentSentenceIndex + 1) % this.sessionSentences.length;
+        const nextSentence = this.sessionSentences[nextIndex];
+        if (!nextSentence) return;
+
+        document.getElementById('nextCurrentSentenceEn').textContent = nextSentence.english;
+        document.getElementById('nextCurrentSentenceUr').textContent = nextSentence.urdu;
+
+        // Show appropriate indicator for next card
+        const nextSentenceCard = document.getElementById('nextSentenceCard');
+        nextSentenceCard.classList.remove('review-word', 'learned-word');
+        
+        if (nextSentence.sentenceType === 'review') {
+            nextSentenceCard.classList.add('review-word');
+        } else if (nextSentence.sentenceType === 'learned') {
+            nextSentenceCard.classList.add('learned-word');
+        }
+
+        // Reset card flip
+        nextSentenceCard.classList.remove('flipped');
+    }
+
     nextSentence() {
+        const oldIndex = this.currentSentenceIndex;
         this.currentSentenceIndex = (this.currentSentenceIndex + 1) % this.sessionSentences.length;
-        this.displayCurrentSentence();
+        
+        // If we've looped back to the beginning, reset session results
+        if (oldIndex === this.sessionSentences.length - 1 && this.currentSentenceIndex === 0) {
+            this.sessionResults = [];
+            localStorage.removeItem('sentenceSession'); // Clear saved session
+        } else {
+            this.saveSessionState();
+        }
+        
+        this.updateSentenceCounter();
+        this.updateProgress();
+    }
+
+    updateSentenceCounter() {
+        document.getElementById('sentenceCounter').textContent = `${this.currentSentenceIndex + 1}/${this.sessionSentences.length}`;
     }
 
     flipCard() {
@@ -141,6 +203,11 @@ class SentenceManager {
 
     markAsLearned() {
         const currentSentence = this.sessionSentences[this.currentSentenceIndex];
+        
+        // Record the result
+        this.sessionResults[this.currentSentenceIndex] = 'learned';
+        this.saveSessionState();
+        
         window.app.markSentenceAsLearned(currentSentence.id);
         this.updateProgress();
         this.updateReviewStack();
@@ -149,6 +216,11 @@ class SentenceManager {
 
     markForReview() {
         const currentSentence = this.sessionSentences[this.currentSentenceIndex];
+        
+        // Record the result
+        this.sessionResults[this.currentSentenceIndex] = 'review';
+        this.saveSessionState();
+        
         window.app.markSentenceForReview(currentSentence.id);
         this.updateProgress();
         this.updateReviewStack();
@@ -157,6 +229,7 @@ class SentenceManager {
 
     animateCardOut(direction) {
         const sentenceCard = document.getElementById('sentenceCard');
+        const nextSentenceCard = document.getElementById('nextSentenceCard');
         
         // Show feedback
         const feedback = direction === 'left' ? 
@@ -164,44 +237,97 @@ class SentenceManager {
             document.getElementById('rightFeedback');
         feedback.classList.add('show');
         
-        // Animate out
+        // Animate current card out
         sentenceCard.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease';
         sentenceCard.style.transform = direction === 'left' ? 
             'translateX(-120vw) rotate(-30deg)' : 
             'translateX(120vw) rotate(30deg)';
         sentenceCard.style.opacity = '0';
         
+        // Animate next card to front position
+        nextSentenceCard.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+        nextSentenceCard.style.transform = 'scale(1) translateY(0)';
+        nextSentenceCard.style.opacity = '1';
+        nextSentenceCard.style.zIndex = '2';
+        
         setTimeout(() => {
             feedback.classList.remove('show');
-            // Reset all transforms and transitions
-            sentenceCard.style.transition = '';
-            sentenceCard.style.transform = '';
-            sentenceCard.style.opacity = '';
             
             // Move to next sentence
             this.nextSentence();
-        }, 600);
+            
+            // Completely hide the swiped card to prevent glitch
+            sentenceCard.style.display = 'none';
+            
+            setTimeout(() => {
+                // Reset and reposition the swiped card as the new back card
+                sentenceCard.style.display = 'block';
+                sentenceCard.style.transition = '';
+                sentenceCard.style.transform = 'scale(0.95) translateY(8px)';
+                sentenceCard.style.opacity = '0.8';
+                sentenceCard.style.zIndex = '1';
+                
+                // Update the back card with the next sentence content
+                const nextNextIndex = (this.currentSentenceIndex + 1) % this.sessionSentences.length;
+                const nextNextSentence = this.sessionSentences[nextNextIndex];
+                
+                if (nextNextSentence) {
+                    sentenceCard.querySelector('#currentSentenceEn, #nextCurrentSentenceEn').textContent = nextNextSentence.english;
+                    sentenceCard.querySelector('#currentSentenceUr, #nextCurrentSentenceUr').textContent = nextNextSentence.urdu;
+                    
+                    // Update indicators
+                    sentenceCard.classList.remove('review-word', 'learned-word');
+                    if (nextNextSentence.sentenceType === 'review') {
+                        sentenceCard.classList.add('review-word');
+                    } else if (nextNextSentence.sentenceType === 'learned') {
+                        sentenceCard.classList.add('learned-word');
+                    }
+                    sentenceCard.classList.remove('flipped');
+                }
+                
+                // Swap IDs
+                const tempId = sentenceCard.id;
+                sentenceCard.id = nextSentenceCard.id;
+                nextSentenceCard.id = tempId;
+                
+                // Update progress and counter
+                this.updateProgress();
+                this.updateSentenceCounter();
+            }, 50);
+            
+        }, 500);
     }
 
     updateProgress() {
         const totalSentences = this.sessionSentences.length;
         const currentSentence = this.currentSentenceIndex + 1;
-        const learnedCount = this.userData.learnedSentences ? this.userData.learnedSentences.length : 0;
 
-        // Calculate total available sentences from learned words
-        const learnedWords = this.userData.learnedWords || [];
-        let totalAvailableSentences = 0;
-        vocabularyData.forEach(word => {
-            if (learnedWords.includes(word.id) && word.sentences) {
-                totalAvailableSentences += word.sentences.length;
+        // Update circles
+        this.updateProgressCircles();
+        
+        document.getElementById('progressText').textContent = `${currentSentence}/${totalSentences}`;
+    }
+
+    updateProgressCircles() {
+        const container = document.getElementById('progressCircles');
+        const totalSentences = this.sessionSentences.length;
+        
+        let circlesHTML = '';
+        for (let i = 0; i < totalSentences; i++) {
+            let circleClass = 'progress-circle';
+            
+            if (i < this.sessionResults.length) {
+                // Already swiped
+                circleClass += this.sessionResults[i] === 'learned' ? ' learned' : ' review';
+            } else if (i === this.currentSentenceIndex) {
+                // Current sentence
+                circleClass += ' current';
             }
-        });
-
-        const progressPercent = totalSentences > 0 ? Math.round((currentSentence / totalSentences) * 100) : 0;
-        document.getElementById('sentenceProgress').style.width = `${progressPercent}%`;
-        document.getElementById('progressText').textContent = `${progressPercent}%`;
-        document.getElementById('learnedSentences').textContent = `${learnedCount} learned`;
-        document.getElementById('totalSentences').textContent = `${totalAvailableSentences} available`;
+            
+            circlesHTML += `<div class="${circleClass}"></div>`;
+        }
+        
+        container.innerHTML = circlesHTML;
     }
 
     updateReviewStack() {
@@ -241,33 +367,34 @@ class SentenceManager {
 
     setupEventListeners() {
         const sentenceCard = document.getElementById('sentenceCard');
-        const frontSpeakBtn = document.getElementById('frontSpeakBtn');
-        const backSpeakBtn = document.getElementById('backSpeakBtn');
+        const nextSentenceCard = document.getElementById('nextSentenceCard');
 
-        // Speak buttons
-        if (frontSpeakBtn) {
-            frontSpeakBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentSentence = this.sessionSentences[this.currentSentenceIndex].english;
-                window.app.speakText(currentSentence);
-            });
-        }
+        // Add swipe functionality to both cards
+        this.addSwipeListeners(sentenceCard);
+        this.addSwipeListeners(nextSentenceCard);
+    }
 
-        if (backSpeakBtn) {
-            backSpeakBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentSentence = this.sessionSentences[this.currentSentenceIndex].english;
-                window.app.speakText(currentSentence);
-            });
-        }
-
+    addSwipeListeners(card) {
         // Simple click/tap to flip (works on mobile)
-        sentenceCard.addEventListener('click', (e) => {
+        card.addEventListener('click', (e) => {
             // Don't flip if clicking on speak buttons
-            if (e.target.closest('#frontSpeakBtn') || e.target.closest('#backSpeakBtn')) {
+            if (e.target.closest('button')) {
                 return;
             }
-            this.flipCard();
+            this.flipCard(card);
+        });
+
+        // Add speak button listeners for this card
+        const speakButtons = card.querySelectorAll('button');
+        speakButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Get the current sentence from the card that was clicked
+                const sentenceElement = card.querySelector('#currentSentenceEn, #nextCurrentSentenceEn');
+                if (sentenceElement) {
+                    window.app.speakText(sentenceElement.textContent);
+                }
+            });
         });
 
         // Swipe handling
@@ -293,7 +420,7 @@ class SentenceManager {
                 isDragging = true;
                 
                 // Apply transform
-                sentenceCard.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.1}deg)`;
+                card.style.transform = `translateX(${diffX}px) rotate(${diffX * 0.1}deg)`;
                 
                 // Show feedback
                 if (diffX > 50) {
@@ -319,7 +446,7 @@ class SentenceManager {
             document.getElementById('rightFeedback').classList.remove('show');
             
             // Reset transform
-            sentenceCard.style.transform = '';
+            card.style.transform = '';
             
             // Trigger action if dragged far enough
             if (isDragging && Math.abs(diffX) > 80) {
@@ -338,12 +465,12 @@ class SentenceManager {
         };
 
         // Touch events
-        sentenceCard.addEventListener('touchstart', (e) => {
+        card.addEventListener('touchstart', (e) => {
             const touch = e.touches[0];
             handleStart(touch.clientX, touch.clientY);
         }, { passive: false });
 
-        sentenceCard.addEventListener('touchmove', (e) => {
+        card.addEventListener('touchmove', (e) => {
             if (startX) {
                 e.preventDefault();
                 const touch = e.touches[0];
@@ -351,28 +478,33 @@ class SentenceManager {
             }
         }, { passive: false });
 
-        sentenceCard.addEventListener('touchend', (e) => {
+        card.addEventListener('touchend', (e) => {
             handleEnd();
         });
 
         // Mouse events
-        sentenceCard.addEventListener('mousedown', (e) => {
+        card.addEventListener('mousedown', (e) => {
             handleStart(e.clientX, e.clientY);
         });
 
-        sentenceCard.addEventListener('mousemove', (e) => {
+        card.addEventListener('mousemove', (e) => {
             if (startX) {
                 handleMove(e.clientX, e.clientY);
             }
         });
 
-        sentenceCard.addEventListener('mouseup', () => {
+        card.addEventListener('mouseup', () => {
             handleEnd();
         });
 
-        sentenceCard.addEventListener('mouseleave', () => {
+        card.addEventListener('mouseleave', () => {
             handleEnd();
         });
+    }
+
+    flipCard(card = null) {
+        const targetCard = card || document.getElementById('sentenceCard');
+        targetCard.classList.toggle('flipped');
     }
 }
 

@@ -1,4 +1,38 @@
 /* styles/animations.css */
+/* Flashcard Stack Container */
+.flashcard-stack {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    margin: 0 auto;
+}
+
+.flashcard-stack .flip-card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    perspective: 1000px;
+    width: 100%;
+    height: 300px;
+    margin: 0 auto;
+    user-select: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: transform 0.1s ease-out;
+}
+
+/* Next card is slightly behind and smaller */
+#nextFlashcard, #nextSentenceCard {
+    transform: scale(0.95) translateY(8px);
+    z-index: 1;
+    opacity: 0.8;
+}
+
+/* Current card is on top */
+#flashcard, #sentenceCard {
+    z-index: 2;
+}
+
 .flip-card {
     perspective: 1000px;
     width: 100%;

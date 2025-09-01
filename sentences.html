@@ -39,44 +39,69 @@
             </div>
 
             <!-- Sentence Card Container -->
-            <div class="flip-card mb-4" id="sentenceCard">
-                <div class="flip-card-inner">
-                    <!-- Front Side -->
-                    <div class="flip-card-front">
-                        <h2 id="currentSentenceEn" class="h4 mb-3">Hello, how are you?</h2>
-                        <div class="mt-3">
-                            <button id="frontSpeakBtn" class="btn btn-sm btn-light">
-                                <i class="bi bi-volume-up"></i> Speak
-                            </button>
+            <div class="flashcard-stack mb-4">
+                <!-- Main sentence card -->
+                <div class="flip-card" id="sentenceCard">
+                    <div class="flip-card-inner">
+                        <!-- Front Side -->
+                        <div class="flip-card-front">
+                            <h2 id="currentSentenceEn" class="h4 mb-3">Hello, how are you?</h2>
+                            <div class="mt-3">
+                                <button id="frontSpeakBtn" class="btn btn-sm btn-light">
+                                    <i class="bi bi-volume-up"></i> Speak
+                                </button>
+                            </div>
+                            <p class="swipe-hint mt-3">Swipe to interact</p>
                         </div>
-                        <p class="swipe-hint mt-3">Swipe to interact</p>
+                        
+                        <!-- Back Side -->
+                        <div class="flip-card-back">
+                            <h3 id="currentSentenceUr" class="h4 mb-3">ہیلو، آپ کیسے ہیں؟</h3>
+                            <div class="mt-3">
+                                <button id="backSpeakBtn" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-volume-up"></i> Speak
+                                </button>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <!-- Back Side -->
-                    <div class="flip-card-back">
-                        <h3 id="currentSentenceUr" class="h4 mb-3">ہیلو، آپ کیسے ہیں؟</h3>
-                        <div class="mt-3">
-                            <button id="backSpeakBtn" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-volume-up"></i> Speak
-                            </button>
+                </div>
+
+                <!-- Next sentence card (underneath) -->
+                <div class="flip-card" id="nextSentenceCard">
+                    <div class="flip-card-inner">
+                        <!-- Front Side -->
+                        <div class="flip-card-front">
+                            <h2 id="nextCurrentSentenceEn" class="h4 mb-3">Good morning!</h2>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-light">
+                                    <i class="bi bi-volume-up"></i> Speak
+                                </button>
+                            </div>
+                            <p class="swipe-hint mt-3">Swipe to interact</p>
+                        </div>
+                        
+                        <!-- Back Side -->
+                        <div class="flip-card-back">
+                            <h3 id="nextCurrentSentenceUr" class="h4 mb-3">صبح بخیر!</h3>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-volume-up"></i> Speak
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Progress Bar -->
+            <!-- Progress Circles -->
             <div class="card border-0 shadow-sm">
                 <div class="card-body">
                     <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="small text-muted">Progress</span>
-                        <span id="progressText" class="small">0%</span>
+                        <span class="small text-muted">Session Progress</span>
+                        <span id="progressText" class="small">0/20</span>
                     </div>
-                    <div class="progress" style="height: 6px;">
-                        <div id="sentenceProgress" class="progress-bar bg-primary" role="progressbar" style="width: 0%"></div>
-                    </div>
-                    <div class="d-flex justify-content-between small text-muted mt-2">
-                        <span id="learnedSentences">0 learned</span>
-                        <span id="totalSentences">0 total</span>
+                    <div id="progressCircles" class="d-flex flex-wrap gap-1 justify-content-center">
+                        <!-- Circles will be populated here -->
                     </div>
                 </div>
             </div>

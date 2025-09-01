@@ -4,7 +4,31 @@ class FlashcardManager {
         this.currentCardIndex = 0;
         this.userData = window.app.userData;
         this.sessionWords = this.generateSessionWords();
+        this.sessionResults = []; // Track swipe results
+        this.loadSessionState();
         this.init();
+    }
+
+    loadSessionState() {
+        const savedState = localStorage.getItem('flashcardSession');
+        if (savedState) {
+            const state = JSON.parse(savedState);
+            // Only restore if it's the same session (same words)
+            if (state.sessionLength === this.sessionWords.length) {
+                this.currentCardIndex = state.currentIndex || 0;
+                this.sessionResults = state.results || [];
+            }
+        }
+    }
+
+    saveSessionState() {
+        const state = {
+            currentIndex: this.currentCardIndex,
+            results: this.sessionResults,
+            sessionLength: this.sessionWords.length,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('flashcardSession', JSON.stringify(state));
     }
 
     generateSessionWords() {
@@ -59,6 +83,7 @@ class FlashcardManager {
 
     init() {
         this.displayCurrentCard();
+        this.displayNextCard();
         this.updateProgress();
         this.updateReviewStack();
         this.setupEventListeners();
@@ -91,9 +116,43 @@ class FlashcardManager {
         this.updateProgress();
     }
 
+    displayNextCard() {
+        const nextIndex = (this.currentCardIndex + 1) % this.sessionWords.length;
+        const nextWord = this.sessionWords[nextIndex];
+        if (!nextWord) return;
+
+        document.getElementById('nextCurrentWord').textContent = nextWord.english;
+        document.getElementById('nextWordTranslation').textContent = nextWord.urdu;
+        document.getElementById('nextWordPhonetic').textContent = nextWord.phonetic;
+
+        // Show appropriate indicator for next card
+        const nextFlashcard = document.getElementById('nextFlashcard');
+        nextFlashcard.classList.remove('review-word', 'learned-word');
+        
+        if (nextWord.wordType === 'review') {
+            nextFlashcard.classList.add('review-word');
+        } else if (nextWord.wordType === 'learned') {
+            nextFlashcard.classList.add('learned-word');
+        }
+
+        // Reset card flip
+        nextFlashcard.classList.remove('flipped');
+    }
+
     nextCard() {
+        const oldIndex = this.currentCardIndex;
         this.currentCardIndex = (this.currentCardIndex + 1) % this.sessionWords.length;
-        this.displayCurrentCard();
+        
+        // If we've looped back to the beginning, reset session results
+        if (oldIndex === this.sessionWords.length - 1 && this.currentCardIndex === 0) {
+            this.sessionResults = [];
+            localStorage.removeItem('flashcardSession'); // Clear saved session
+        } else {
+            this.saveSessionState();
+        }
+        
+        this.updateCardCounter();
+        this.updateProgress();
     }
 
     flipCard() {
@@ -108,6 +167,10 @@ class FlashcardManager {
         console.log('Review words before:', this.userData.reviewWords);
         console.log('Review words types:', this.userData.reviewWords.map(id => typeof id));
         
+        // Record the result
+        this.sessionResults[this.currentCardIndex] = 'learned';
+        this.saveSessionState();
+        
         window.app.markWordAsLearned(currentWord.id);
         
         console.log('Review words after:', this.userData.reviewWords);
@@ -118,6 +181,11 @@ class FlashcardManager {
 
     markForReview() {
         const currentWord = this.sessionWords[this.currentCardIndex];
+        
+        // Record the result
+        this.sessionResults[this.currentCardIndex] = 'review';
+        this.saveSessionState();
+        
         window.app.markWordForReview(currentWord.id);
         this.updateProgress();
         this.updateReviewStack();
@@ -126,6 +194,7 @@ class FlashcardManager {
 
     animateCardOut(direction) {
         const flashcard = document.getElementById('flashcard');
+        const nextFlashcard = document.getElementById('nextFlashcard');
         
         // Show feedback
         const feedback = direction === 'left' ? 
@@ -133,33 +202,102 @@ class FlashcardManager {
             document.getElementById('rightFeedback');
         feedback.classList.add('show');
         
-        // Animate out
+        // Animate current card out
         flashcard.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.5s ease';
         flashcard.style.transform = direction === 'left' ? 
             'translateX(-120vw) rotate(-30deg)' : 
             'translateX(120vw) rotate(30deg)';
         flashcard.style.opacity = '0';
         
+        // Animate next card to front position
+        nextFlashcard.style.transition = 'transform 0.3s ease-out, opacity 0.3s ease-out';
+        nextFlashcard.style.transform = 'scale(1) translateY(0)';
+        nextFlashcard.style.opacity = '1';
+        nextFlashcard.style.zIndex = '2';
+        
         setTimeout(() => {
             feedback.classList.remove('show');
-            // Reset all transforms and transitions
-            flashcard.style.transition = '';
-            flashcard.style.transform = '';
-            flashcard.style.opacity = '';
+            
+            // Move to next card
             this.nextCard();
+            
+            // Completely hide the swiped card to prevent glitch
+            flashcard.style.display = 'none';
+            
+            setTimeout(() => {
+                // Reset and reposition the swiped card as the new back card
+                flashcard.style.display = 'block';
+                flashcard.style.transition = '';
+                flashcard.style.transform = 'scale(0.95) translateY(8px)';
+                flashcard.style.opacity = '0.8';
+                flashcard.style.zIndex = '1';
+                
+                // Update the back card with the next word content
+                const nextNextIndex = (this.currentCardIndex + 1) % this.sessionWords.length;
+                const nextNextWord = this.sessionWords[nextNextIndex];
+                
+                if (nextNextWord) {
+                    flashcard.querySelector('#currentWord, #nextCurrentWord').textContent = nextNextWord.english;
+                    flashcard.querySelector('#wordTranslation, #nextWordTranslation').textContent = nextNextWord.urdu;
+                    flashcard.querySelector('#wordPhonetic, #nextWordPhonetic').textContent = nextNextWord.phonetic;
+                    
+                    // Update indicators
+                    flashcard.classList.remove('review-word', 'learned-word');
+                    if (nextNextWord.wordType === 'review') {
+                        flashcard.classList.add('review-word');
+                    } else if (nextNextWord.wordType === 'learned') {
+                        flashcard.classList.add('learned-word');
+                    }
+                    flashcard.classList.remove('flipped');
+                }
+                
+                // Swap IDs
+                const tempId = flashcard.id;
+                flashcard.id = nextFlashcard.id;
+                nextFlashcard.id = tempId;
+                
+                // Update progress and card counter immediately
+                this.updateProgress();
+                this.updateCardCounter();
+            }, 50);
+            
         }, 500);
+    }
+
+    updateCardCounter() {
+        document.getElementById('cardCounter').textContent = `${this.currentCardIndex + 1}/${this.sessionWords.length}`;
     }
 
     updateProgress() {
         const totalCards = this.sessionWords.length;
         const currentCard = this.currentCardIndex + 1;
-        const learnedCount = this.userData.learnedWords ? this.userData.learnedWords.length : 0;
 
-        const progressPercent = totalCards > 0 ? Math.round((currentCard / totalCards) * 100) : 0;
-        document.getElementById('cardProgress').style.width = `${progressPercent}%`;
-        document.getElementById('progressText').textContent = `${progressPercent}%`;
-        document.getElementById('learnedCards').textContent = `${learnedCount} learned`;
-        document.getElementById('totalCards').textContent = `${vocabularyData.length} total`;
+        // Update circles
+        this.updateProgressCircles();
+        
+        document.getElementById('progressText').textContent = `${currentCard}/${totalCards}`;
+    }
+
+    updateProgressCircles() {
+        const container = document.getElementById('progressCircles');
+        const totalCards = this.sessionWords.length;
+        
+        let circlesHTML = '';
+        for (let i = 0; i < totalCards; i++) {
+            let circleClass = 'progress-circle';
+            
+            if (i < this.sessionResults.length) {
+                // Already swiped
+                circleClass += this.sessionResults[i] === 'learned' ? ' learned' : ' review';
+            } else if (i === this.currentCardIndex) {
+                // Current card
+                circleClass += ' current';
+            }
+            
+            circlesHTML += `<div class="${circleClass}"></div>`;
+        }
+        
+        container.innerHTML = circlesHTML;
     }
 
     updateReviewStack() {
@@ -185,33 +323,34 @@ class FlashcardManager {
 
     setupEventListeners() {
         const flashcard = document.getElementById('flashcard');
-        const frontSpeakBtn = document.getElementById('frontSpeakBtn');
-        const backSpeakBtn = document.getElementById('backSpeakBtn');
+        const nextFlashcard = document.getElementById('nextFlashcard');
 
-        // Speak buttons
-        if (frontSpeakBtn) {
-            frontSpeakBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentWord = this.sessionWords[this.currentCardIndex].english;
-                window.app.speakText(currentWord);
-            });
-        }
+        // Add swipe functionality to both cards
+        this.addSwipeListeners(flashcard);
+        this.addSwipeListeners(nextFlashcard);
+    }
 
-        if (backSpeakBtn) {
-            backSpeakBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const currentWord = this.sessionWords[this.currentCardIndex].english;
-                window.app.speakText(currentWord);
-            });
-        }
-
+    addSwipeListeners(card) {
         // Simple click/tap to flip (works on mobile)
-        flashcard.addEventListener('click', (e) => {
+        card.addEventListener('click', (e) => {
             // Don't flip if clicking on speak buttons
-            if (e.target.closest('#frontSpeakBtn') || e.target.closest('#backSpeakBtn')) {
+            if (e.target.closest('button')) {
                 return;
             }
-            this.flipCard();
+            this.flipCard(card);
+        });
+
+        // Add speak button listeners for this card
+        const speakButtons = card.querySelectorAll('button');
+        speakButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // Get the current word from the card that was clicked
+                const wordElement = card.querySelector('#currentWord, #nextCurrentWord');
+                if (wordElement) {
+                    window.app.speakText(wordElement.textContent);
+                }
+            });
         });
 
         // Swipe handling
@@ -251,7 +390,7 @@ class FlashcardManager {
                 }
                 
                 // Apply transform for visual drag
-                flashcard.style.transform = `translateX(${diffX * 0.3}px) rotate(${diffX * 0.1}deg)`;
+                card.style.transform = `translateX(${diffX * 0.3}px) rotate(${diffX * 0.1}deg)`;
             }
         };
 
@@ -265,7 +404,7 @@ class FlashcardManager {
             document.getElementById('rightFeedback').classList.remove('show');
             
             // Reset transform
-            flashcard.style.transform = '';
+            card.style.transform = '';
             
             // Trigger action if dragged far enough
             if (isDragging && Math.abs(diffX) > 80) {
@@ -284,12 +423,12 @@ class FlashcardManager {
         };
 
         // Touch events
-        flashcard.addEventListener('touchstart', (e) => {
+        card.addEventListener('touchstart', (e) => {
             const touch = e.touches[0];
             handleStart(touch.clientX, touch.clientY);
         }, { passive: false });
 
-        flashcard.addEventListener('touchmove', (e) => {
+        card.addEventListener('touchmove', (e) => {
             if (startX) {
                 e.preventDefault(); // Prevent scrolling only if we're tracking
                 const touch = e.touches[0];
@@ -297,28 +436,33 @@ class FlashcardManager {
             }
         }, { passive: false });
 
-        flashcard.addEventListener('touchend', (e) => {
+        card.addEventListener('touchend', (e) => {
             handleEnd();
         });
 
         // Mouse events for desktop testing
-        flashcard.addEventListener('mousedown', (e) => {
+        card.addEventListener('mousedown', (e) => {
             handleStart(e.clientX, e.clientY);
         });
 
-        flashcard.addEventListener('mousemove', (e) => {
+        card.addEventListener('mousemove', (e) => {
             if (startX) {
                 handleMove(e.clientX, e.clientY);
             }
         });
 
-        flashcard.addEventListener('mouseup', () => {
+        card.addEventListener('mouseup', () => {
             handleEnd();
         });
 
-        flashcard.addEventListener('mouseleave', () => {
+        card.addEventListener('mouseleave', () => {
             handleEnd();
         });
+    }
+
+    flipCard(card = null) {
+        const targetCard = card || document.getElementById('flashcard');
+        targetCard.classList.toggle('flipped');
     }
 }
 

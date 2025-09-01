@@ -105,6 +105,26 @@ class EnglishLearningApp {
         const learnedCountElement = document.getElementById('learnedCount');
         const totalCountElement = document.getElementById('totalCount');
 
+        // Home page specific elements
+        const homeWordsLearned = document.getElementById('homeWordsLearned');
+        const homeWordsReview = document.getElementById('homeWordsReview');
+        const homeSentencesLearned = document.getElementById('homeSentencesLearned');
+        const homeSentencesReview = document.getElementById('homeSentencesReview');
+
+        // Calculate sentence stats
+        const learnedSentences = this.userData.learnedSentences ? this.userData.learnedSentences.length : 0;
+        const reviewSentences = this.userData.reviewSentences ? this.userData.reviewSentences.length : 0;
+        const reviewWords = this.userData.reviewWords ? this.userData.reviewWords.length : 0;
+        
+        // Calculate total available sentences from learned words
+        const learnedWordIds = this.userData.learnedWords || [];
+        let totalAvailableSentences = 0;
+        vocabularyData.forEach(word => {
+            if (learnedWordIds.includes(word.id) && word.sentences) {
+                totalAvailableSentences += word.sentences.length;
+            }
+        });
+
         if (streakBadge) {
             streakBadge.textContent = `🔥 ${this.userData.streak || 0}`;
         }
@@ -127,6 +147,23 @@ class EnglishLearningApp {
             } else {
                 mainProgressElement.classList.add('bg-success');
             }
+        }
+
+        // Update home page progress elements
+        if (homeWordsLearned) {
+            homeWordsLearned.textContent = wordsLearned;
+        }
+
+        if (homeWordsReview) {
+            homeWordsReview.textContent = reviewWords;
+        }
+
+        if (homeSentencesLearned) {
+            homeSentencesLearned.textContent = learnedSentences;
+        }
+
+        if (homeSentencesReview) {
+            homeSentencesReview.textContent = reviewSentences;
         }
 
         if (learnedCountElement) {

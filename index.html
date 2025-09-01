@@ -49,35 +49,58 @@
                 </div>
             </div>
 
-            <!-- Difficulty Level Progress -->
+            <!-- Overall Progress -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body">
-                    <h2 class="h6 text-muted mb-3">Learning Level</h2>
-                    <div id="difficultyLevels" class="d-flex justify-content-center gap-3 mb-3">
-                        <!-- Difficulty badges will be populated here -->
+                    <h2 class="h6 text-muted mb-4">Your Learning Progress</h2>
+                    
+                    <!-- Words Progress -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-light rounded-3">
+                                <div class="text-primary mb-2">
+                                    <i class="bi bi-book fs-3"></i>
+                                </div>
+                                <div class="h4 mb-1 text-primary" id="homeWordsLearned">0</div>
+                                <div class="small text-muted">Words Learned</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-light rounded-3">
+                                <div class="text-warning mb-2">
+                                    <i class="bi bi-arrow-clockwise fs-3"></i>
+                                </div>
+                                <div class="h4 mb-1 text-warning" id="homeWordsReview">0</div>
+                                <div class="small text-muted">Words to Review</div>
+                            </div>
+                        </div>
                     </div>
-                    <div id="levelProgress" class="text-center">
-                        <!-- Level progress info will be populated here -->
+
+                    <!-- Sentences Progress -->
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-light rounded-3">
+                                <div class="text-success mb-2">
+                                    <i class="bi bi-chat-text fs-3"></i>
+                                </div>
+                                <div class="h4 mb-1 text-success" id="homeSentencesLearned">0</div>
+                                <div class="small text-muted">Sentences & Phrases</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-center p-3 bg-light rounded-3">
+                                <div class="text-info mb-2">
+                                    <i class="bi bi-clock-history fs-3"></i>
+                                </div>
+                                <div class="h4 mb-1 text-info" id="homeSentencesReview">0</div>
+                                <div class="small text-muted">Phrases to Review</div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Progress Summary -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h3 class="h6 mb-0">Your Progress</h3>
-                        <span id="progressPercent" class="text-muted">0%</span>
-                    </div>
-                    <div class="progress mb-3" style="height: 8px;">
-                        <div id="mainProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
-                    </div>
-                    <div class="d-flex justify-content-between small text-muted">
-                        <span id="learnedCount">0 learned</span>
-                        <span id="totalCount">30 total</span>
-                    </div>
-                </div>
-            </div>
+
         </div>
     </main>
 
