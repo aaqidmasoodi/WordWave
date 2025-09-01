@@ -435,6 +435,11 @@ class EnglishLearningApp {
             totalStudyTime: 0
         };
         
+        // Clear all session data
+        localStorage.removeItem('flashcardSession');
+        localStorage.removeItem('sentenceSession');
+        localStorage.removeItem('quizSession');
+        
         // Save the reset data
         this.saveUserData();
         

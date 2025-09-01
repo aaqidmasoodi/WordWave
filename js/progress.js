@@ -9,11 +9,6 @@ class ProgressManager {
         this.updateProgressStats();
         this.updateCategoriesProgress();
         this.displayRecentWords();
-        
-        // Delay D3 chart creation to ensure DOM is fully loaded
-        setTimeout(() => {
-            // D3 charts removed - keeping library for future use
-        }, 100);
     }
 
     updateProgressStats() {

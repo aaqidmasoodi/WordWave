@@ -4,11 +4,39 @@ class QuizManager {
         this.currentQuestionIndex = 0;
         this.score = 0;
         this.quizQuestions = [];
+        this.quizResults = []; // Track quiz results
+        this.loadQuizSession();
         this.init();
     }
 
+    loadQuizSession() {
+        const savedQuiz = localStorage.getItem('quizSession');
+        if (savedQuiz) {
+            const session = JSON.parse(savedQuiz);
+            this.currentQuestionIndex = session.currentIndex || 0;
+            this.score = session.score || 0;
+            this.quizResults = session.results || [];
+            this.quizQuestions = session.questions || [];
+        }
+    }
+
+    saveQuizSession() {
+        const session = {
+            currentIndex: this.currentQuestionIndex,
+            score: this.score,
+            results: this.quizResults,
+            questions: this.quizQuestions,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('quizSession', JSON.stringify(session));
+    }
+
     init() {
-        this.generateQuiz();
+        // If no saved session, generate new quiz
+        if (this.quizQuestions.length === 0) {
+            this.generateQuiz();
+        }
+        
         if (this.quizQuestions.length > 0) {
             this.displayQuestion();
         } else {
@@ -69,20 +97,20 @@ class QuizManager {
         const question = this.quizQuestions[this.currentQuestionIndex];
         const quizContent = document.getElementById('quizContent');
         
-        // Update counters
-        document.getElementById('questionCounter').textContent = 
-            `${this.currentQuestionIndex + 1}/${this.quizQuestions.length}`;
-        document.getElementById('quizScore').textContent = 
-            `${this.score}/${this.currentQuestionIndex}`;
+        // Update progress circles
+        this.updateProgressCircles();
 
         quizContent.innerHTML = `
-            <div class="mb-5">
-                <h3 class="h3 mb-4 text-muted fw-light">${question.question}</h3>
+            <div class="mb-4">
+                <h4 class="h5 mb-3 text-primary fw-normal lh-base">${question.question}</h4>
             </div>
-            <div class="d-grid gap-3">
+            <div class="d-grid gap-2">
                 ${question.options.map((option, index) => `
-                    <button class="btn btn-outline-primary quiz-option py-3 fs-5" data-index="${index}">
-                        ${option}
+                    <button class="btn quiz-option py-3 text-start" data-index="${index}">
+                        <div class="d-flex align-items-center">
+                            <div class="option-letter me-3">${String.fromCharCode(65 + index)}</div>
+                            <div class="option-text">${option}</div>
+                        </div>
                     </button>
                 `).join('')}
             </div>
@@ -91,28 +119,54 @@ class QuizManager {
         // Add event listeners to options
         document.querySelectorAll('.quiz-option').forEach(button => {
             button.addEventListener('click', (e) => {
-                this.handleAnswer(parseInt(e.target.dataset.index));
+                // Remove focus to prevent blue highlight
+                const clickedButton = e.currentTarget;
+                clickedButton.blur();
+                this.handleAnswer(parseInt(clickedButton.dataset.index));
             });
         });
+    }
+
+    updateProgressCircles() {
+        const container = document.getElementById('quizProgressCircles');
+        const totalQuestions = this.quizQuestions.length;
+        
+        let circlesHTML = '';
+        for (let i = 0; i < totalQuestions; i++) {
+            let circleClass = 'progress-circle';
+            
+            if (i < this.quizResults.length) {
+                // Already answered
+                circleClass += this.quizResults[i] === 'correct' ? ' learned' : ' review';
+            } else if (i === this.currentQuestionIndex) {
+                // Current question
+                circleClass += ' current';
+            }
+            
+            circlesHTML += `<div class="${circleClass}"></div>`;
+        }
+        
+        container.innerHTML = circlesHTML;
     }
 
     handleAnswer(selectedIndex) {
         const question = this.quizQuestions[this.currentQuestionIndex];
         const isCorrect = selectedIndex === question.correctIndex;
         
-        // Disable all buttons
+        // Record the result
+        this.quizResults[this.currentQuestionIndex] = isCorrect ? 'correct' : 'incorrect';
+        
+        // Disable all buttons but don't add visual styling to all
         document.querySelectorAll('.quiz-option').forEach(button => {
             button.disabled = true;
         });
 
-        // Show correct/incorrect styling
+        // Show correct/incorrect styling only on relevant buttons
         const buttons = document.querySelectorAll('.quiz-option');
-        buttons[question.correctIndex].classList.remove('btn-outline-primary');
-        buttons[question.correctIndex].classList.add('btn-success');
+        buttons[question.correctIndex].classList.add('correct');
         
         if (!isCorrect) {
-            buttons[selectedIndex].classList.remove('btn-outline-primary');
-            buttons[selectedIndex].classList.add('btn-danger');
+            buttons[selectedIndex].classList.add('incorrect');
             
             // Add incorrect word to review stack
             const correctAnswer = question.correctAnswer;
@@ -128,9 +182,16 @@ class QuizManager {
             this.score++;
         }
 
+        // Update progress circles immediately
+        this.updateProgressCircles();
+
         // Move to next question after delay
         setTimeout(() => {
             this.currentQuestionIndex++;
+            
+            // Save session AFTER moving to next question
+            this.saveQuizSession();
+            
             this.displayQuestion();
         }, 1500);
     }
@@ -157,6 +218,11 @@ class QuizManager {
     resetQuiz() {
         this.currentQuestionIndex = 0;
         this.score = 0;
+        this.quizResults = [];
+        
+        // Clear saved session
+        localStorage.removeItem('quizSession');
+        
         document.getElementById('quizContainer').style.display = 'block';
         document.getElementById('quizComplete').style.display = 'none';
         this.generateQuiz();

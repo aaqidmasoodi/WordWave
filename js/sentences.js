@@ -32,6 +32,12 @@ class SentenceManager {
 
     generateSessionSentences() {
         const learnedWords = this.userData.learnedWords || [];
+        
+        // Check if user has learned enough words (minimum 5 for sentences)
+        if (learnedWords.length < 5) {
+            return [];
+        }
+        
         const learnedSentences = this.userData.learnedSentences || [];
         const reviewSentences = this.userData.reviewSentences || [];
         
@@ -116,16 +122,35 @@ class SentenceManager {
 
     showNoSentencesMessage() {
         const sentenceCard = document.getElementById('sentenceCard');
+        const learnedWordsCount = this.userData.learnedWords ? this.userData.learnedWords.length : 0;
+        
         sentenceCard.innerHTML = `
             <div class="text-center p-4">
                 <i class="bi bi-book text-muted fs-1 mb-3"></i>
-                <h3 class="h5 mb-3">No Sentences Available</h3>
-                <p class="text-muted mb-3">Learn some words first to unlock their sentences for practice.</p>
+                <h3 class="h5 mb-3">Need More Words</h3>
+                <p class="text-muted mb-3">You need to learn at least 5 words to unlock sentence practice. You have learned ${learnedWordsCount} words.</p>
                 <a href="flashcards.html" class="btn btn-primary">
                     <i class="bi bi-card-checklist me-1"></i>Learn Words
                 </a>
             </div>
         `;
+        
+        // Hide the next sentence card
+        const nextSentenceCard = document.getElementById('nextSentenceCard');
+        if (nextSentenceCard) {
+            nextSentenceCard.style.display = 'none';
+        }
+        
+        // Hide progress and review sections
+        const progressSection = document.querySelector('.card:has(#progressCircles)');
+        const reviewSection = document.querySelector('.card:has(#reviewStack)');
+        
+        if (progressSection) {
+            progressSection.style.display = 'none';
+        }
+        if (reviewSection) {
+            reviewSection.style.display = 'none';
+        }
     }
 
     displayCurrentSentence() {
