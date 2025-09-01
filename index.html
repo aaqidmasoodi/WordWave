@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordWave | Home</title>
+    <!-- Fixed: Removed extra spaces in CDN links -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="styles/custom.css" rel="stylesheet">
+    <link href="styles/animations.css" rel="stylesheet">
+</head>
+<body>
+    <!-- App Header -->
+    <header class="app-header border-bottom">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between py-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-book fs-4 me-2 text-primary"></i>
+                    <h1 class="h5 mb-0">WordWave</h1>
+                </div>
+                <div class="d-flex align-items-center">
+                    <span id="streakBadge" class="badge bg-warning text-dark me-2">🔥 0</span>
+                    <span id="wordsBadge" class="badge bg-primary">0/30</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="container py-4">
+            <!-- Word of the Day -->
+            <div class="card border-0 shadow-sm mb-4 word-of-day-gradient">
+                <div class="card-body text-center">
+                    <h2 class="h6 mb-3">Word of the Day</h2>
+                    <div id="wordOfTheDay">
+                        <div class="h3 mb-2" id="dailyWordEnglish">Loading...</div>
+                        <div class="text-muted mb-3" id="dailyWordUrdu">...</div>
+                        <div class="mb-3">
+                            <button id="speakDailyWord" class="btn btn-sm btn-light">
+                                <i class="bi bi-volume-up"></i> Speak
+                            </button>
+                        </div>
+                        <a href="flashcards.html" class="btn btn-primary">
+                            <i class="bi bi-card-checklist me-1"></i>Learn More Words
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Difficulty Level Progress -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h6 text-muted mb-3">Learning Level</h2>
+                    <div id="difficultyLevels" class="d-flex justify-content-center gap-3 mb-3">
+                        <!-- Difficulty badges will be populated here -->
+                    </div>
+                    <div id="levelProgress" class="text-center">
+                        <!-- Level progress info will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Summary -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h3 class="h6 mb-0">Your Progress</h3>
+                        <span id="progressPercent" class="text-muted">0%</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 8px;">
+                        <div id="mainProgress" class="progress-bar" role="progressbar" style="width: 0%"></div>
+                    </div>
+                    <div class="d-flex justify-content-between small text-muted">
+                        <span id="learnedCount">0 learned</span>
+                        <span id="totalCount">30 total</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav border-top">
+        <div class="container">
+            <div class="row g-0">
+                <div class="col text-center">
+                    <a href="index.html" class="nav-link active">
+                        <i class="bi bi-house fs-5"></i>
+                        <div class="nav-text">Home</div>
+                    </a>
+                </div>
+                <div class="col text-center">
+                    <a href="flashcards.html" class="nav-link">
+                        <i class="bi bi-card-checklist fs-5"></i>
+                        <div class="nav-text">Cards</div>
+                    </a>
+                </div>
+                <div class="col text-center">
+                    <a href="foundations.html" class="nav-link">
+                        <i class="bi bi-fonts fs-5"></i>
+                        <div class="nav-text">Basics</div>
+                    </a>
+                </div>
+                <!-- Fixed: Added missing sentences link -->
+                <div class="col text-center">
+                    <a href="sentences.html" class="nav-link">
+                        <i class="bi bi-chat-text fs-5"></i>
+                        <div class="nav-text">Sentences</div>
+                    </a>
+                </div>
+                <div class="col text-center">
+                    <a href="quiz.html" class="nav-link">
+                        <i class="bi bi-question-circle fs-5"></i>
+                        <div class="nav-text">Quiz</div>
+                    </a>
+                </div>
+                <div class="col text-center">
+                    <a href="progress.html" class="nav-link">
+                        <i class="bi bi-graph-up fs-5"></i>
+                        <div class="nav-text">Progress</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
