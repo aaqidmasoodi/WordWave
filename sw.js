@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v5';
+const CACHE_NAME = 'wordwave-v5.0.1';
 const urlsToCache = [
   '/',
   '/index.html',
