@@ -18,11 +18,11 @@ class SettingsManager {
             });
         }
 
-        // Reset app button
-        const resetAppBtn = document.getElementById('resetAppBtn');
-        if (resetAppBtn) {
-            resetAppBtn.addEventListener('click', () => {
-                this.resetApp();
+        // Reset progress button
+        const resetProgressBtn = document.getElementById('resetProgressBtn');
+        if (resetProgressBtn) {
+            resetProgressBtn.addEventListener('click', () => {
+                this.resetProgress();
             });
         }
     }
@@ -102,24 +102,25 @@ class SettingsManager {
         }
     }
 
-    async resetApp() {
-        const btn = document.getElementById('resetAppBtn');
+    async resetProgress() {
+        const btn = document.getElementById('resetProgressBtn');
         
-        if (confirm('Are you sure you want to reset the app? This will clear all progress, cache, and data. This cannot be undone.')) {
+        if (confirm('Are you sure you want to reset your learning progress? This will clear all your progress, streaks, and learned words. This cannot be undone.')) {
             btn.disabled = true;
             btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
             
             try {
-                // Clear all caches
-                if ('caches' in window) {
-                    const cacheNames = await caches.keys();
-                    await Promise.all(
-                        cacheNames.map(cacheName => caches.delete(cacheName))
-                    );
+                // Only clear user progress data, keep cache intact
+                const keysToRemove = [];
+                for (let i = 0; i < localStorage.length; i++) {
+                    const key = localStorage.key(i);
+                    if (key && key.startsWith('wordwave_')) {
+                        keysToRemove.push(key);
+                    }
                 }
                 
-                // Clear all localStorage
-                localStorage.clear();
+                // Remove user data keys
+                keysToRemove.forEach(key => localStorage.removeItem(key));
                 
                 // Reset app state if available
                 if (window.app && window.app.state) {
@@ -129,13 +130,15 @@ class SettingsManager {
                 setTimeout(() => {
                     btn.innerHTML = '<i class="bi bi-check"></i>';
                     setTimeout(() => {
-                        // Redirect to home page
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
+                        // Redirect to home to restart fresh
                         window.location.href = '/';
                     }, 1000);
                 }, 1000);
                 
             } catch (error) {
-                console.error('Error resetting app:', error);
+                console.error('Error resetting progress:', error);
                 btn.disabled = false;
                 btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
             }
