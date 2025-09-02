@@ -100,13 +100,6 @@ class PWAUpdateManager {
                 .catch(registrationError => {
                     console.log('SW registration failed: ', registrationError);
                 });
-
-            // Listen for messages from service worker
-            navigator.serviceWorker.addEventListener('message', event => {
-                if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
-                    this.showUpdateNotification();
-                }
-            });
         }
     }
 
@@ -115,15 +108,31 @@ class PWAUpdateManager {
         
         newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New update available
-                this.showUpdateNotification();
+                // New update available - show subtle indicator
+                this.showUpdateIndicator();
             }
         });
     }
 
-    showUpdateNotification() {
-        // Don't show popup - let settings page handle it
-        console.log('Update available - will be handled by settings page');
+    showUpdateIndicator() {
+        // Add update badge to settings link in sidebar
+        const settingsLink = document.querySelector('a[href="settings.html"]');
+        if (settingsLink && !settingsLink.querySelector('.update-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'update-badge badge bg-danger ms-2';
+            badge.style.fontSize = '0.6rem';
+            badge.textContent = '1';
+            settingsLink.appendChild(badge);
+        }
+
+        // Add update indicator to check button if on settings page
+        const checkBtn = document.getElementById('checkUpdatesBtn');
+        if (checkBtn && !checkBtn.classList.contains('btn-success')) {
+            checkBtn.classList.remove('btn-outline-primary');
+            checkBtn.classList.add('btn-success');
+            checkBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
+            checkBtn.title = 'Update available - click to update';
+        }
     }
 
     async applyUpdate() {

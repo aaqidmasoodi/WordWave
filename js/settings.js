@@ -57,6 +57,9 @@ class SettingsManager {
                         // Apply update automatically
                         registration.waiting.postMessage({ type: 'SKIP_WAITING' });
                         
+                        // Clear update indicators
+                        this.clearUpdateIndicators();
+                        
                         // Wait a moment then reload
                         setTimeout(() => {
                             window.location.reload();
@@ -171,6 +174,22 @@ class SettingsManager {
         } catch (error) {
             console.error('Error calculating storage:', error);
             storageElement.textContent = 'Unknown';
+        }
+    }
+
+    clearUpdateIndicators() {
+        // Remove badge from settings link
+        const updateBadge = document.querySelector('.update-badge');
+        if (updateBadge) {
+            updateBadge.remove();
+        }
+
+        // Reset check button style
+        const checkBtn = document.getElementById('checkUpdatesBtn');
+        if (checkBtn) {
+            checkBtn.classList.remove('btn-success');
+            checkBtn.classList.add('btn-outline-primary');
+            checkBtn.title = '';
         }
     }
 }
