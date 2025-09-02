@@ -1,0 +1,117 @@
+/* Native App Behaviors - Disable Web-Specific Features */
+
+/* Disable zoom and pinch gestures */
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Allow text selection for inputs and content areas */
+input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
+}
+
+/* Disable scroll indicators/bars */
+::-webkit-scrollbar {
+    display: none;
+}
+
+html {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+/* Disable double-tap zoom */
+body {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+
+/* Disable pull-to-refresh */
+body {
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+}
+
+/* Remove iOS Safari bounce effect */
+html, body {
+    position: fixed;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.main-content {
+    position: absolute;
+    top: 60px; /* Account for header height */
+    left: 0;
+    right: 0;
+    bottom: 70px; /* Account for bottom nav height */
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Disable text selection on buttons and UI elements */
+button, .btn, .card, .badge, .nav-link {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Remove focus outlines for touch devices */
+@media (pointer: coarse) {
+    button:focus,
+    .btn:focus,
+    input:focus,
+    select:focus,
+    textarea:focus {
+        outline: none;
+        box-shadow: none;
+    }
+}
+
+/* Disable context menu on long press */
+img, button, .btn, .card {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+}
+
+/* Smooth scrolling for native feel */
+* {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Disable rubber band scrolling on iOS */
+.main-content {
+    overscroll-behavior: none;
+}
+
+/* Remove default button styles that look web-like */
+button, .btn {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    border-radius: 8px;
+}
+
+/* Disable zoom on input focus (iOS) */
+input, select, textarea {
+    font-size: 16px;
+}
+
+/* Remove blue highlight on tap (Android) */
+* {
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    -webkit-focus-ring-color: rgba(0,0,0,0);
+}

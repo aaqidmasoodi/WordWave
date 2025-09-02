@@ -78,7 +78,90 @@ class PWAInstaller {
     }
 }
 
-// Initialize PWA installer
+// PWA Update Manager
+class PWAUpdateManager {
+    constructor() {
+        this.registration = null;
+        this.init();
+    }
+
+    init() {
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    this.registration = registration;
+                    console.log('SW registered: ', registration);
+                    
+                    // Check for updates
+                    registration.addEventListener('updatefound', () => {
+                        this.handleUpdateFound(registration);
+                    });
+                })
+                .catch(registrationError => {
+                    console.log('SW registration failed: ', registrationError);
+                });
+
+            // Listen for messages from service worker
+            navigator.serviceWorker.addEventListener('message', event => {
+                if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+                    this.showUpdateNotification();
+                }
+            });
+        }
+    }
+
+    handleUpdateFound(registration) {
+        const newWorker = registration.installing;
+        
+        newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // New update available
+                this.showUpdateNotification();
+            }
+        });
+    }
+
+    showUpdateNotification() {
+        // Create update notification
+        const updateNotification = document.createElement('div');
+        updateNotification.id = 'updateNotification';
+        updateNotification.className = 'position-fixed top-0 start-50 translate-middle-x mt-3';
+        updateNotification.style.zIndex = '10000';
+        updateNotification.innerHTML = `
+            <div class="alert alert-info alert-dismissible fade show shadow" role="alert">
+                <i class="bi bi-arrow-clockwise me-2"></i>
+                <strong>Update Available!</strong> A new version of WordWave is ready.
+                <button type="button" class="btn btn-sm btn-outline-info ms-2" onclick="window.pwaUpdateManager.applyUpdate()">
+                    Update Now
+                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+        
+        document.body.appendChild(updateNotification);
+    }
+
+    async applyUpdate() {
+        if (this.registration && this.registration.waiting) {
+            // Tell the waiting service worker to skip waiting
+            this.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            
+            // Reload the page to get the new version
+            window.location.reload();
+        }
+    }
+
+    async checkForUpdates() {
+        if (this.registration) {
+            await this.registration.update();
+            return true;
+        }
+        return false;
+    }
+}
+
+// Initialize PWA components
 document.addEventListener('DOMContentLoaded', () => {
     new PWAInstaller();
+    window.pwaUpdateManager = new PWAUpdateManager();
 });

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v1';
+const CACHE_NAME = 'wordwave-v2';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -37,6 +37,8 @@ self.addEventListener('install', event => {
         return cache.addAll(urlsToCache);
       })
   );
+  // Force the waiting service worker to become the active service worker
+  self.skipWaiting();
 });
 
 // Fetch event
@@ -68,4 +70,13 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  // Claim all clients immediately
+  return self.clients.claim();
+});
+
+// Listen for messages from the main thread
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
