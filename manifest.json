@@ -1,7 +1,7 @@
 {
-  "name": "WordWave - Learn Urdu",
+  "name": "WordWave - Learn English",
   "short_name": "WordWave",
-  "description": "Master Urdu vocabulary with interactive flashcards, quizzes, and progress tracking",
+  "description": "Master English vocabulary with interactive flashcards, quizzes, and progress tracking",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
