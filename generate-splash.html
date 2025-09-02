@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate iOS Splash Screens</title>
+    <style>
+        .splash-canvas {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        .splash-content {
+            text-align: center;
+        }
+        .splash-icon {
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 30px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            font-weight: bold;
+        }
+        .splash-title {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .splash-subtitle {
+            font-size: 16px;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>iOS Splash Screen Generator</h1>
+    <p>Right-click each canvas and "Save image as" with the specified filename:</p>
+    
+    <!-- iPhone SE -->
+    <h3>iPhone SE (640x1136) - save as: splash-640x1136.png</h3>
+    <canvas id="splash1" width="640" height="1136" class="splash-canvas"></canvas>
+    
+    <!-- iPhone 8 -->
+    <h3>iPhone 8 (750x1334) - save as: splash-750x1334.png</h3>
+    <canvas id="splash2" width="750" height="1334" class="splash-canvas"></canvas>
+    
+    <!-- iPhone 8 Plus -->
+    <h3>iPhone 8 Plus (1242x2208) - save as: splash-1242x2208.png</h3>
+    <canvas id="splash3" width="1242" height="2208" class="splash-canvas"></canvas>
+    
+    <!-- iPhone X -->
+    <h3>iPhone X (1125x2436) - save as: splash-1125x2436.png</h3>
+    <canvas id="splash4" width="1125" height="2436" class="splash-canvas"></canvas>
+
+    <script>
+        function drawSplash(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+            
+            // Create gradient
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#667eea');
+            gradient.addColorStop(1, '#764ba2');
+            
+            // Fill background
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, width, height);
+            
+            // Draw icon background
+            const iconSize = Math.min(width, height) * 0.15;
+            const iconX = (width - iconSize) / 2;
+            const iconY = (height - iconSize) / 2 - iconSize * 0.5;
+            
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.2)';
+            ctx.roundRect(iconX, iconY, iconSize, iconSize, iconSize * 0.25);
+            ctx.fill();
+            
+            // Draw W
+            ctx.fillStyle = 'white';
+            ctx.font = `bold ${iconSize * 0.5}px -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('W', width / 2, iconY + iconSize / 2);
+            
+            // Draw title
+            ctx.font = `bold ${Math.min(width, height) * 0.08}px -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.fillText('WordWave', width / 2, iconY + iconSize + iconSize * 0.4);
+            
+            // Draw subtitle
+            ctx.font = `${Math.min(width, height) * 0.04}px -apple-system, BlinkMacSystemFont, sans-serif`;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.fillText('Master Urdu with Confidence', width / 2, iconY + iconSize + iconSize * 0.7);
+        }
+        
+        // Add roundRect method if not available
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+            };
+        }
+        
+        // Generate all splash screens
+        drawSplash('splash1');
+        drawSplash('splash2');
+        drawSplash('splash3');
+        drawSplash('splash4');
+    </script>
+</body>
+</html>
