@@ -216,6 +216,12 @@ class SettingsManager {
             checkBtn.classList.add('btn-outline-primary');
             checkBtn.title = '';
         }
+
+        // Remove dashboard update notification
+        const updateCard = document.getElementById('updateNotificationCard');
+        if (updateCard) {
+            updateCard.remove();
+        }
     }
 }
 
