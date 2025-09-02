@@ -79,10 +79,23 @@ class SettingsManager {
             if ('serviceWorker' in navigator) {
                 const registration = await navigator.serviceWorker.getRegistration();
                 if (registration) {
+                    console.log('🔍 Current SW state:', registration.active?.state);
+                    console.log('🔍 Waiting SW exists:', !!registration.waiting);
+                    console.log('🔍 Installing SW exists:', !!registration.installing);
+                    
+                    // Force update check - more aggressive for Chrome Android
                     await registration.update();
                     
+                    // Wait a bit for the update to process
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Check again after forced update
+                    const updatedRegistration = await navigator.serviceWorker.getRegistration();
+                    console.log('🔍 After update - Waiting SW:', !!updatedRegistration.waiting);
+                    console.log('🔍 After update - Installing SW:', !!updatedRegistration.installing);
+                    
                     // Check if there's a waiting service worker (new version)
-                    if (registration.waiting) {
+                    if (updatedRegistration.waiting || updatedRegistration.installing) {
                         // Update found - set flag and transform button
                         localStorage.setItem('wordwave_update_available', 'true');
                         localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
@@ -94,9 +107,39 @@ class SettingsManager {
                         
                         // Transform button to install update
                         this.updateButtonState();
-                        this.waitingWorker = registration.waiting;
+                        this.waitingWorker = updatedRegistration.waiting || updatedRegistration.installing;
                         
                     } else {
+                        // Try cache busting approach for stubborn browsers
+                        const cacheBuster = Date.now();
+                        const swUrl = `/sw.js?v=${cacheBuster}`;
+                        console.log('🔍 Trying cache-busted SW check:', swUrl);
+                        
+                        try {
+                            const response = await fetch(swUrl, { cache: 'no-cache' });
+                            if (response.ok) {
+                                console.log('🔍 SW file fetched successfully');
+                                // Re-register with cache buster
+                                const newRegistration = await navigator.serviceWorker.register(swUrl);
+                                await new Promise(resolve => setTimeout(resolve, 1500));
+                                
+                                if (newRegistration.waiting || newRegistration.installing) {
+                                    localStorage.setItem('wordwave_update_available', 'true');
+                                    localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
+                                    
+                                    status.classList.remove('alert-info');
+                                    status.classList.add('alert-success');
+                                    message.innerHTML = 'Update found!';
+                                    updateAvailable.classList.remove('d-none');
+                                    this.updateButtonState();
+                                    this.waitingWorker = newRegistration.waiting || newRegistration.installing;
+                                    return;
+                                }
+                            }
+                        } catch (e) {
+                            console.log('🔍 Cache-busted check failed:', e);
+                        }
+                        
                         // No update - show up to date
                         status.classList.remove('alert-info');
                         status.classList.add('alert-success');

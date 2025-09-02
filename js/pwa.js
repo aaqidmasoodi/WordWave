@@ -111,11 +111,20 @@ class PWAUpdateManager {
                         window.location.reload();
                     });
 
-                    // Auto-check for updates every 60 seconds
+                    // Auto-check for updates every 30 seconds (more frequent for Chrome Android)
                     setInterval(() => {
                         console.log('🔍 Auto-checking for updates...');
-                        registration.update();
-                    }, 60000);
+                        registration.update().then(() => {
+                            // Force check after update call
+                            setTimeout(() => {
+                                if (registration.waiting || registration.installing) {
+                                    console.log('🔄 Auto-detected update after interval check');
+                                    this.setUpdateFlag();
+                                    window.dispatchEvent(new CustomEvent('updateAvailable'));
+                                }
+                            }, 1000);
+                        });
+                    }, 30000);
                 })
                 .catch(registrationError => {
                     console.log('SW registration failed: ', registrationError);
