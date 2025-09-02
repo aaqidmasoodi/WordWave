@@ -78,7 +78,7 @@ class PWAInstaller {
     }
 }
 
-// PWA Update Manager
+// PWA Update Manager - Uses localStorage flags instead of direct UI manipulation
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
@@ -95,7 +95,7 @@ class PWAUpdateManager {
                     // Check if there's already a waiting service worker
                     if (registration.waiting) {
                         console.log('Update available immediately');
-                        this.showUpdateIndicator();
+                        localStorage.setItem('wordwave_update_available', 'true');
                     }
                     
                     // Listen for new service worker installing
@@ -107,6 +107,7 @@ class PWAUpdateManager {
                     // Listen for service worker state changes
                     navigator.serviceWorker.addEventListener('controllerchange', () => {
                         console.log('Controller changed - reloading page');
+                        localStorage.removeItem('wordwave_update_available');
                         window.location.reload();
                     });
                 })
@@ -121,88 +122,16 @@ class PWAUpdateManager {
         
         newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New update available - only show indicator, DO NOT auto-install
-                console.log('Update available - user must manually install from Settings');
-                this.showUpdateIndicator();
+                // New update available - set flag in localStorage
+                console.log('Update available - setting localStorage flag');
+                localStorage.setItem('wordwave_update_available', 'true');
             }
         });
     }
-
-    showUpdateIndicator() {
-        // Add update badge to settings link in sidebar
-        const settingsLink = document.querySelector('a[href="settings.html"]');
-        if (settingsLink && !settingsLink.querySelector('.update-badge')) {
-            const badge = document.createElement('span');
-            badge.className = 'update-badge badge bg-danger ms-2';
-            badge.style.fontSize = '0.6rem';
-            badge.textContent = '1';
-            settingsLink.appendChild(badge);
-        }
-
-        // Add update indicator to check button if on settings page
-        const checkBtn = document.getElementById('checkUpdatesBtn');
-        if (checkBtn && !checkBtn.classList.contains('btn-success')) {
-            checkBtn.classList.remove('btn-outline-primary');
-            checkBtn.classList.add('btn-success');
-            checkBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
-            checkBtn.title = 'Update available - click to update';
-        }
-
-        // Add update notification to dashboard if on home page
-        const dashboardContainer = document.querySelector('.dashboard-container, .container');
-        if (dashboardContainer && !document.getElementById('updateNotificationCard')) {
-            const updateCard = document.createElement('div');
-            updateCard.id = 'updateNotificationCard';
-            updateCard.className = 'card border-0 shadow-sm mb-4';
-            updateCard.style.background = 'linear-gradient(135deg, #198754 0%, #20c997 100%)';
-            updateCard.innerHTML = `
-                <div class="card-body py-3">
-                    <div class="d-flex align-items-center text-white">
-                        <div class="bg-white bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px;">
-                            <i class="bi bi-arrow-up-circle text-white"></i>
-                        </div>
-                        <div class="flex-grow-1">
-                            <div class="fw-semibold mb-1">New Update Available!</div>
-                            <small class="opacity-90">A new version of WordWave is ready to install.</small>
-                        </div>
-                        <a href="settings.html" class="btn btn-light btn-sm">
-                            <i class="bi bi-gear me-1"></i>Settings
-                        </a>
-                    </div>
-                </div>
-            `;
-            
-            // Insert at the top of the dashboard
-            const firstCard = dashboardContainer.querySelector('.card');
-            if (firstCard) {
-                dashboardContainer.insertBefore(updateCard, firstCard);
-            } else {
-                dashboardContainer.appendChild(updateCard);
-            }
-        }
-    }
-
-    async applyUpdate() {
-        if (this.registration && this.registration.waiting) {
-            // Tell the waiting service worker to skip waiting
-            this.registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-            
-            // Reload the page to get the new version
-            window.location.reload();
-        }
-    }
-
-    async checkForUpdates() {
-        if (this.registration) {
-            await this.registration.update();
-            return true;
-        }
-        return false;
-    }
 }
 
-// Initialize PWA components
+// Initialize PWA features
 document.addEventListener('DOMContentLoaded', () => {
     new PWAInstaller();
-    window.pwaUpdateManager = new PWAUpdateManager();
+    new PWAUpdateManager();
 });

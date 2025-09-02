@@ -114,6 +114,9 @@ class SettingsManager {
             installBtn.disabled = true;
             installBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Installing...';
             
+            // Clear the update flag
+            localStorage.removeItem('wordwave_update_available');
+            
             // Apply the update
             this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
             
