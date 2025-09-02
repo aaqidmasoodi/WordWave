@@ -505,7 +505,38 @@ class EnglishLearningApp {
     checkUpdateBanner() {
         // Check if update is available and show banner
         if (localStorage.getItem('wordwave_update_available') === 'true') {
-            this.showUpdateBanner();
+            console.log('🔍 Update flag is true, verifying actual update availability...');
+            
+            // Verify if there's actually an update available
+            this.verifyUpdateAvailability().then(hasUpdate => {
+                if (hasUpdate) {
+                    console.log('✅ Update verified, showing banner');
+                    this.showUpdateBanner();
+                } else {
+                    console.log('❌ No actual update found, clearing stale flag');
+                    localStorage.removeItem('wordwave_update_available');
+                    localStorage.removeItem('wordwave_update_timestamp');
+                }
+            });
+        }
+    }
+
+    async verifyUpdateAvailability() {
+        try {
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                if (registration) {
+                    // Check if there's actually a waiting service worker
+                    const hasWaiting = !!registration.waiting;
+                    const hasInstalling = !!registration.installing;
+                    console.log('🔍 SW verification - waiting:', hasWaiting, 'installing:', hasInstalling);
+                    return hasWaiting || hasInstalling;
+                }
+            }
+            return false;
+        } catch (error) {
+            console.error('Error verifying update:', error);
+            return false;
         }
     }
 
@@ -542,21 +573,43 @@ class EnglishLearningApp {
         try {
             // Get service worker registration
             const registration = await navigator.serviceWorker.getRegistration();
-            if (registration && registration.waiting) {
+            if (registration && (registration.waiting || registration.installing)) {
+                console.log('🔄 Installing update...');
+                
                 // Clear the update flag
                 localStorage.removeItem('wordwave_update_available');
                 localStorage.removeItem('wordwave_update_timestamp');
                 
                 // Apply the update
-                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                const workerToActivate = registration.waiting || registration.installing;
+                workerToActivate.postMessage({ type: 'SKIP_WAITING' });
                 
                 // Page will reload automatically via controllerchange event
+            } else {
+                console.log('❌ No waiting service worker found, clearing stale flag');
+                
+                // Clear stale flag and hide banner
+                localStorage.removeItem('wordwave_update_available');
+                localStorage.removeItem('wordwave_update_timestamp');
+                this.hideUpdateBanner();
+                
+                // Reset button
+                if (installBtn) {
+                    installBtn.disabled = false;
+                    installBtn.innerHTML = '<i class="bi bi-download me-1"></i>Install';
+                }
             }
         } catch (error) {
             console.error('Error installing update:', error);
+            
+            // Clear potentially stale flag
+            localStorage.removeItem('wordwave_update_available');
+            localStorage.removeItem('wordwave_update_timestamp');
+            this.hideUpdateBanner();
+            
             if (installBtn) {
                 installBtn.disabled = false;
-                installBtn.innerHTML = '<i class="bi bi-download me-1"></i>Install Now';
+                installBtn.innerHTML = '<i class="bi bi-download me-1"></i>Install';
             }
         }
     }
