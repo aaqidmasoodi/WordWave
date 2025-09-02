@@ -157,7 +157,25 @@ class FlashcardManager {
     }
 
     displayNextCard() {
-        const nextIndex = (this.currentCardIndex + 1) % this.sessionWords.length;
+        const nextIndex = this.currentCardIndex + 1;
+        
+        // If we're at the last card, show a preview of what's coming next
+        if (nextIndex >= this.sessionWords.length) {
+            const nextFlashcard = document.getElementById('nextFlashcard');
+            nextFlashcard.innerHTML = `
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <div class="text-center p-4">
+                            <i class="bi bi-arrow-clockwise text-primary fs-1 mb-3"></i>
+                            <h3 class="h5 mb-2">New Session</h3>
+                            <p class="text-muted small">Fresh cards coming up!</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            return;
+        }
+        
         const nextWord = this.sessionWords[nextIndex];
         if (!nextWord) return;
 
@@ -181,14 +199,25 @@ class FlashcardManager {
 
     nextCard() {
         const oldIndex = this.currentCardIndex;
-        this.currentCardIndex = (this.currentCardIndex + 1) % this.sessionWords.length;
+        this.currentCardIndex++;
         
-        // If we've looped back to the beginning, reset everything
-        if (oldIndex === this.sessionWords.length - 1 && this.currentCardIndex === 0) {
-            // Reset global state
-            window.flashcardState.currentCardIndex = 0;
-            window.flashcardState.sessionResults = [];
+        // Check if we've completed the session
+        if (this.currentCardIndex >= this.sessionWords.length) {
+            // Generate new session with 80% new, 10% learned, 10% review
+            this.sessionWords = this.generateSessionWords();
+            this.currentCardIndex = 0;
+            this.sessionResults = [];
+            
+            // Clear session storage to start fresh
             localStorage.removeItem('flashcardSession');
+            
+            // Reset global state
+            if (window.flashcardState) {
+                window.flashcardState.currentCardIndex = 0;
+                window.flashcardState.sessionResults = [];
+            }
+            
+            console.log('Generated new session with', this.sessionWords.length, 'cards');
         } else {
             this.saveSessionState();
         }

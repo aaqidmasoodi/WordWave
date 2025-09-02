@@ -124,6 +124,12 @@ class SentenceManager {
             this.updateReviewStack();
             this.setupEventListeners();
         }
+        
+        // Show the cards with fade-in effect after content is loaded
+        const flashcardStack = document.querySelector('.flashcard-stack');
+        if (flashcardStack) {
+            flashcardStack.style.opacity = '1';
+        }
     }
 
     showNoSentencesMessage() {
@@ -163,14 +169,38 @@ class SentenceManager {
         const sentence = this.sessionSentences[this.currentSentenceIndex];
         if (!sentence) return;
 
-        document.getElementById('currentSentenceEn').textContent = sentence.english;
-        document.getElementById('currentSentenceUr').textContent = sentence.urdu;
+        const sentenceCard = document.getElementById('sentenceCard');
+        
+        // Create proper card structure to replace loading state
+        sentenceCard.innerHTML = `
+            <div class="flip-card-inner">
+                <!-- Front Side -->
+                <div class="flip-card-front">
+                    <h2 id="currentSentenceEn" class="h4 mb-3">${sentence.english}</h2>
+                    <div class="mt-3">
+                        <button id="frontSpeakBtn" class="btn btn-sm btn-light">
+                            <i class="bi bi-volume-up"></i> Speak
+                        </button>
+                    </div>
+                    <p class="swipe-hint mt-3">Swipe to interact</p>
+                </div>
+                
+                <!-- Back Side -->
+                <div class="flip-card-back">
+                    <h3 id="currentSentenceUr" class="h4 mb-3">${sentence.urdu}</h3>
+                    <div class="mt-3">
+                        <button id="backSpeakBtn" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-volume-up"></i> Speak
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
 
         // Update sentence counter
         document.getElementById('sentenceCounter').textContent = `${this.currentSentenceIndex + 1}/${this.sessionSentences.length}`;
 
         // Show appropriate indicator
-        const sentenceCard = document.getElementById('sentenceCard');
         sentenceCard.classList.remove('review-word', 'learned-word');
         
         if (sentence.sentenceType === 'review') {
@@ -186,15 +216,61 @@ class SentenceManager {
     }
 
     displayNextSentence() {
-        const nextIndex = (this.currentSentenceIndex + 1) % this.sessionSentences.length;
+        const nextIndex = this.currentSentenceIndex + 1;
+        
+        // If we're at the last sentence, show a preview of what's coming next
+        if (nextIndex >= this.sessionSentences.length) {
+            const nextSentenceCard = document.getElementById('nextSentenceCard');
+            nextSentenceCard.innerHTML = `
+                <div class="flip-card-inner">
+                    <div class="flip-card-front">
+                        <div class="text-center p-4">
+                            <i class="bi bi-arrow-clockwise text-primary fs-1 mb-3"></i>
+                            <h3 class="h5 mb-2">New Session</h3>
+                            <p class="text-muted small">Fresh sentences coming up!</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            nextSentenceCard.style.display = 'block';
+            return;
+        }
+        
         const nextSentence = this.sessionSentences[nextIndex];
         if (!nextSentence) return;
 
-        document.getElementById('nextCurrentSentenceEn').textContent = nextSentence.english;
-        document.getElementById('nextCurrentSentenceUr').textContent = nextSentence.urdu;
+        const nextSentenceCard = document.getElementById('nextSentenceCard');
+        
+        // Create proper card structure for next card
+        nextSentenceCard.innerHTML = `
+            <div class="flip-card-inner">
+                <!-- Front Side -->
+                <div class="flip-card-front">
+                    <h2 id="nextCurrentSentenceEn" class="h4 mb-3">${nextSentence.english}</h2>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-light">
+                            <i class="bi bi-volume-up"></i> Speak
+                        </button>
+                    </div>
+                    <p class="swipe-hint mt-3">Swipe to interact</p>
+                </div>
+                
+                <!-- Back Side -->
+                <div class="flip-card-back">
+                    <h3 id="nextCurrentSentenceUr" class="h4 mb-3">${nextSentence.urdu}</h3>
+                    <div class="mt-3">
+                        <button class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-volume-up"></i> Speak
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        // Show the next card
+        nextSentenceCard.style.display = 'block';
 
         // Show appropriate indicator for next card
-        const nextSentenceCard = document.getElementById('nextSentenceCard');
         nextSentenceCard.classList.remove('review-word', 'learned-word');
         
         if (nextSentence.sentenceType === 'review') {
@@ -209,12 +285,19 @@ class SentenceManager {
 
     nextSentence() {
         const oldIndex = this.currentSentenceIndex;
-        this.currentSentenceIndex = (this.currentSentenceIndex + 1) % this.sessionSentences.length;
+        this.currentSentenceIndex++;
         
-        // If we've looped back to the beginning, reset session results
-        if (oldIndex === this.sessionSentences.length - 1 && this.currentSentenceIndex === 0) {
+        // Check if we've completed the session
+        if (this.currentSentenceIndex >= this.sessionSentences.length) {
+            // Generate new session
+            this.sessionSentences = this.generateSessionSentences();
+            this.currentSentenceIndex = 0;
             this.sessionResults = [];
-            localStorage.removeItem('sentenceSession'); // Clear saved session
+            
+            // Clear session storage to start fresh
+            localStorage.removeItem('sentenceSession');
+            
+            console.log('Generated new sentence session with', this.sessionSentences.length, 'sentences');
         } else {
             this.saveSessionState();
         }
