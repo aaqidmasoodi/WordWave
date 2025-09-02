@@ -155,13 +155,15 @@ class SettingsManager {
                 // Remove user data keys
                 keysToRemove.forEach(key => localStorage.removeItem(key));
                 
-                // Reset app state if available
+                // Reset app state if available (without additional confirm)
                 if (window.app && window.app.state) {
                     window.app.state.reset();
                 }
                 
                 setTimeout(() => {
                     btn.innerHTML = '<i class="bi bi-check"></i>';
+                    // Show success message
+                    alert('All progress has been reset successfully!');
                     setTimeout(() => {
                         btn.disabled = false;
                         btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
