@@ -1,4 +1,8 @@
-const CACHE_NAME = 'wordwave-v5.1.7';
+const CACHE_NAME = 'wordwave-v5.1.8';
+
+// Disable caching on localhost for development
+const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+
 const urlsToCache = [
   '/',
   '/index.html',
@@ -37,6 +41,13 @@ const urlsToCache = [
 
 // Install event
 self.addEventListener('install', event => {
+  // Skip caching on localhost
+  if (isLocalhost) {
+    console.log('🚫 Skipping cache on localhost for development');
+    self.skipWaiting();
+    return;
+  }
+  
   console.log('Service worker installing - new version available');
   event.waitUntil(
     caches.open(CACHE_NAME)
@@ -51,6 +62,11 @@ self.addEventListener('install', event => {
 
 // Fetch event
 self.addEventListener('fetch', event => {
+  // Skip caching on localhost
+  if (isLocalhost) {
+    return;
+  }
+  
   event.respondWith(
     caches.match(event.request)
       .then(response => {

@@ -63,7 +63,7 @@ html, body {
 
 /* Add padding to bottom navigation */
 .bottom-nav {
-    padding-bottom: 20px;
+    padding-bottom: 90px;
 }
 
 /* Disable text selection on buttons and UI elements */
@@ -90,6 +90,7 @@ button, .btn, .card, .badge, .nav-link {
 img, button, .btn, .card {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
+    user-select: none;
 }
 
 /* Smooth scrolling for native feel */
