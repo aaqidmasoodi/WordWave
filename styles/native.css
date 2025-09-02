@@ -56,9 +56,14 @@ html, body {
     top: 60px; /* Account for header height */
     left: 0;
     right: 0;
-    bottom: 70px; /* Account for bottom nav height */
+    bottom: 90px; /* Account for bottom nav height + padding */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+}
+
+/* Add padding to bottom navigation */
+.bottom-nav {
+    padding-bottom: 20px;
 }
 
 /* Disable text selection on buttons and UI elements */
