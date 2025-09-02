@@ -102,5 +102,5 @@ class VersionManager {
 // Auto-update version displays when page loads
 document.addEventListener('DOMContentLoaded', () => {
     VersionManager.updateVersionDisplays();
-    VersionManager.checkForUpdates();
+    // Removed automatic update checking - users should control updates
 });

@@ -18,6 +18,14 @@ class SettingsManager {
             });
         }
 
+        // Install update button
+        const installUpdateBtn = document.getElementById('installUpdateBtn');
+        if (installUpdateBtn) {
+            installUpdateBtn.addEventListener('click', () => {
+                this.installUpdate();
+            });
+        }
+
         // Reset progress button
         const resetProgressBtn = document.getElementById('resetProgressBtn');
         if (resetProgressBtn) {
@@ -31,6 +39,8 @@ class SettingsManager {
         const btn = document.getElementById('checkUpdatesBtn');
         const status = document.getElementById('updateStatus');
         const message = document.getElementById('updateMessage');
+        const updateAvailable = document.getElementById('updateAvailable');
+        const installBtn = document.getElementById('installUpdateBtn');
 
         // Show checking status
         btn.disabled = true;
@@ -40,7 +50,6 @@ class SettingsManager {
         message.textContent = 'Checking...';
 
         try {
-            // Actually check for updates using service worker
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
                 const registration = await navigator.serviceWorker.getRegistration();
                 if (registration) {
@@ -48,31 +57,23 @@ class SettingsManager {
                     
                     // Check if there's a waiting service worker (new version)
                     if (registration.waiting) {
-                        // Update found - show updating status
+                        // Update found - show install option
                         status.classList.remove('alert-info');
-                        status.classList.add('alert-warning');
-                        message.innerHTML = 'Update found! Updating...';
-                        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
+                        status.classList.add('alert-success');
+                        message.innerHTML = 'Update available!';
+                        updateAvailable.classList.remove('d-none');
+                        installBtn.classList.remove('d-none');
                         
-                        // Apply update automatically
-                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
-                        
-                        // Clear update indicators
-                        this.clearUpdateIndicators();
-                        
-                        // Wait a moment then reload
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
+                        // Store the waiting worker for later installation
+                        this.waitingWorker = registration.waiting;
                         
                     } else {
                         // No update - show up to date
                         status.classList.remove('alert-info');
                         status.classList.add('alert-success');
                         message.innerHTML = 'Up to date!';
-                        
-                        btn.disabled = false;
-                        btn.innerHTML = '<i class="bi bi-search"></i>';
+                        updateAvailable.classList.add('d-none');
+                        installBtn.classList.add('d-none');
                         
                         // Hide status after 3 seconds
                         setTimeout(() => {
@@ -85,6 +86,9 @@ class SettingsManager {
             } else {
                 throw new Error('Service worker not available');
             }
+            
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-search"></i>';
             
         } catch (error) {
             console.error('Error checking for updates:', error);
@@ -99,6 +103,24 @@ class SettingsManager {
             setTimeout(() => {
                 status.classList.add('d-none');
             }, 3000);
+        }
+    }
+
+    async installUpdate() {
+        const installBtn = document.getElementById('installUpdateBtn');
+        const updateAvailable = document.getElementById('updateAvailable');
+        
+        if (this.waitingWorker) {
+            installBtn.disabled = true;
+            installBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Installing...';
+            
+            // Apply the update
+            this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+            
+            // Wait a moment then reload
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
         }
     }
 
