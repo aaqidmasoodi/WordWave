@@ -88,15 +88,7 @@ body {
     height: 70px; /* Define explicit height */
 }
 
-/* Add bottom padding to body to prevent content being hidden */
-body {
-    padding-bottom: 80px; /* 70px nav height + 10px extra space */
-}
 
-/* Ensure main content areas have proper spacing */
-.container, .dashboard-container {
-    padding-bottom: 20px; /* Extra padding for scrollable content */
-}
 
 .nav-link {
     color: var(--gray-400);
