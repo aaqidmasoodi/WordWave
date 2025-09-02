@@ -1,24 +1,65 @@
 // js/flashcards.js
+// js/flashcards.js
 class FlashcardManager {
     constructor() {
-        this.currentCardIndex = 0;
         this.userData = window.app.userData;
         this.sessionWords = this.generateSessionWords();
-        this.sessionResults = []; // Track swipe results
+        this.initializeGlobalState();
         this.loadSessionState();
         this.init();
     }
 
-    loadSessionState() {
-        const savedState = localStorage.getItem('flashcardSession');
-        if (savedState) {
-            const state = JSON.parse(savedState);
-            // Only restore if it's the same session (same words)
-            if (state.sessionLength === this.sessionWords.length) {
-                this.currentCardIndex = state.currentIndex || 0;
-                this.sessionResults = state.results || [];
-            }
+    initializeGlobalState() {
+        if (!window.flashcardState) {
+            window.flashcardState = {
+                currentCardIndex: 0,
+                sessionResults: []
+            };
         }
+    }
+
+    // Getters that always read from global state
+    get currentCardIndex() {
+        return window.flashcardState.currentCardIndex;
+    }
+
+    set currentCardIndex(value) {
+        window.flashcardState.currentCardIndex = value;
+    }
+
+    get sessionResults() {
+        return window.flashcardState.sessionResults;
+    }
+
+    set sessionResults(value) {
+        window.flashcardState.sessionResults = value;
+    }
+
+    // Global reset function
+    static resetGlobalState() {
+        window.flashcardState = {
+            currentCardIndex: 0,
+            sessionResults: []
+        };
+        localStorage.removeItem('flashcardSession');
+    }
+
+    loadSessionState() {
+        const saved = localStorage.getItem('flashcardSession');
+        if (saved) {
+            try {
+                const state = JSON.parse(saved);
+                if (state.sessionLength === this.sessionWords.length) {
+                    window.flashcardState.currentCardIndex = state.currentIndex || 0;
+                    window.flashcardState.sessionResults = state.results || [];
+                    return;
+                }
+            } catch (e) {}
+        }
+        
+        // Reset to fresh state
+        window.flashcardState.currentCardIndex = 0;
+        window.flashcardState.sessionResults = [];
     }
 
     saveSessionState() {
@@ -68,7 +109,6 @@ class FlashcardManager {
         // Combine and shuffle
         const sessionWords = this.shuffleArray([...selectedNew, ...selectedReview, ...selectedLearned]);
         
-        console.log(`Session: ${newCount} new, ${reviewCount} review, ${learnedCount} learned words`);
         return sessionWords;
     }
 
@@ -143,10 +183,12 @@ class FlashcardManager {
         const oldIndex = this.currentCardIndex;
         this.currentCardIndex = (this.currentCardIndex + 1) % this.sessionWords.length;
         
-        // If we've looped back to the beginning, reset session results
+        // If we've looped back to the beginning, reset everything
         if (oldIndex === this.sessionWords.length - 1 && this.currentCardIndex === 0) {
-            this.sessionResults = [];
-            localStorage.removeItem('flashcardSession'); // Clear saved session
+            // Reset global state
+            window.flashcardState.currentCardIndex = 0;
+            window.flashcardState.sessionResults = [];
+            localStorage.removeItem('flashcardSession');
         } else {
             this.saveSessionState();
         }
@@ -162,10 +204,6 @@ class FlashcardManager {
 
     markAsLearned() {
         const currentWord = this.sessionWords[this.currentCardIndex];
-        console.log('Current word object:', currentWord);
-        console.log('Word ID type:', typeof currentWord.id, 'Value:', currentWord.id);
-        console.log('Review words before:', this.userData.reviewWords);
-        console.log('Review words types:', this.userData.reviewWords.map(id => typeof id));
         
         // Record the result
         this.sessionResults[this.currentCardIndex] = 'learned';
@@ -173,7 +211,6 @@ class FlashcardManager {
         
         window.app.markWordAsLearned(currentWord.id);
         
-        console.log('Review words after:', this.userData.reviewWords);
         this.updateProgress();
         this.updateReviewStack();
         this.animateCardOut('right');

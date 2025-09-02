@@ -15,7 +15,7 @@ class ProgressManager {
         const totalWords = vocabularyData.length;
         const learnedWords = this.userData.learnedWords.length;
         const reviewWords = this.userData.reviewWords.length;
-        const streak = this.userData.streak;
+        const streak = this.userData.streakCount || 0; // Fix undefined streak
         const completionPercent = totalWords > 0 ? Math.round((learnedWords / totalWords) * 100) : 0;
 
         // These elements may not exist anymore, so check before updating

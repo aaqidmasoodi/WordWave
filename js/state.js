@@ -66,9 +66,23 @@ class AppState {
     }
 
     clearAllSessions() {
-        ['flashcard', 'sentence', 'quiz'].forEach(type => {
-            this.clearSession(type);
-        });
+        console.log('Clearing all sessions...');
+        
+        // Clear localStorage session keys
+        localStorage.removeItem('flashcardSession');
+        localStorage.removeItem('sentenceSession');
+        localStorage.removeItem('quizSession');
+        
+        console.log('Cleared localStorage sessions');
+        
+        // Clear internal session state
+        this.state.sessions = {
+            flashcards: null,
+            sentences: null,
+            quiz: null
+        };
+        
+        console.log('Sessions cleared');
     }
 
     // Persistence
@@ -110,6 +124,18 @@ class AppState {
         
         this.clearAllSessions();
         this.saveUserData();
+        
+        // Reset all global UI states
+        if (window.flashcardState) {
+            window.flashcardState = null;
+        }
+        if (window.sentenceState) {
+            window.sentenceState = null;
+        }
+        
+        // Also clear the old localStorage keys for compatibility
+        localStorage.removeItem('englishLearningUserData');
+        localStorage.removeItem('wordWaveUserData');
     }
 }
 

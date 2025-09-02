@@ -9,15 +9,21 @@ class SentenceManager {
     }
 
     loadSessionState() {
-        const savedState = localStorage.getItem('sentenceSession');
-        if (savedState) {
-            const state = JSON.parse(savedState);
-            // Only restore if it's the same session (same sentences)
-            if (state.sessionLength === this.sessionSentences.length) {
-                this.currentSentenceIndex = state.currentIndex || 0;
-                this.sessionResults = state.results || [];
-            }
+        const saved = localStorage.getItem('sentenceSession');
+        if (saved) {
+            try {
+                const state = JSON.parse(saved);
+                if (state.sessionLength === this.sessionSentences.length) {
+                    this.currentSentenceIndex = state.currentIndex || 0;
+                    this.sessionResults = state.results || [];
+                    return;
+                }
+            } catch (e) {}
         }
+        
+        // Reset to fresh state
+        this.currentSentenceIndex = 0;
+        this.sessionResults = [];
     }
 
     saveSessionState() {

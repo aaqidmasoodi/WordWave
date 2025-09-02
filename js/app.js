@@ -19,8 +19,28 @@ class EnglishLearningApp {
                         localStorage.setItem('wordWaveUserData', JSON.stringify(this.state.user));
                     },
                     reset: function() {
-                        this.state.user = this.getDefaultUserData();
+                        const defaultData = {
+                            learnedWords: [],
+                            reviewWords: [],
+                            learnedSentences: [],
+                            reviewSentences: [],
+                            currentDifficulty: 'beginner',
+                            streakCount: 0,
+                            lastStudyDate: null,
+                            totalStudyTime: 0
+                        };
+                        this.state.user = defaultData;
                         this.saveUserData();
+                        
+                        // Clear sessions
+                        localStorage.removeItem('flashcardSession');
+                        localStorage.removeItem('sentenceSession');
+                        localStorage.removeItem('quizSession');
+                        
+                        // Reset global states
+                        if (window.flashcardState) {
+                            window.flashcardState = null;
+                        }
                     }
                 };
                 // Load existing data
@@ -487,8 +507,10 @@ class EnglishLearningApp {
         // Reset using centralized state
         this.state.reset();
         
-        // Update all UI elements
-        this.updateDashboard();
+        // Reset flashcard global state
+        if (typeof FlashcardManager !== 'undefined') {
+            FlashcardManager.resetGlobalState();
+        }
         
         // Show confirmation
         alert('All progress has been reset successfully!');
