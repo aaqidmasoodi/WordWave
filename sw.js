@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v5.1.8';
+const CACHE_NAME = 'wordwave-v5.1.9';
 
 // Disable caching on localhost for development
 const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
