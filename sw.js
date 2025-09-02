@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v5.0.9';
+const CACHE_NAME = 'wordwave-v5.1.0';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -37,6 +37,7 @@ const urlsToCache = [
 
 // Install event
 self.addEventListener('install', event => {
+  console.log('Service worker installing - new version available');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -44,8 +45,8 @@ self.addEventListener('install', event => {
         return cache.addAll(urlsToCache);
       })
   );
-  // Force the waiting service worker to become the active service worker
-  self.skipWaiting();
+  // DO NOT skip waiting automatically - wait for user permission
+  console.log('Service worker installed but waiting for user activation');
 });
 
 // Fetch event

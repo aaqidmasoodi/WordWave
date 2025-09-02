@@ -92,9 +92,22 @@ class PWAUpdateManager {
                     this.registration = registration;
                     console.log('SW registered: ', registration);
                     
-                    // Check for updates
+                    // Check if there's already a waiting service worker
+                    if (registration.waiting) {
+                        console.log('Update available immediately');
+                        this.showUpdateIndicator();
+                    }
+                    
+                    // Listen for new service worker installing
                     registration.addEventListener('updatefound', () => {
+                        console.log('New service worker found');
                         this.handleUpdateFound(registration);
+                    });
+                    
+                    // Listen for service worker state changes
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        console.log('Controller changed - reloading page');
+                        window.location.reload();
                     });
                 })
                 .catch(registrationError => {
