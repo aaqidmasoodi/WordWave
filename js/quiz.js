@@ -32,6 +32,16 @@ class QuizManager {
     }
 
     init() {
+        // Load last quiz score from global state if available
+        if (window.app && window.app.userData && window.app.userData.lastQuizScore) {
+            const lastScore = window.app.userData.lastQuizScore;
+            // If quiz is complete, show the last score
+            if (this.currentQuestionIndex >= this.quizQuestions.length && this.quizQuestions.length > 0) {
+                updateHeaderElement('quizScore', `${lastScore.score}/${lastScore.total}`);
+                updateHeaderElement('questionCounter', 'Complete!');
+            }
+        }
+        
         // If no saved session, generate new quiz
         if (this.quizQuestions.length === 0) {
             this.generateQuiz();
@@ -97,12 +107,16 @@ class QuizManager {
         const question = this.quizQuestions[this.currentQuestionIndex];
         const quizContent = document.getElementById('quizContent');
         
+        // Update header with current score and question number
+        updateHeaderElement('quizScore', `${this.score}/${this.quizQuestions.length}`);
+        updateHeaderElement('questionCounter', `${this.currentQuestionIndex + 1}/${this.quizQuestions.length}`);
+        
         // Update progress circles
         this.updateProgressCircles();
 
         quizContent.innerHTML = `
-            <div class="mb-4">
-                <h4 class="h5 mb-3 text-primary fw-normal lh-base">${question.question}</h4>
+            <div class="mb-4 text-center">
+                <h4 class="h4 mb-3 text-primary fw-light lh-base quiz-question">${question.question}</h4>
             </div>
             <div class="d-grid gap-2">
                 ${question.options.map((option, index) => `
@@ -205,9 +219,24 @@ class QuizManager {
         document.getElementById('quizContainer').style.display = 'none';
         document.getElementById('quizComplete').style.display = 'block';
         
+        // Update header with final score
+        updateHeaderElement('quizScore', `${this.score}/${this.quizQuestions.length}`);
+        updateHeaderElement('questionCounter', 'Complete!');
+        
         const percentage = Math.round((this.score / this.quizQuestions.length) * 100);
         document.getElementById('finalScore').textContent = 
             `${this.score}/${this.quizQuestions.length} (${percentage}%)`;
+
+        // Save quiz result to global state
+        if (window.app && window.app.userData) {
+            window.app.userData.lastQuizScore = {
+                score: this.score,
+                total: this.quizQuestions.length,
+                percentage: percentage,
+                date: new Date().toISOString()
+            };
+            window.app.saveUserData();
+        }
 
         // Trigger confetti for perfect score
         if (this.score === this.quizQuestions.length && this.quizQuestions.length > 0) {
@@ -290,6 +319,17 @@ class QuizManager {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof window.app !== 'undefined') {
-        window.quizManager = new QuizManager();
+        // Wait for header to load before initializing quiz
+        const initQuiz = () => {
+            window.quizManager = new QuizManager();
+        };
+        
+        // Check if header elements exist, or wait for header loaded event
+        const quizScore = document.getElementById('quizScore');
+        if (quizScore) {
+            initQuiz();
+        } else {
+            document.addEventListener('headerLoaded', initQuiz);
+        }
     }
 });

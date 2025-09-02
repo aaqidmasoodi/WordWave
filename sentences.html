@@ -10,23 +10,6 @@
     <link href="styles/animations.css" rel="stylesheet">
 </head>
 <body>
-    <!-- App Header -->
-    <header class="app-header border-bottom">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between py-3">
-                <div class="d-flex align-items-center">
-                    <a href="index.html" class="text-decoration-none text-dark me-3">
-                        <i class="bi bi-arrow-left fs-4"></i>
-                    </a>
-                    <h1 class="h5 mb-0">Sentences</h1>
-                </div>
-                <div class="d-flex align-items-center">
-                    <span id="sentenceCounter" class="text-muted small">1/20</span>
-                </div>
-            </div>
-        </div>
-    </header>
-
     <!-- Main Content -->
     <main class="main-content">
         <div class="container py-4">
@@ -90,52 +73,17 @@
         </div>
     </main>
 
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav border-top">
-        <div class="container">
-            <div class="row g-0">
-                <div class="col text-center">
-                    <a href="index.html" class="nav-link">
-                        <i class="bi bi-house fs-5"></i>
-                        <div class="nav-text">Home</div>
-                    </a>
-                </div>
-                <div class="col text-center">
-                    <a href="flashcards.html" class="nav-link">
-                        <i class="bi bi-card-checklist fs-5"></i>
-                        <div class="nav-text">Cards</div>
-                    </a>
-                </div>
-                <div class="col text-center">
-                    <a href="foundations.html" class="nav-link">
-                        <i class="bi bi-fonts fs-5"></i>
-                        <div class="nav-text">Basics</div>
-                    </a>
-                </div>
-                <div class="col text-center">
-                    <a href="sentences.html" class="nav-link active">
-                        <i class="bi bi-chat-text fs-5"></i>
-                        <div class="nav-text">Sentences</div>
-                    </a>
-                </div>
-                <div class="col text-center">
-                    <a href="quiz.html" class="nav-link">
-                        <i class="bi bi-question-circle fs-5"></i>
-                        <div class="nav-text">Quiz</div>
-                    </a>
-                </div>
-                <div class="col text-center">
-                    <a href="progress.html" class="nav-link">
-                        <i class="bi bi-graph-up fs-5"></i>
-                        <div class="nav-text">Progress</div>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </nav>
-
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script src="js/sentences.js"></script>
+    <script src="components/header/header.js"></script>
+    <script src="components/sidebar/sidebar.js"></script>
+    <script src="components/bottom-nav/bottom-nav.js"></script>
+    <script>
+        initHeader({
+            title: 'Sentences',
+            rightContent: '<span id="sentenceCounter" class="badge bg-info">1/10</span>'
+        });
+    </script>
 </body>
 </html>

@@ -513,12 +513,47 @@ body {
 
 /* Word of the Day Animated Gradient */
 .word-of-day-gradient {
-    background: linear-gradient(-45deg, #e3f2fd, #fff3e0, #e1f5fe, #fce4ec, #f3e5f5, #fff8e1);
-    background-size: 400% 400%;
-    animation: gradientShift 30s ease infinite;
-    color: #333;
+    background: linear-gradient(135deg, 
+        #667eea 0%, 
+        #764ba2 25%, 
+        #f093fb 50%, 
+        #f5576c 75%, 
+        #4facfe 100%);
+    background-size: 300% 300%;
+    animation: fluidGradient 12s ease-in-out infinite;
+    color: white;
     transform: none !important;
     transition: none !important;
+    border: none !important;
+    box-shadow: 
+        0 8px 32px rgba(102, 126, 234, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.word-of-day-gradient::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, 
+        rgba(255, 255, 255, 0.1) 0%, 
+        transparent 50%, 
+        rgba(255, 255, 255, 0.1) 100%);
+    animation: shimmer 8s ease-in-out infinite;
+}
+
+@keyframes fluidGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
 }
 
 .word-of-day-gradient:hover,
@@ -529,11 +564,13 @@ body {
 }
 
 .word-of-day-gradient .text-muted {
-    color: rgba(0, 0, 0, 0.6) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
 }
 
 .word-of-day-gradient .h6 {
-    color: rgba(0, 0, 0, 0.8);
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1.5rem !important; /* Make Urdu text bigger */
+    font-weight: 600;
 }
 
 @keyframes gradientShift {
@@ -627,4 +664,117 @@ body {
 
 .cursor-pointer {
     cursor: pointer;
+}
+/* Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    background: white;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+}
+
+.sidebar-overlay.active .sidebar {
+    transform: translateX(0);
+}
+
+.sidebar-header {
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.user-avatar img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+.user-name {
+    margin-top: 1rem;
+    margin-bottom: 0;
+    color: #333;
+}
+
+.sidebar-content {
+    padding: 1rem 0;
+}
+
+.sidebar-menu {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    margin: 0;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    color: #666;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.sidebar-link:hover {
+    background: #f8f9fa;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.sidebar-link i {
+    width: 20px;
+}
+.user-avatar .avatar-placeholder {
+    width: 80px;
+    height: 80px;
+    background: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    font-weight: bold;
+}
+/* Quiz question styling */
+.quiz-question {
+    font-weight: 300 !important; /* Light weight for regular text */
+}
+
+.quiz-question strong {
+    font-size: 1.5em; /* Make the highlighted word bigger */
+    font-weight: 700 !important; /* Bold weight for the target word */
+    color: #0d6efd; /* Slightly different blue for emphasis */
+}
+/* Make Urdu text in Word of the Day bigger */
+#dailyWordUrdu {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
 }

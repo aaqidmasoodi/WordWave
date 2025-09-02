@@ -77,14 +77,30 @@ class FoundationsManager {
     }
 
     setupEventListeners() {
-        // View switching
-        document.getElementById('alphabetBtn').addEventListener('click', () => {
-            this.switchView('alphabet');
-        });
+        // Wait for header buttons to be available
+        const setupButtons = () => {
+            const alphabetBtn = document.getElementById('alphabetBtn');
+            const countingBtn = document.getElementById('countingBtn');
+            
+            if (alphabetBtn && countingBtn) {
+                // View switching
+                alphabetBtn.addEventListener('click', () => {
+                    this.switchView('alphabet');
+                });
 
-        document.getElementById('countingBtn').addEventListener('click', () => {
-            this.switchView('counting');
-        });
+                countingBtn.addEventListener('click', () => {
+                    this.switchView('counting');
+                });
+            }
+        };
+        
+        // Try to setup immediately, or wait for header
+        const alphabetBtn = document.getElementById('alphabetBtn');
+        if (alphabetBtn) {
+            setupButtons();
+        } else {
+            document.addEventListener('headerLoaded', setupButtons);
+        }
 
         // Keyboard navigation
         document.addEventListener('keydown', (e) => {
@@ -100,6 +116,17 @@ class FoundationsManager {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof window.app !== 'undefined') {
-        window.foundationsManager = new FoundationsManager();
+        // Wait for header to load before initializing foundations
+        const initFoundations = () => {
+            window.foundationsManager = new FoundationsManager();
+        };
+        
+        // Check if header elements exist, or wait for header loaded event
+        const alphabetBtn = document.getElementById('alphabetBtn');
+        if (alphabetBtn) {
+            initFoundations();
+        } else {
+            document.addEventListener('headerLoaded', initFoundations);
+        }
     }
 });

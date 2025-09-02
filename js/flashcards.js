@@ -137,8 +137,8 @@ class FlashcardManager {
         document.getElementById('wordTranslation').textContent = word.urdu;
         document.getElementById('wordPhonetic').textContent = word.phonetic;
 
-        // Update card counter
-        document.getElementById('cardCounter').textContent = `${this.currentCardIndex + 1}/${this.sessionWords.length}`;
+        // Update card counter using global function
+        updateHeaderElement('cardCounter', `${this.currentCardIndex + 1}/${this.sessionWords.length}`);
 
         // Show appropriate indicator
         const flashcard = document.getElementById('flashcard');
@@ -535,6 +535,17 @@ class FlashcardManager {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof window.app !== 'undefined') {
-        window.flashcardManager = new FlashcardManager();
+        // Wait for header to load before initializing flashcards
+        const initFlashcards = () => {
+            window.flashcardManager = new FlashcardManager();
+        };
+        
+        // Check if header elements exist, or wait for header loaded event
+        const cardCounter = document.getElementById('cardCounter');
+        if (cardCounter) {
+            initFlashcards();
+        } else {
+            document.addEventListener('headerLoaded', initFlashcards);
+        }
     }
 });

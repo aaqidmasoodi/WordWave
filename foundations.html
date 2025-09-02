@@ -10,24 +10,6 @@
     <link href="styles/animations.css" rel="stylesheet">
 </head>
 <body>
-    <!-- App Header -->
-    <header class="app-header border-bottom">
-        <div class="container">
-            <div class="d-flex align-items-center justify-content-between py-3">
-                <div class="d-flex align-items-center">
-                    <a href="index.html" class="text-decoration-none text-dark me-3">
-                        <i class="bi bi-arrow-left fs-4"></i>
-                    </a>
-                    <h1 class="h5 mb-0">Foundations</h1>
-                </div>
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-sm btn-outline-primary active" id="alphabetBtn">ABC</button>
-                    <button type="button" class="btn btn-sm btn-outline-primary" id="countingBtn">123</button>
-                </div>
-            </div>
-        </div>
-    </header>
-
     <!-- Main Content -->
     <main class="main-content">
         <div class="container py-4">
@@ -100,5 +82,14 @@
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
     <script src="js/foundations.js"></script>
+    <script src="components/header/header.js"></script>
+    <script src="components/sidebar/sidebar.js"></script>
+    <script src="components/bottom-nav/bottom-nav.js"></script>
+    <script>
+        initHeader({
+            title: 'Foundations',
+            rightContent: '<div class="btn-group" role="group"><button type="button" class="btn btn-sm btn-outline-primary active" id="alphabetBtn">ABC</button><button type="button" class="btn btn-sm btn-outline-primary" id="countingBtn">123</button></div>'
+        });
+    </script>
 </body>
 </html>

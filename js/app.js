@@ -131,7 +131,26 @@ class EnglishLearningApp {
     }
 
     init() {
-        this.updateDashboard();
+        // Migrate old streak property to streakCount if needed
+        if (this.userData.streak && !this.userData.streakCount) {
+            this.userData.streakCount = this.userData.streak;
+            delete this.userData.streak;
+            this.saveUserData();
+        }
+        
+        // Wait for header to load before updating dashboard
+        const initDashboard = () => {
+            this.updateDashboard();
+        };
+        
+        // Check if header elements exist, or wait for header loaded event
+        const headerRight = document.getElementById('headerRight');
+        if (headerRight) {
+            initDashboard();
+        } else {
+            document.addEventListener('headerLoaded', initDashboard);
+        }
+        
         this.setupEventListeners();
     }
 
@@ -194,13 +213,9 @@ class EnglishLearningApp {
             }
         });
 
-        if (streakBadge) {
-            streakBadge.textContent = `🔥 ${this.userData.streak || 0}`;
-        }
-
-        if (wordsBadge) {
-            wordsBadge.textContent = `${wordsLearned}/${totalWords}`;
-        }
+        // Update badges using global header functions
+        updateHeaderElement('streakBadge', `🔥 ${this.userData.streakCount || 0}`);
+        updateHeaderElement('wordsBadge', `${wordsLearned}/${totalWords}`);
 
         if (progressPercentElement) {
             progressPercentElement.textContent = `${progressPercent}%`;
@@ -464,7 +479,7 @@ class EnglishLearningApp {
     updateStreak() {
         const today = new Date().toDateString();
         if (this.userData.lastLogin !== today) {
-            this.userData.streak = (this.userData.streak || 0) + 1;
+            this.userData.streakCount = (this.userData.streakCount || 0) + 1;
             this.userData.lastLogin = today;
             this.saveUserData();
         }

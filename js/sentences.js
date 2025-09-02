@@ -197,8 +197,8 @@ class SentenceManager {
             </div>
         `;
 
-        // Update sentence counter
-        document.getElementById('sentenceCounter').textContent = `${this.currentSentenceIndex + 1}/${this.sessionSentences.length}`;
+        // Update sentence counter using global function
+        updateHeaderElement('sentenceCounter', `${this.currentSentenceIndex + 1}/${this.sessionSentences.length}`);
 
         // Show appropriate indicator
         sentenceCard.classList.remove('review-word', 'learned-word');
@@ -625,6 +625,17 @@ class SentenceManager {
 // Initialize when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     if (typeof window.app !== 'undefined') {
-        window.sentenceManager = new SentenceManager();
+        // Wait for header to load before initializing sentences
+        const initSentences = () => {
+            window.sentenceManager = new SentenceManager();
+        };
+        
+        // Check if header elements exist, or wait for header loaded event
+        const sentenceCounter = document.getElementById('sentenceCounter');
+        if (sentenceCounter) {
+            initSentences();
+        } else {
+            document.addEventListener('headerLoaded', initSentences);
+        }
     }
 });

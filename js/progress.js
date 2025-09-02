@@ -6,9 +6,20 @@ class ProgressManager {
     }
 
     init() {
-        this.updateProgressStats();
-        this.updateCategoriesProgress();
-        this.displayRecentWords();
+        // Wait for header to load before updating progress stats
+        const initProgress = () => {
+            this.updateProgressStats();
+            this.updateCategoriesProgress();
+            this.displayRecentWords();
+        };
+        
+        // Check if header elements exist, or wait for header loaded event
+        const headerRight = document.getElementById('headerRight');
+        if (headerRight) {
+            initProgress();
+        } else {
+            document.addEventListener('headerLoaded', initProgress);
+        }
     }
 
     updateProgressStats() {
@@ -38,9 +49,8 @@ class ProgressManager {
             streakCountElement.textContent = streak;
         }
 
-        if (streakDisplayElement) {
-            streakDisplayElement.textContent = `🔥 ${streak}`;
-        }
+        // Update header streak display using global function
+        updateHeaderElement('streakDisplay', `🔥 ${streak}`);
 
         if (mainProgressElement) {
             mainProgressElement.style.width = `${completionPercent}%`;
