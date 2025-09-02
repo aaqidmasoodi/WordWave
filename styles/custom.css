@@ -1,12 +1,47 @@
 /* styles/custom.css */
 
-/* Disable browser swipe navigation on mobile */
+/* Responsive scaling fixes for Chrome Android zoom issues */
 html {
+    font-size: 16px; /* Base font size */
+    -webkit-text-size-adjust: 100%; /* Prevent iOS text size adjustment */
+    -ms-text-size-adjust: 100%; /* Prevent Windows Phone text size adjustment */
+    text-size-adjust: 100%; /* Standard property */
     overscroll-behavior-x: none; /* Prevents horizontal overscroll */
     -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
 }
 
+/* Responsive font scaling for different screen densities */
+@media screen and (max-width: 480px) {
+    html {
+        font-size: 14px; /* Smaller base font for small screens */
+    }
+}
+
+@media screen and (min-width: 481px) and (max-width: 768px) {
+    html {
+        font-size: 15px; /* Medium base font for tablets */
+    }
+}
+
+@media screen and (min-width: 769px) {
+    html {
+        font-size: 16px; /* Standard base font for desktop */
+    }
+}
+
+/* High DPI display adjustments */
+@media screen and (-webkit-min-device-pixel-ratio: 2), 
+       screen and (min-resolution: 192dpi) {
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* Disable browser swipe navigation on mobile */
 body {
+    font-size: 1rem; /* Use relative units based on html font-size */
+    line-height: 1.5;
     overscroll-behavior: none; /* Prevents pull-to-refresh and swipe navigation */
     -webkit-user-select: none; /* Disable text selection on iOS */
     user-select: none;
