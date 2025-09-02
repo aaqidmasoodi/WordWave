@@ -3,9 +3,21 @@
 class FlashcardManager {
     constructor() {
         this.userData = window.app.userData;
-        this.sessionWords = this.generateSessionWords();
         this.initializeGlobalState();
+        
+        // Try to load existing session first
         this.loadSessionState();
+        
+        // Only generate new session if we don't have saved session words
+        if (!this.sessionWords || this.sessionWords.length === 0) {
+            console.log('🆕 No saved session found, generating new words');
+            this.sessionWords = this.generateSessionWords();
+            // Save the new session immediately
+            this.saveSessionState();
+        } else {
+            console.log('✅ Using saved session words');
+        }
+        
         this.init();
     }
 
@@ -45,31 +57,44 @@ class FlashcardManager {
     }
 
     loadSessionState() {
-        const saved = localStorage.getItem('flashcardSession');
-        if (saved) {
-            try {
-                const state = JSON.parse(saved);
-                if (state.sessionLength === this.sessionWords.length) {
-                    window.flashcardState.currentCardIndex = state.currentIndex || 0;
-                    window.flashcardState.sessionResults = state.results || [];
-                    return;
-                }
-            } catch (e) {}
+        console.log('🔍 Loading session state...');
+        console.log('window.app exists:', !!window.app);
+        console.log('window.app.state exists:', !!window.app?.state);
+        
+        if (!window.app?.state?.getFlashcardSession) {
+            console.error('❌ State methods not available!');
+            this.sessionWords = [];
+            window.flashcardState.currentCardIndex = 0;
+            window.flashcardState.sessionResults = [];
+            return;
+        }
+        
+        const session = window.app.state.getFlashcardSession();
+        console.log('📦 Raw session data:', session);
+        
+        if (session && session.words && session.words.length > 0) {
+            this.sessionWords = session.words;
+            window.flashcardState.currentCardIndex = session.currentIndex || 0;
+            window.flashcardState.sessionResults = session.results || [];
+            console.log(`✅ Restored flashcard session: card ${session.currentIndex + 1}/${session.words.length}`);
+            console.log(`📝 Session words:`, session.words.map(w => w.english || w.word));
+            console.log(`Current word should be: "${session.words[session.currentIndex].english || session.words[session.currentIndex].word}"`);
+            return;
         }
         
         // Reset to fresh state
+        this.sessionWords = [];
         window.flashcardState.currentCardIndex = 0;
         window.flashcardState.sessionResults = [];
+        console.log('🆕 No valid session found');
     }
 
     saveSessionState() {
-        const state = {
-            currentIndex: this.currentCardIndex,
-            results: this.sessionResults,
-            sessionLength: this.sessionWords.length,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('flashcardSession', JSON.stringify(state));
+        window.app.state.saveFlashcardSession(
+            this.sessionWords,
+            this.currentCardIndex,
+            this.sessionResults
+        );
     }
 
     generateSessionWords() {
@@ -90,8 +115,9 @@ class FlashcardManager {
         // Get previously learned words (for occasional review)
         const learnedWordsData = availableWords.filter(word => learnedWords.includes(word.id));
         
-        // Calculate session size (max 5 words per session)
-        const sessionSize = Math.min(5, newWords.length + wordsForReview.length + learnedWordsData.length);
+        // Calculate session size from state settings
+        const maxSessionSize = this.userData.sessionLength?.flashcards || 10;
+        const sessionSize = Math.min(maxSessionSize, newWords.length + wordsForReview.length + learnedWordsData.length);
         
         // Calculate mix: 60% new, 30% review, 10% learned
         const learnedCount = Math.min(Math.floor(sessionSize * 0.1), learnedWordsData.length);
@@ -133,9 +159,33 @@ class FlashcardManager {
         const word = this.sessionWords[this.currentCardIndex];
         if (!word) return;
 
+        console.log(`🎯 Displaying card ${this.currentCardIndex + 1}: "${word.english}"`);
+
         document.getElementById('currentWord').textContent = word.english;
         document.getElementById('wordTranslation').textContent = word.urdu;
         document.getElementById('wordPhonetic').textContent = word.phonetic;
+
+        // Update status badges
+        const frontBadge = document.getElementById('wordStatusBadge');
+        const backBadge = document.getElementById('wordStatusBadgeBack');
+        
+        if (frontBadge && backBadge) {
+            if (word.wordType === 'review') {
+                frontBadge.textContent = 'Review';
+                frontBadge.className = 'badge bg-warning text-dark';
+                backBadge.textContent = 'Review';
+                backBadge.className = 'badge bg-warning text-dark';
+            } else if (word.wordType === 'learned') {
+                frontBadge.textContent = 'Learned';
+                frontBadge.className = 'badge bg-success';
+                backBadge.textContent = 'Learned';
+                backBadge.className = 'badge bg-success';
+            } else {
+                // New words - hide badge
+                frontBadge.className = 'badge d-none';
+                backBadge.className = 'badge d-none';
+            }
+        }
 
         // Update card counter using global function
         updateHeaderElement('cardCounter', `${this.currentCardIndex + 1}/${this.sessionWords.length}`);

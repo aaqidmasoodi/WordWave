@@ -12,6 +12,11 @@ class AppState {
                 learnedSentences: [],
                 reviewSentences: [],
                 currentDifficulty: 'beginner',
+                sessionLength: {
+                    flashcards: 10,
+                    sentences: 10,
+                    quiz: 10
+                },
                 streakCount: 0,
                 lastStudyDate: null,
                 totalStudyTime: 0
@@ -107,6 +112,60 @@ class AppState {
         window.addEventListener('beforeunload', () => {
             this.saveUserData();
         });
+    }
+
+    // Session management for flashcards
+    getFlashcardSession() {
+        const saved = localStorage.getItem('wordwave_flashcard_session');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error('Error parsing flashcard session:', e);
+            }
+        }
+        return null;
+    }
+
+    saveFlashcardSession(sessionWords, currentIndex, results) {
+        const session = {
+            words: sessionWords,
+            currentIndex: currentIndex,
+            results: results,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('wordwave_flashcard_session', JSON.stringify(session));
+    }
+
+    clearFlashcardSession() {
+        localStorage.removeItem('wordwave_flashcard_session');
+    }
+
+    // Session management for sentences
+    getSentenceSession() {
+        const saved = localStorage.getItem('wordwave_sentence_session');
+        if (saved) {
+            try {
+                return JSON.parse(saved);
+            } catch (e) {
+                console.error('Error parsing sentence session:', e);
+            }
+        }
+        return null;
+    }
+
+    saveSentenceSession(sessionSentences, currentIndex, results) {
+        const session = {
+            sentences: sessionSentences,
+            currentIndex: currentIndex,
+            results: results,
+            timestamp: Date.now()
+        };
+        localStorage.setItem('wordwave_sentence_session', JSON.stringify(session));
+    }
+
+    clearSentenceSession() {
+        localStorage.removeItem('wordwave_sentence_session');
     }
 
     // Reset

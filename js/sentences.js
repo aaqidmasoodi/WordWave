@@ -2,38 +2,46 @@ class SentenceManager {
     constructor() {
         this.currentSentenceIndex = 0;
         this.userData = window.app.userData;
-        this.sessionSentences = this.generateSessionSentences();
         this.sessionResults = []; // Track swipe results
+        
+        // Try to load existing session first
         this.loadSessionState();
+        
+        // Only generate new session if we don't have saved session sentences
+        if (!this.sessionSentences || this.sessionSentences.length === 0) {
+            console.log('🆕 No saved sentence session found, generating new sentences');
+            this.sessionSentences = this.generateSessionSentences();
+            // Save the new session immediately
+            this.saveSessionState();
+        } else {
+            console.log('✅ Using saved sentence session');
+        }
+        
         this.init();
     }
 
     loadSessionState() {
-        const saved = localStorage.getItem('sentenceSession');
-        if (saved) {
-            try {
-                const state = JSON.parse(saved);
-                if (state.sessionLength === this.sessionSentences.length) {
-                    this.currentSentenceIndex = state.currentIndex || 0;
-                    this.sessionResults = state.results || [];
-                    return;
-                }
-            } catch (e) {}
+        const session = window.app.state.getSentenceSession();
+        if (session && session.sentences && session.sentences.length > 0) {
+            this.sessionSentences = session.sentences;
+            this.currentSentenceIndex = session.currentIndex || 0;
+            this.sessionResults = session.results || [];
+            console.log(`Restored sentence session: sentence ${session.currentIndex + 1}/${session.sentences.length}`);
+            return;
         }
         
         // Reset to fresh state
         this.currentSentenceIndex = 0;
         this.sessionResults = [];
+        console.log('Starting new sentence session');
     }
 
     saveSessionState() {
-        const state = {
-            currentIndex: this.currentSentenceIndex,
-            results: this.sessionResults,
-            sessionLength: this.sessionSentences.length,
-            timestamp: Date.now()
-        };
-        localStorage.setItem('sentenceSession', JSON.stringify(state));
+        window.app.state.saveSentenceSession(
+            this.sessionSentences,
+            this.currentSentenceIndex,
+            this.sessionResults
+        );
     }
 
     generateSessionSentences() {
@@ -82,8 +90,9 @@ class SentenceManager {
             learnedSentences.includes(sentence.id)
         );
         
-        // Calculate session size (max 5 sentences per session)
-        const sessionSize = Math.min(5, availableSentences.length);
+        // Calculate session size from state settings
+        const maxSessionSize = this.userData.sessionLength?.sentences || 10;
+        const sessionSize = Math.min(maxSessionSize, availableSentences.length);
         
         // Calculate mix: 60% new, 30% review, 10% learned
         const learnedCount = Math.min(Math.floor(sessionSize * 0.1), learnedSentencesData.length);
