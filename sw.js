@@ -1,4 +1,41 @@
-const CACHE_NAME = 'wordwave-v5.4.4';
+const CACHE_NAME = 'wordwave-v5.4.5';
+
+// Clear all old caches aggressively
+self.addEventListener('activate', event => {
+    console.log('🔄 SW Activating:', CACHE_NAME);
+    event.waitUntil(
+        caches.keys().then(cacheNames => {
+            return Promise.all(
+                cacheNames.map(cacheName => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('🗑️ Deleting old cache:', cacheName);
+                        return caches.delete(cacheName);
+                    }
+                })
+            );
+        }).then(() => {
+            console.log('✅ SW Activated and old caches cleared:', CACHE_NAME);
+            // Take control immediately
+            return self.clients.claim();
+        })
+    );
+});
+
+// Handle skip waiting message
+self.addEventListener('message', event => {
+    console.log('📨 SW received message:', event.data);
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        console.log('⏭️ Skipping waiting, activating immediately');
+        self.skipWaiting();
+    }
+});
+
+// Force immediate activation and control
+self.addEventListener('install', event => {
+    console.log('📦 SW Installing:', CACHE_NAME);
+    // Skip waiting immediately
+    self.skipWaiting();
+});
 
 // Disable caching on localhost for development
 const isLocalhost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
