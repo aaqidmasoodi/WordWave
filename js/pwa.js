@@ -108,7 +108,8 @@ class PWAUpdateManager {
         
         newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New update available - show subtle indicator
+                // New update available - only show indicator, DO NOT auto-install
+                console.log('Update available - user must manually install from Settings');
                 this.showUpdateIndicator();
             }
         });

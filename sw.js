@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v5.0.7';
+const CACHE_NAME = 'wordwave-v5.0.8';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -77,13 +77,15 @@ self.addEventListener('activate', event => {
       );
     })
   );
-  // Claim all clients immediately
-  return self.clients.claim();
+  // DO NOT claim clients automatically - let user control updates
+  console.log('Service worker activated - waiting for user to install update');
 });
 
 // Listen for messages from the main thread
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'SKIP_WAITING') {
+    // Only skip waiting when explicitly requested by user
+    console.log('User requested update installation');
     self.skipWaiting();
   }
 });
