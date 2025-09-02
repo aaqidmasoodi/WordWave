@@ -122,23 +122,8 @@ class PWAUpdateManager {
     }
 
     showUpdateNotification() {
-        // Create update notification
-        const updateNotification = document.createElement('div');
-        updateNotification.id = 'updateNotification';
-        updateNotification.className = 'position-fixed top-0 start-50 translate-middle-x mt-3';
-        updateNotification.style.zIndex = '10000';
-        updateNotification.innerHTML = `
-            <div class="alert alert-info alert-dismissible fade show shadow" role="alert">
-                <i class="bi bi-arrow-clockwise me-2"></i>
-                <strong>Update Available!</strong> A new version of WordWave is ready.
-                <button type="button" class="btn btn-sm btn-outline-info ms-2" onclick="window.pwaUpdateManager.applyUpdate()">
-                    Update Now
-                </button>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-        `;
-        
-        document.body.appendChild(updateNotification);
+        // Don't show popup - let settings page handle it
+        console.log('Update available - will be handled by settings page');
     }
 
     async applyUpdate() {

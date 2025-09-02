@@ -42,20 +42,39 @@ class SettingsManager {
         try {
             // Actually check for updates using service worker
             if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-                // Force service worker to check for updates
                 const registration = await navigator.serviceWorker.getRegistration();
                 if (registration) {
                     await registration.update();
                     
                     // Check if there's a waiting service worker (new version)
                     if (registration.waiting) {
+                        // Update found - show updating status
                         status.classList.remove('alert-info');
-                        status.classList.add('alert-success');
-                        message.innerHTML = 'Update found!';
+                        status.classList.add('alert-warning');
+                        message.innerHTML = 'Update found! Updating...';
+                        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
+                        
+                        // Apply update automatically
+                        registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                        
+                        // Wait a moment then reload
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                        
                     } else {
+                        // No update - show up to date
                         status.classList.remove('alert-info');
                         status.classList.add('alert-success');
                         message.innerHTML = 'Up to date!';
+                        
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="bi bi-search"></i>';
+                        
+                        // Hide status after 3 seconds
+                        setTimeout(() => {
+                            status.classList.add('d-none');
+                        }, 3000);
                     }
                 } else {
                     throw new Error('No service worker registration found');
@@ -63,9 +82,6 @@ class SettingsManager {
             } else {
                 throw new Error('Service worker not available');
             }
-            
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-search"></i>';
             
         } catch (error) {
             console.error('Error checking for updates:', error);
@@ -75,6 +91,11 @@ class SettingsManager {
             
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-search"></i>';
+            
+            // Hide status after 3 seconds
+            setTimeout(() => {
+                status.classList.add('d-none');
+            }, 3000);
         }
     }
 
