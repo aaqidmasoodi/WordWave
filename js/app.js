@@ -1,11 +1,63 @@
 // js/app.js
 class EnglishLearningApp {
     constructor() {
-        this.userData = this.loadUserData();
+        // Ensure state exists, create if needed
+        if (!window.appState) {
+            // If AppState class exists, create instance
+            if (typeof AppState !== 'undefined') {
+                window.appState = new AppState();
+            } else {
+                // Fallback: create simple state object
+                window.appState = {
+                    state: { user: this.getDefaultUserData() },
+                    getUserData: function() { return this.state.user; },
+                    setUserData: function(data) { 
+                        this.state.user = data; 
+                        localStorage.setItem('wordWaveUserData', JSON.stringify(data));
+                    },
+                    saveUserData: function() {
+                        localStorage.setItem('wordWaveUserData', JSON.stringify(this.state.user));
+                    },
+                    reset: function() {
+                        this.state.user = this.getDefaultUserData();
+                        this.saveUserData();
+                    }
+                };
+                // Load existing data
+                const saved = localStorage.getItem('wordWaveUserData');
+                if (saved) {
+                    try {
+                        window.appState.state.user = JSON.parse(saved);
+                    } catch (e) {}
+                }
+            }
+        }
+        this.state = window.appState;
         this.sessionStartTime = Date.now();
         this.sessionTimer = null;
         this.init();
         this.startSessionTracking();
+    }
+
+    getDefaultUserData() {
+        return {
+            learnedWords: [],
+            reviewWords: [],
+            learnedSentences: [],
+            reviewSentences: [],
+            currentDifficulty: 'beginner',
+            streakCount: 0,
+            lastStudyDate: null,
+            totalStudyTime: 0
+        };
+    }
+
+    get userData() {
+        return this.state.getUserData();
+    }
+
+    set userData(value) {
+        this.state.setUserData(value);
     }
 
     startSessionTracking() {
@@ -85,11 +137,8 @@ class EnglishLearningApp {
     }
 
     saveUserData() {
-        try {
-            localStorage.setItem('englishLearningUserData', JSON.stringify(this.userData));
-        } catch (e) {
-            console.error('Error saving user data:', e);
-        }
+        // Data is automatically saved by the state system
+        this.state.saveUserData();
     }
 
     updateDashboard() {
@@ -435,13 +484,8 @@ class EnglishLearningApp {
             totalStudyTime: 0
         };
         
-        // Clear all session data
-        localStorage.removeItem('flashcardSession');
-        localStorage.removeItem('sentenceSession');
-        localStorage.removeItem('quizSession');
-        
-        // Save the reset data
-        this.saveUserData();
+        // Reset using centralized state
+        this.state.reset();
         
         // Update all UI elements
         this.updateDashboard();

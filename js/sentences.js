@@ -76,8 +76,8 @@ class SentenceManager {
             learnedSentences.includes(sentence.id)
         );
         
-        // Calculate session size (max 20 sentences per session)
-        const sessionSize = Math.min(20, availableSentences.length);
+        // Calculate session size (max 5 sentences per session)
+        const sessionSize = Math.min(5, availableSentences.length);
         
         // Calculate mix: 60% new, 30% review, 10% learned
         const learnedCount = Math.min(Math.floor(sessionSize * 0.1), learnedSentencesData.length);

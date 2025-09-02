@@ -49,8 +49,8 @@ class FlashcardManager {
         // Get previously learned words (for occasional review)
         const learnedWordsData = availableWords.filter(word => learnedWords.includes(word.id));
         
-        // Calculate session size (max 20 words per session)
-        const sessionSize = Math.min(20, newWords.length + wordsForReview.length + learnedWordsData.length);
+        // Calculate session size (max 5 words per session)
+        const sessionSize = Math.min(5, newWords.length + wordsForReview.length + learnedWordsData.length);
         
         // Calculate mix: 60% new, 30% review, 10% learned
         const learnedCount = Math.min(Math.floor(sessionSize * 0.1), learnedWordsData.length);

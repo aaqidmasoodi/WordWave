@@ -209,10 +209,67 @@ class QuizManager {
         document.getElementById('finalScore').textContent = 
             `${this.score}/${this.quizQuestions.length} (${percentage}%)`;
 
+        // Trigger confetti for perfect score
+        if (this.score === this.quizQuestions.length && this.quizQuestions.length > 0) {
+            this.triggerConfetti();
+        }
+
         // Setup retake button
         document.getElementById('retakeQuiz').addEventListener('click', () => {
             this.resetQuiz();
         });
+    }
+
+    triggerConfetti() {
+        const container = document.createElement('div');
+        container.className = 'confetti-container';
+        document.body.appendChild(container);
+
+        // Explosion center
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+
+        // Create 80 confetti pieces
+        for (let i = 0; i < 80; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti confetti-piece';
+            
+            // Start at explosion center
+            confetti.style.left = centerX + 'px';
+            confetti.style.top = centerY + 'px';
+            
+            // Random explosion direction (360 degrees)
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 200 + Math.random() * 300; // Random explosion force
+            
+            // Calculate final position
+            const x = Math.cos(angle) * velocity;
+            const y = Math.sin(angle) * velocity + 200; // Add gravity
+            const rotation = Math.random() * 720 - 360;
+            
+            // Set CSS variables
+            confetti.style.setProperty('--x', x + 'px');
+            confetti.style.setProperty('--y', y + 'px');
+            confetti.style.setProperty('--r', rotation + 'deg');
+            
+            // Random size
+            const size = 6 + Math.random() * 8;
+            confetti.style.width = size + 'px';
+            confetti.style.height = size + 'px';
+            
+            container.appendChild(confetti);
+        }
+
+        // Remove after animation
+        setTimeout(() => {
+            if (document.body.contains(container)) {
+                document.body.removeChild(container);
+            }
+        }, 3500);
+    }
+
+    createConfettiBurst(container, side) {
+        // This method is no longer needed
     }
 
     resetQuiz() {
