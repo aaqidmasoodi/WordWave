@@ -7,6 +7,8 @@ class SettingsManager {
         this.setupEventListeners();
         this.updateAppInfo();
         this.calculateStorageUsage();
+        // Set initial button state based on update availability
+        this.updateButtonState();
     }
 
     setupEventListeners() {
@@ -39,6 +41,27 @@ class SettingsManager {
         }
     }
 
+    updateButtonState() {
+        const btn = document.getElementById('checkUpdatesBtn');
+        if (!btn) return;
+
+        // Only two states based on flag
+        if (localStorage.getItem('wordwave_update_available') === 'true') {
+            // Install mode
+            btn.innerHTML = '<i class="bi bi-download"></i> Install Update';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-primary');
+            this.isInstallMode = true;
+        } else {
+            // Check mode
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Check for Updates';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-outline-primary');
+            this.isInstallMode = false;
+        }
+        btn.disabled = false;
+    }
+
     async checkForUpdates() {
         const btn = document.getElementById('checkUpdatesBtn');
         const status = document.getElementById('updateStatus');
@@ -53,28 +76,25 @@ class SettingsManager {
         message.textContent = 'Checking...';
 
         try {
-            if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+            if ('serviceWorker' in navigator) {
                 const registration = await navigator.serviceWorker.getRegistration();
                 if (registration) {
                     await registration.update();
                     
                     // Check if there's a waiting service worker (new version)
                     if (registration.waiting) {
-                        // Update found - transform button to install
+                        // Update found - set flag and transform button
+                        localStorage.setItem('wordwave_update_available', 'true');
+                        localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
+                        
                         status.classList.remove('alert-info');
                         status.classList.add('alert-success');
                         message.innerHTML = 'Update available!';
                         updateAvailable.classList.remove('d-none');
                         
                         // Transform button to install update
-                        btn.innerHTML = '<i class="bi bi-download"></i> Install Update';
-                        btn.disabled = false;
-                        btn.classList.remove('btn-outline-primary');
-                        btn.classList.add('btn-primary');
-                        
-                        // Store the waiting worker and change button behavior
+                        this.updateButtonState();
                         this.waitingWorker = registration.waiting;
-                        this.isInstallMode = true;
                         
                     } else {
                         // No update - show up to date
@@ -83,12 +103,8 @@ class SettingsManager {
                         message.innerHTML = 'Up to date!';
                         updateAvailable.classList.add('d-none');
                         
-                        // Reset button to check mode
-                        btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Check for Updates';
-                        btn.disabled = false;
-                        btn.classList.remove('btn-primary');
-                        btn.classList.add('btn-outline-primary');
-                        this.isInstallMode = false;
+                        // Reset button using consistent method
+                        this.updateButtonState();
                         
                         // Hide status after 3 seconds
                         setTimeout(() => {
@@ -96,20 +112,26 @@ class SettingsManager {
                         }, 3000);
                     }
                 } else {
-                    throw new Error('No service worker registration found');
+                    // No registration found
+                    status.classList.remove('alert-info');
+                    status.classList.add('alert-warning');
+                    message.textContent = 'Service worker not registered';
+                    this.updateButtonState();
                 }
             } else {
-                throw new Error('Service worker not available');
+                // Service worker not supported
+                status.classList.remove('alert-info');
+                status.classList.add('alert-warning');
+                message.textContent = 'Service worker not supported';
+                this.updateButtonState();
             }
-            
-            btn.disabled = false;
-            btn.innerHTML = '<i class="bi bi-search"></i>';
             
         } catch (error) {
             console.error('Error checking for updates:', error);
             status.classList.remove('alert-info');
             status.classList.add('alert-warning');
-            message.textContent = 'Check failed';
+            message.textContent = 'Check failed - try again';
+            this.updateButtonState();
             
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-search"></i>';
