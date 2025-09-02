@@ -253,21 +253,27 @@ class FlashcardManager {
         
         // Check if we've completed the session
         if (this.currentCardIndex >= this.sessionWords.length) {
-            // Generate new session with 80% new, 10% learned, 10% review
+            console.log('🎉 Session completed! Generating new session...');
+            
+            // Generate new session
             this.sessionWords = this.generateSessionWords();
             this.currentCardIndex = 0;
             this.sessionResults = [];
             
-            // Clear session storage to start fresh
-            localStorage.removeItem('flashcardSession');
-            
-            // Reset global state
+            // Update global state
             if (window.flashcardState) {
                 window.flashcardState.currentCardIndex = 0;
                 window.flashcardState.sessionResults = [];
             }
             
-            console.log('Generated new session with', this.sessionWords.length, 'cards');
+            // Save the new session immediately
+            this.saveSessionState();
+            
+            // Update UI with new session
+            this.displayCurrentCard();
+            this.displayNextCard();
+            
+            console.log('✅ New session started with', this.sessionWords.length, 'cards');
         } else {
             this.saveSessionState();
         }
