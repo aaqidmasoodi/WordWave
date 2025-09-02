@@ -170,6 +170,10 @@ class FlashcardManager {
         const backBadge = document.getElementById('wordStatusBadgeBack');
         
         if (frontBadge && backBadge) {
+            console.log(`🏷️ Word "${word.english}" - Type: ${word.wordType}, ID: ${word.id}`);
+            console.log(`📋 Current review stack:`, this.userData.reviewWords || []);
+            console.log(`🔍 Is word in review stack?`, (this.userData.reviewWords || []).includes(word.id));
+            
             if (word.wordType === 'review') {
                 frontBadge.textContent = 'Review';
                 frontBadge.className = 'badge bg-warning text-dark';
