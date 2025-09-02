@@ -16,68 +16,59 @@
         <div class="container py-4">
             <!-- Word of the Day -->
             <div class="card border-0 shadow-sm mb-4 word-of-day-gradient">
-                <div class="card-body text-center">
-                    <h2 class="h6 mb-3">Word of the Day</h2>
-                    <div id="wordOfTheDay">
-                        <div class="h3 mb-2" id="dailyWordEnglish">Loading...</div>
-                        <div class="text-muted mb-3" id="dailyWordUrdu">...</div>
-                        <div class="mb-3">
+                <div class="card-body py-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="flex-grow-1">
+                            <div class="small text-white-50 mb-1">Word of the Day</div>
+                            <div class="h5 mb-0 text-white" id="dailyWordEnglish">Loading...</div>
+                            <div class="text-white-75" id="dailyWordUrdu">...</div>
+                        </div>
+                        <div class="d-flex gap-2">
                             <button id="speakDailyWord" class="btn btn-sm btn-light">
-                                <i class="bi bi-volume-up"></i> Speak
+                                <i class="bi bi-volume-up"></i>
                             </button>
                         </div>
-                        <a href="flashcards.html" class="btn btn-primary">
-                            <i class="bi bi-card-checklist me-1"></i>Learn More Words
-                        </a>
                     </div>
                 </div>
             </div>
 
             <!-- Overall Progress -->
             <div class="card border-0 shadow-sm mb-4">
-                <div class="card-body">
-                    <h2 class="h6 text-muted mb-4">Your Learning Progress</h2>
+                <div class="card-body py-3">
+                    <h2 class="h6 text-muted mb-3">Your Learning Progress</h2>
                     
-                    <!-- Words Progress -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-6">
-                            <div class="text-center p-3 bg-light rounded-3">
-                                <div class="text-primary mb-2">
-                                    <i class="bi bi-book fs-3"></i>
+                    <!-- Compact Progress Grid -->
+                    <div class="row g-2">
+                        <div class="col-4">
+                            <div class="text-center p-2 bg-light rounded-2">
+                                <i class="bi bi-book text-primary fs-5 mb-1"></i>
+                                <div class="d-flex justify-content-center align-items-center gap-1">
+                                    <span class="h6 mb-0 text-success" id="homeWordsLearned">0</span>
+                                    <span class="small text-muted">/</span>
+                                    <span class="small text-warning" id="homeWordsReview">0</span>
                                 </div>
-                                <div class="h4 mb-1 text-primary" id="homeWordsLearned">0</div>
-                                <div class="small text-muted">Words Learned</div>
+                                <div class="small text-muted" style="font-size: 0.7rem;">Words</div>
                             </div>
                         </div>
-                        <div class="col-6">
-                            <div class="text-center p-3 bg-light rounded-3">
-                                <div class="text-warning mb-2">
-                                    <i class="bi bi-arrow-clockwise fs-3"></i>
+                        <div class="col-4">
+                            <div class="text-center p-2 bg-light rounded-2">
+                                <i class="bi bi-chat-text text-primary fs-5 mb-1"></i>
+                                <div class="d-flex justify-content-center align-items-center gap-1">
+                                    <span class="h6 mb-0 text-success" id="homeSentencesLearned">0</span>
+                                    <span class="small text-muted">/</span>
+                                    <span class="small text-warning" id="homeSentencesReview">0</span>
                                 </div>
-                                <div class="h4 mb-1 text-warning" id="homeWordsReview">0</div>
-                                <div class="small text-muted">Words to Review</div>
+                                <div class="small text-muted" style="font-size: 0.7rem;">Sentences</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="text-center p-2 bg-light rounded-2">
+                                <i class="bi bi-question-circle text-secondary fs-5 mb-1"></i>
+                                <div class="h6 mb-0 text-secondary" id="homeQuizzesTaken">0</div>
+                                <div class="small text-muted" style="font-size: 0.7rem;">Quizzes</div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Sentences Progress -->
-                    <div class="row g-3">
-                        <div class="col-6">
-                            <div class="text-center p-3 bg-light rounded-3">
-                                <div class="text-success mb-2">
-                                    <i class="bi bi-chat-text fs-3"></i>
-                                </div>
-                                <div class="h4 mb-1 text-success" id="homeSentencesLearned">0</div>
-                                <div class="small text-muted">Sentences & Phrases</div>
-                            </div>
-                        </div>
-                        <div class="col-6">
-                            <div class="text-center p-3 bg-light rounded-3">
-                                <div class="text-info mb-2">
-                                    <i class="bi bi-clock-history fs-3"></i>
-                                </div>
-                                <div class="h4 mb-1 text-info" id="homeSentencesReview">0</div>
-                                <div class="small text-muted">Phrases to Review</div>
                             </div>
                         </div>
                     </div>

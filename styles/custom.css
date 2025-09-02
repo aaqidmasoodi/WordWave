@@ -778,3 +778,32 @@ body {
     font-size: 2rem !important;
     font-weight: 700 !important;
 }
+/* Compact Word of the Day text colors */
+.word-of-day-gradient .text-white-50 {
+    color: rgba(255, 255, 255, 0.7) !important;
+}
+
+.word-of-day-gradient .text-white-75 {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Speak button styling for Word of the Day */
+.word-of-day-gradient .btn-light {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.word-of-day-gradient .btn-light:hover {
+    background-color: white;
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #333;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.word-of-day-gradient .btn-light:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}

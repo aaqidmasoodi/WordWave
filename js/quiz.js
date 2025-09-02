@@ -203,6 +203,15 @@ class QuizManager {
         setTimeout(() => {
             this.currentQuestionIndex++;
             
+            // Check if quiz is now complete and increment count
+            if (this.currentQuestionIndex >= this.quizQuestions.length) {
+                // Quiz just completed - increment count
+                if (window.app && window.app.userData) {
+                    window.app.userData.quizzesTaken = (window.app.userData.quizzesTaken || 0) + 1;
+                    window.app.saveUserData();
+                }
+            }
+            
             // Save session AFTER moving to next question
             this.saveQuizSession();
             
@@ -227,7 +236,7 @@ class QuizManager {
         document.getElementById('finalScore').textContent = 
             `${this.score}/${this.quizQuestions.length} (${percentage}%)`;
 
-        // Save quiz result to global state
+        // Save quiz result to global state (but don't increment count here)
         if (window.app && window.app.userData) {
             window.app.userData.lastQuizScore = {
                 score: this.score,

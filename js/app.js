@@ -198,6 +198,7 @@ class EnglishLearningApp {
         const homeWordsReview = document.getElementById('homeWordsReview');
         const homeSentencesLearned = document.getElementById('homeSentencesLearned');
         const homeSentencesReview = document.getElementById('homeSentencesReview');
+        const homeQuizzesTaken = document.getElementById('homeQuizzesTaken');
 
         // Calculate sentence stats
         const learnedSentences = this.userData.learnedSentences ? this.userData.learnedSentences.length : 0;
@@ -248,6 +249,10 @@ class EnglishLearningApp {
 
         if (homeSentencesReview) {
             homeSentencesReview.textContent = reviewSentences;
+        }
+
+        if (homeQuizzesTaken) {
+            homeQuizzesTaken.textContent = this.userData.quizzesTaken || 0;
         }
 
         if (learnedCountElement) {

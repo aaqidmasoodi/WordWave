@@ -119,7 +119,9 @@ class AppState {
             currentDifficulty: 'beginner',
             streakCount: 0,
             lastStudyDate: null,
-            totalStudyTime: 0
+            totalStudyTime: 0,
+            quizzesTaken: 0,
+            quizzesTaken: 0
         };
         
         this.clearAllSessions();
