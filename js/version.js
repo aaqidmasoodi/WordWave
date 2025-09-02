@@ -40,26 +40,47 @@ class VersionManager {
     }
 
     static showUpdateNotification(newVersion) {
-        // Show temporary update notification
+        // Show update notification that slides from under navbar
         const notification = document.createElement('div');
-        notification.className = 'position-fixed top-0 start-50 translate-middle-x mt-3';
-        notification.style.zIndex = '10000';
+        notification.className = 'update-notification';
+        notification.style.cssText = `
+            position: fixed;
+            top: 60px;
+            left: 0;
+            right: 0;
+            width: 100%;
+            background: #198754;
+            color: white;
+            padding: 12px 20px;
+            z-index: 9999;
+            transform: translateY(-100%);
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        `;
+        
         notification.innerHTML = `
-            <div class="alert alert-success alert-dismissible fade show shadow" role="alert">
+            <div class="d-flex align-items-center justify-content-center">
                 <i class="bi bi-check-circle me-2"></i>
-                <strong>Updated to v${newVersion}!</strong> App is now up to date.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <span><strong>Updated to v${newVersion}!</strong> App is now up to date.</span>
             </div>
         `;
         
         document.body.appendChild(notification);
         
-        // Auto-remove after 4 seconds
+        // Slide in
         setTimeout(() => {
-            if (notification.parentNode) {
-                notification.remove();
-            }
-        }, 4000);
+            notification.style.transform = 'translateY(0)';
+        }, 100);
+        
+        // Slide out and remove after 3 seconds
+        setTimeout(() => {
+            notification.style.transform = 'translateY(-100%)';
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }, 3000);
     }
 
     static checkForUpdates() {
