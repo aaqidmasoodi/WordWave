@@ -63,6 +63,14 @@ class UpdateUIManager {
     }
 
     showDashboardNotification() {
+        // Only show on home/dashboard page
+        const isDashboard = window.location.pathname === '/' || 
+                           window.location.pathname === '/index.html' ||
+                           window.location.pathname.endsWith('/index.html') ||
+                           document.querySelector('.dashboard-container');
+        
+        if (!isDashboard) return;
+        
         const dashboardContainer = document.querySelector('.dashboard-container, .container');
         if (dashboardContainer && !document.getElementById('updateNotificationCard')) {
             const updateCard = document.createElement('div');
@@ -71,16 +79,12 @@ class UpdateUIManager {
             updateCard.style.background = 'linear-gradient(135deg, #198754 0%, #20c997 100%)';
             updateCard.innerHTML = `
                 <div class="card-body py-3">
-                    <div class="d-flex align-items-center text-white">
-                        <div class="bg-white bg-opacity-20 rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px; min-width: 40px;">
-                            <i class="bi bi-arrow-up-circle text-white"></i>
-                        </div>
+                    <div class="d-flex align-items-center justify-content-between text-white">
                         <div class="flex-grow-1">
-                            <div class="fw-semibold mb-1">New Update Available!</div>
-                            <small class="opacity-90">A new version of WordWave is ready to install.</small>
+                            <div class="fw-semibold mb-0">New Update Available</div>
                         </div>
-                        <a href="settings.html" class="btn btn-light btn-sm">
-                            <i class="bi bi-gear me-1"></i>Settings
+                        <a href="settings.html" class="btn btn-light btn-sm px-3 py-2 rounded-pill fw-semibold">
+                            Update
                         </a>
                     </div>
                 </div>

@@ -117,6 +117,14 @@ class SettingsManager {
             // Clear the update flag
             localStorage.removeItem('wordwave_update_available');
             
+            // Clear all sessions to prevent compatibility issues
+            console.log('🧹 Clearing all sessions for update compatibility...');
+            localStorage.removeItem('wordwave_flashcard_session');
+            localStorage.removeItem('wordwave_sentence_session');
+            localStorage.removeItem('flashcardSession');
+            localStorage.removeItem('sentenceSession');
+            localStorage.removeItem('quizSession');
+            
             // Apply the update
             this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
             
