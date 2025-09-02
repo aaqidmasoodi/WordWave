@@ -9,6 +9,7 @@ html {
 body {
     overscroll-behavior: none; /* Prevents pull-to-refresh and swipe navigation */
     -webkit-user-select: none; /* Disable text selection on iOS */
+    user-select: none;
     -webkit-touch-callout: none; /* Disable callout on iOS */
     -webkit-tap-highlight-color: transparent; /* Remove tap highlight */
 }
@@ -114,6 +115,11 @@ body {
     z-index: 1000;
     padding: 8px 0;
     height: 70px; /* Define explicit height */
+}
+
+/* Prevent content from being hidden behind bottom navigation */
+.main-content {
+    padding-bottom: 90px; /* 70px nav height + 20px extra space */
 }
 
 

@@ -16,10 +16,10 @@ class VersionManager {
                     }
                 }
             }
-            return '5.0.3'; // Current version fallback
+            return '5.2.0'; // Current version fallback
         } catch (error) {
             console.error('Error getting version:', error);
-            return '5.0.3';
+            return '5.2.0';
         }
     }
 

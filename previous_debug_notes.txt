@@ -1,0 +1,45 @@
+WORDWAVE DEBUG NOTES
+===================
+
+STREAK BUG FIX - September 2, 2025
+----------------------------------
+
+PROBLEM:
+- Streak counter was stuck at 0 and never updating when users learned words
+- markWordAsLearned() was being called correctly
+- updateStreak() logic was correct
+- But streak value remained 0 despite apparent updates
+
+ROOT CAUSE:
+- We were trying to update this.userData.streakCount = newValue
+- But this.userData was just a REFERENCE to the real data
+- The real data lived at this.state.state.user
+- Our updates to this.userData were being ignored/overwritten by the state system
+
+DEBUGGING PROCESS:
+1. Added console logs to trace function calls ✓
+2. Confirmed markWordAsLearned() was being called ✓
+3. Confirmed updateStreak() was being called ✓
+4. Found that assignments like this.userData.streakCount = 1 were being ignored
+5. Discovered this.userData was a reference, not the source object
+6. Found the actual state structure was this.state.state.user
+
+SOLUTION:
+- Changed from: this.userData.streakCount = oldStreak + 1
+- Changed to: this.state.state.user.streakCount = oldStreak + 1
+- Same for lastStudyDate
+
+ANALOGY:
+- Like trying to change a photocopy instead of the original document
+- The photocopy changes don't affect the original
+- We needed to change the original document (this.state.state.user) directly
+
+LESSON LEARNED:
+- Always update the source object in state management systems
+- References to state objects may not persist changes
+- Use proper debugging to trace object references and state structure
+
+STATUS: ✅ FIXED
+- Streak now properly increments from 0 to 1 on first word learned
+- Badge updates immediately in header
+- Daily streak tracking works correctly

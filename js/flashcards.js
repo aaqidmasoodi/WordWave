@@ -298,7 +298,15 @@ class FlashcardManager {
         this.sessionResults[this.currentCardIndex] = 'learned';
         this.saveSessionState();
         
-        window.app.markWordAsLearned(currentWord.id);
+        console.log('🎯 FLASHCARD: About to call markWordAsLearned');
+        console.log('🎯 FLASHCARD: window.app exists?', !!window.app);
+        console.log('🎯 FLASHCARD: window.app.markWordAsLearned exists?', !!(window.app && window.app.markWordAsLearned));
+        
+        if (window.app && window.app.markWordAsLearned) {
+            window.app.markWordAsLearned(currentWord.id);
+        } else {
+            console.error('🚨 FLASHCARD: window.app or markWordAsLearned not available!');
+        }
         
         this.updateProgress();
         this.updateReviewStack();

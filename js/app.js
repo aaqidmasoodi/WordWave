@@ -215,6 +215,7 @@ class EnglishLearningApp {
         });
 
         // Update badges using global header functions
+        console.log('🔥 Updating streak badge:', this.userData.streakCount);
         updateHeaderElement('streakBadge', `🔥 ${this.userData.streakCount || 0}`);
         updateHeaderElement('wordsBadge', `${wordsLearned}/${totalWords}`);
 
@@ -374,7 +375,9 @@ class EnglishLearningApp {
     }
 
     markWordAsLearned(wordId) {
-        console.log('Marking word as learned:', wordId);
+        console.log('🎯 markWordAsLearned called with:', wordId);
+        console.log('🎯 Current streakCount before:', this.userData.streakCount);
+        console.log('🎯 Current lastStudyDate before:', this.userData.lastStudyDate);
         
         // Ensure arrays exist
         if (!this.userData.learnedWords) {
@@ -393,7 +396,11 @@ class EnglishLearningApp {
                 this.userData.reviewWords.splice(reviewIndex, 1);
             }
             
+            console.log('🎯 About to call updateStreak...');
             this.updateStreak();
+            console.log('🎯 After updateStreak - streakCount:', this.userData.streakCount);
+            console.log('🎯 After updateStreak - lastStudyDate:', this.userData.lastStudyDate);
+            
             this.saveUserData();
             this.updateDashboard();
             console.log('Word marked as learned. Learned words:', this.userData.learnedWords);
@@ -483,10 +490,22 @@ class EnglishLearningApp {
 
     updateStreak() {
         const today = new Date().toDateString();
-        if (this.userData.lastLogin !== today) {
-            this.userData.streakCount = (this.userData.streakCount || 0) + 1;
-            this.userData.lastLogin = today;
+        console.log('🔥 Checking streak - Today:', today, 'Last study date:', this.userData.lastStudyDate);
+        
+        // Use lastStudyDate instead of lastLogin for streak tracking
+        if (this.userData.lastStudyDate !== today) {
+            const oldStreak = this.userData.streakCount || 0;
+            
+            // Update through the correct state path
+            this.state.state.user.streakCount = oldStreak + 1;
+            this.state.state.user.lastStudyDate = today;
+            
             this.saveUserData();
+            
+            // Update the badge immediately
+            updateHeaderElement('streakBadge', `🔥 ${this.userData.streakCount}`);
+        } else {
+            console.log('🔥 Already studied today, current streak:', this.userData.streakCount);
         }
     }
 
@@ -503,15 +522,8 @@ class EnglishLearningApp {
             }
         });
 
-        // Reset progress button
-        const resetBtn = document.getElementById('resetProgressBtn');
-        if (resetBtn) {
-            resetBtn.addEventListener('click', () => {
-                if (confirm('Are you sure you want to reset all your progress? This cannot be undone.')) {
-                    this.resetAllProgress();
-                }
-            });
-        }
+        // Reset progress button - handled by settings.js on settings page
+        // Removed duplicate event listener to prevent double prompts
     }
 
     resetAllProgress() {
