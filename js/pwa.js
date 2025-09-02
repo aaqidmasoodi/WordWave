@@ -78,7 +78,7 @@ class PWAInstaller {
     }
 }
 
-// PWA Update Manager - Uses localStorage flags instead of direct UI manipulation
+// PWA Update Manager - Automatic update detection with flag system
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
@@ -94,22 +94,28 @@ class PWAUpdateManager {
                     
                     // Check if there's already a waiting service worker
                     if (registration.waiting) {
-                        console.log('Update available immediately');
-                        localStorage.setItem('wordwave_update_available', 'true');
+                        console.log('🔄 Update available immediately');
+                        this.setUpdateFlag();
                     }
                     
                     // Listen for new service worker installing
                     registration.addEventListener('updatefound', () => {
-                        console.log('New service worker found');
+                        console.log('🔄 New service worker found');
                         this.handleUpdateFound(registration);
                     });
                     
                     // Listen for service worker state changes
                     navigator.serviceWorker.addEventListener('controllerchange', () => {
-                        console.log('Controller changed - reloading page');
-                        localStorage.removeItem('wordwave_update_available');
+                        console.log('🔄 Controller changed - clearing flag and reloading');
+                        this.clearUpdateFlag();
                         window.location.reload();
                     });
+
+                    // Auto-check for updates every 60 seconds
+                    setInterval(() => {
+                        console.log('🔍 Auto-checking for updates...');
+                        registration.update();
+                    }, 60000);
                 })
                 .catch(registrationError => {
                     console.log('SW registration failed: ', registrationError);
@@ -122,11 +128,36 @@ class PWAUpdateManager {
         
         newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // New update available - set flag in localStorage
-                console.log('Update available - setting localStorage flag');
-                localStorage.setItem('wordwave_update_available', 'true');
+                console.log('✅ Update available - setting flag');
+                this.setUpdateFlag();
+                
+                // Dispatch event for home page to listen
+                window.dispatchEvent(new CustomEvent('updateAvailable'));
             }
         });
+    }
+
+    setUpdateFlag() {
+        localStorage.setItem('wordwave_update_available', 'true');
+        localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
+        console.log('🚩 Update flag set to true');
+    }
+
+    clearUpdateFlag() {
+        localStorage.removeItem('wordwave_update_available');
+        localStorage.removeItem('wordwave_update_timestamp');
+        console.log('🚩 Update flag cleared');
+    }
+
+    // Static methods for other components to use
+    static isUpdateAvailable() {
+        return localStorage.getItem('wordwave_update_available') === 'true';
+    }
+
+    static clearUpdateFlag() {
+        localStorage.removeItem('wordwave_update_available');
+        localStorage.removeItem('wordwave_update_timestamp');
+        console.log('🚩 Update flag cleared (static)');
     }
 }
 

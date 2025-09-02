@@ -108,17 +108,23 @@ class EnglishLearningApp {
         const day = now.getDay(); // 0 = Sunday
         const dateKey = now.toISOString().split('T')[0]; // YYYY-MM-DD
 
+        // Ensure usageTracking exists
         if (!this.userData.usageTracking) {
             this.userData.usageTracking = {};
         }
 
+        // Ensure date key exists
         if (!this.userData.usageTracking[dateKey]) {
             this.userData.usageTracking[dateKey] = {};
         }
 
         const timeKey = `${day}-${hour}`;
-        this.userData.usageTracking[dateKey][timeKey] = 
-            (this.userData.usageTracking[dateKey][timeKey] || 0) + 1;
+        
+        // Safely update the tracking
+        if (!this.userData.usageTracking[dateKey][timeKey]) {
+            this.userData.usageTracking[dateKey][timeKey] = 0;
+        }
+        this.userData.usageTracking[dateKey][timeKey]++;
 
         this.saveUserData();
     }
@@ -137,6 +143,14 @@ class EnglishLearningApp {
             delete this.userData.streak;
             this.saveUserData();
         }
+        
+        // Check for available updates and show banner
+        this.checkUpdateBanner();
+        
+        // Listen for update events
+        window.addEventListener('updateAvailable', () => {
+            this.showUpdateBanner();
+        });
         
         // Wait for header to load before updating dashboard
         const initDashboard = () => {
@@ -486,6 +500,65 @@ class EnglishLearningApp {
         
         this.saveUserData();
         console.log('Sentence marked for review. Review sentences:', this.userData.reviewSentences);
+    }
+
+    checkUpdateBanner() {
+        // Check if update is available and show banner
+        if (localStorage.getItem('wordwave_update_available') === 'true') {
+            this.showUpdateBanner();
+        }
+    }
+
+    showUpdateBanner() {
+        const banner = document.getElementById('updateBanner');
+        if (banner) {
+            banner.classList.remove('d-none');
+            
+            // Add click handler for install button
+            const installBtn = document.getElementById('installUpdateFromBanner');
+            if (installBtn && !installBtn.hasAttribute('data-listener')) {
+                installBtn.setAttribute('data-listener', 'true');
+                installBtn.addEventListener('click', () => {
+                    this.installUpdateFromBanner();
+                });
+            }
+        }
+    }
+
+    hideUpdateBanner() {
+        const banner = document.getElementById('updateBanner');
+        if (banner) {
+            banner.classList.add('d-none');
+        }
+    }
+
+    async installUpdateFromBanner() {
+        const installBtn = document.getElementById('installUpdateFromBanner');
+        if (installBtn) {
+            installBtn.disabled = true;
+            installBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Installing...';
+        }
+
+        try {
+            // Get service worker registration
+            const registration = await navigator.serviceWorker.getRegistration();
+            if (registration && registration.waiting) {
+                // Clear the update flag
+                localStorage.removeItem('wordwave_update_available');
+                localStorage.removeItem('wordwave_update_timestamp');
+                
+                // Apply the update
+                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                
+                // Page will reload automatically via controllerchange event
+            }
+        } catch (error) {
+            console.error('Error installing update:', error);
+            if (installBtn) {
+                installBtn.disabled = false;
+                installBtn.innerHTML = '<i class="bi bi-download me-1"></i>Install Now';
+            }
+        }
     }
 
     updateStreak() {

@@ -31,6 +31,47 @@
 <body>
     <!-- Main Content -->
     <main class="main-content">
+        <!-- Update Available Banner -->
+        <div id="updateBanner" class="d-none" style="
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 12px 20px;
+            margin: 0;
+            border: none;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+        ">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <div style="
+                        background: rgba(255,255,255,0.2);
+                        border-radius: 50%;
+                        width: 32px;
+                        height: 32px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        margin-right: 12px;
+                    ">
+                        <i class="bi bi-arrow-up-circle-fill" style="font-size: 16px;"></i>
+                    </div>
+                    <div>
+                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">New Update Available</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Tap to install the latest version</div>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-light btn-sm" id="installUpdateFromBanner" style="
+                    font-weight: 600;
+                    font-size: 12px;
+                    padding: 6px 16px;
+                    border-radius: 20px;
+                    border: none;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                ">
+                    Install
+                </button>
+            </div>
+        </div>
+        
         <div class="container py-4">
             <!-- Word of the Day -->
             <div class="card border-0 shadow-sm mb-4 word-of-day-gradient">
