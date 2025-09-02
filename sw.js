@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v3';
+const CACHE_NAME = 'wordwave-v4';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,11 +7,18 @@ const urlsToCache = [
   '/sentences.html',
   '/foundations.html',
   '/progress.html',
+  '/settings.html',
+  '/privacy.html',
+  '/terms.html',
+  '/developer.html',
   '/styles/custom.css',
   '/styles/animations.css',
+  '/styles/native.css',
   '/js/app.js',
   '/js/state.js',
   '/js/data.js',
+  '/js/pwa.js',
+  '/js/settings.js',
   '/js/flashcards.js',
   '/js/quiz.js',
   '/js/sentences.js',
