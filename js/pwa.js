@@ -32,7 +32,7 @@ class PWAInstaller {
             installBtn.style.cssText = `
                 bottom: 80px;
                 right: 20px;
-                z-index: 1000;
+                z-index: 9999;
                 border-radius: 25px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.2);
             `;
@@ -82,7 +82,7 @@ class PWAInstaller {
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
-        this.currentVersion = '5.9.9'; // Current app version
+        this.currentVersion = '6.0.0'; // Current app version
         this.init();
     }
 

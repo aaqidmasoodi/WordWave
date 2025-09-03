@@ -40,11 +40,18 @@ class OneSignalNotificationManager {
                 autoRegister: false,
                 autoResubscribe: true,
                 notifyButton: { enable: false },
-                // Fix service worker conflicts
-                serviceWorkerParam: { scope: '/' },
+                // Completely disable service worker messaging
+                serviceWorkerParam: { 
+                    scope: '/',
+                    workerName: 'OneSignalSDKWorker.js'
+                },
                 serviceWorkerPath: 'OneSignalSDKWorker.js',
-                // Disable session tracking to prevent errors
-                sessionThreshold: 0,
+                // Disable all session tracking
+                sessionThreshold: -1,
+                enableOnSession: false,
+                // Disable all messaging features that cause conflicts
+                enableOnFocus: false,
+                enableOnBlur: false,
                 welcomeNotification: {
                     disable: false,
                     title: "Thanks for subscribing to WordWave!",
@@ -136,7 +143,7 @@ class OneSignalNotificationManager {
                 words_learned: userData?.learnedWords?.length || 0,
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
-                app_version: '5.9.9'
+                app_version: '6.0.0'
             };
 
             OneSignal.User.addTags(tags);
