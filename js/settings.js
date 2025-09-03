@@ -99,7 +99,7 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '5.9.0';
+        const currentVersion = '5.9.2';
         const storedVersion = localStorage.getItem('wordwave_update_version');
         
         // If stored version matches current, clear all update flags
@@ -559,73 +559,58 @@ class SettingsManager {
 
     initNotificationSettings() {
         const pushToggle = document.getElementById('pushNotifications');
-        const enableBtn = document.getElementById('enableNotifications');
+        const statusDiv = document.getElementById('notificationStatus');
+        const statusText = document.getElementById('statusText');
 
         if (!pushToggle) return;
 
-        // Check current status after a short delay to ensure system is ready
+        // Wait for notification manager to initialize
         setTimeout(() => {
-            this.updateNotificationStatus();
+            pushToggle.checked = window.notificationManager.isSubscribed();
+            this.updateNotificationUI();
         }, 1000);
 
         // Handle toggle
         pushToggle.addEventListener('change', async (e) => {
             if (e.target.checked) {
-                const success = await window.advancedNotificationManager.enableNotifications();
-                if (!success) {
+                // Request permission - this triggers OneSignal prompt
+                const granted = await window.notificationManager.requestPermission();
+                if (!granted) {
                     e.target.checked = false;
-                    this.showNotificationError('Permission denied. Please enable in browser settings.');
                 }
+                this.updateNotificationUI();
             } else {
-                await window.advancedNotificationManager.disableNotifications();
-            }
-        });
-
-        // Handle enable button
-        enableBtn?.addEventListener('click', async () => {
-            const success = await window.advancedNotificationManager.enableNotifications();
-            if (success) {
-                pushToggle.checked = true;
-            } else {
-                this.showNotificationError('Permission denied. Please enable in browser settings.');
+                await window.notificationManager.unsubscribe();
+                this.updateNotificationUI();
             }
         });
     }
 
     updateNotificationStatus() {
+        this.updateNotificationUI();
+    }
+
+    updateNotificationUI() {
         const pushToggle = document.getElementById('pushNotifications');
-        const enableBtn = document.getElementById('enableNotifications');
         const statusDiv = document.getElementById('notificationStatus');
         const statusText = document.getElementById('statusText');
 
-        if (!pushToggle || !window.advancedNotificationManager) return;
+        if (!pushToggle) return;
 
-        const status = window.advancedNotificationManager.getStatus();
+        const isSubscribed = window.notificationManager.isSubscribed();
         
-        if (!status.initialized) {
-            statusText.textContent = 'Initializing advanced notification system...';
-            statusDiv.className = 'alert alert-info';
-            statusDiv.classList.remove('d-none');
-            return;
-        }
+        pushToggle.checked = isSubscribed;
 
-        if (status.subscribed) {
-            pushToggle.checked = true;
-            enableBtn?.classList.add('d-none');
-            statusText.textContent = '✅ Smart notifications enabled! 🚀';
+        if (isSubscribed) {
+            statusText.textContent = 'Notifications enabled ✓';
             statusDiv.className = 'alert alert-success';
             statusDiv.classList.remove('d-none');
+        } else if (Notification.permission === 'denied') {
+            statusText.textContent = 'Notifications blocked. Enable in browser settings.';
+            statusDiv.className = 'alert alert-warning';
+            statusDiv.classList.remove('d-none');
         } else {
-            pushToggle.checked = false;
-            if (Notification.permission === 'denied') {
-                enableBtn?.classList.add('d-none');
-                statusText.textContent = 'Notifications blocked. Enable in browser settings.';
-                statusDiv.className = 'alert alert-warning';
-                statusDiv.classList.remove('d-none');
-            } else {
-                enableBtn?.classList.remove('d-none');
-                statusDiv.classList.add('d-none');
-            }
+            statusDiv.classList.add('d-none');
         }
     }
 
