@@ -99,7 +99,7 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '5.8.4';
+        const currentVersion = '5.9.0';
         const storedVersion = localStorage.getItem('wordwave_update_version');
         
         // If stored version matches current, clear all update flags
@@ -560,12 +560,10 @@ class SettingsManager {
     initNotificationSettings() {
         const pushToggle = document.getElementById('pushNotifications');
         const enableBtn = document.getElementById('enableNotifications');
-        const statusDiv = document.getElementById('notificationStatus');
-        const statusText = document.getElementById('statusText');
 
-        if (!pushToggle || !window.notificationManager) return;
+        if (!pushToggle) return;
 
-        // Check current status after a short delay to ensure OneSignal is ready
+        // Check current status after a short delay to ensure system is ready
         setTimeout(() => {
             this.updateNotificationStatus();
         }, 1000);
@@ -573,29 +571,21 @@ class SettingsManager {
         // Handle toggle
         pushToggle.addEventListener('change', async (e) => {
             if (e.target.checked) {
-                const success = await window.notificationManager.requestPermission();
-                if (success) {
-                    await window.notificationManager.subscribe();
-                    window.notificationManager.setUserProperties();
-                    this.updateNotificationStatus();
-                } else {
+                const success = await window.advancedNotificationManager.enableNotifications();
+                if (!success) {
                     e.target.checked = false;
                     this.showNotificationError('Permission denied. Please enable in browser settings.');
                 }
             } else {
-                await window.notificationManager.unsubscribe();
-                this.updateNotificationStatus();
+                await window.advancedNotificationManager.disableNotifications();
             }
         });
 
         // Handle enable button
         enableBtn?.addEventListener('click', async () => {
-            const success = await window.notificationManager.requestPermission();
+            const success = await window.advancedNotificationManager.enableNotifications();
             if (success) {
-                await window.notificationManager.subscribe();
-                window.notificationManager.setUserProperties();
                 pushToggle.checked = true;
-                this.updateNotificationStatus();
             } else {
                 this.showNotificationError('Permission denied. Please enable in browser settings.');
             }
@@ -608,40 +598,21 @@ class SettingsManager {
         const statusDiv = document.getElementById('notificationStatus');
         const statusText = document.getElementById('statusText');
 
-        if (!pushToggle) return;
+        if (!pushToggle || !window.advancedNotificationManager) return;
 
-        // Check saved notification preference first
-        const savedPrefs = localStorage.getItem('wordwave_notifications');
-        if (savedPrefs) {
-            try {
-                const prefs = JSON.parse(savedPrefs);
-                if (prefs.subscribed) {
-                    pushToggle.checked = true;
-                    enableBtn?.classList.add('d-none');
-                    statusText.textContent = 'Notifications enabled ✓';
-                    statusDiv.className = 'alert alert-success';
-                    statusDiv.classList.remove('d-none');
-                    console.log('📱 Restored notification state from localStorage');
-                    return;
-                }
-            } catch (e) {
-                console.log('Failed to parse notification preferences');
-            }
-        }
-
-        if (!window.notificationManager?.initialized) {
-            statusText.textContent = 'Initializing notifications...';
+        const status = window.advancedNotificationManager.getStatus();
+        
+        if (!status.initialized) {
+            statusText.textContent = 'Initializing advanced notification system...';
             statusDiv.className = 'alert alert-info';
             statusDiv.classList.remove('d-none');
             return;
         }
 
-        const isSubscribed = window.notificationManager.getSubscriptionStatus();
-        
-        if (isSubscribed) {
+        if (status.subscribed) {
             pushToggle.checked = true;
             enableBtn?.classList.add('d-none');
-            statusText.textContent = 'Notifications enabled ✓';
+            statusText.textContent = '✅ Smart notifications enabled! 🚀';
             statusDiv.className = 'alert alert-success';
             statusDiv.classList.remove('d-none');
         } else {
