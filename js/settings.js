@@ -98,6 +98,17 @@ class SettingsManager {
         const btn = document.getElementById('checkUpdatesBtn');
         if (!btn) return;
 
+        // FORCE CLEAR update flags on page load - version check
+        const currentVersion = '5.8.2';
+        const storedVersion = localStorage.getItem('wordwave_update_version');
+        
+        // If stored version matches current, clear all update flags
+        if (storedVersion === currentVersion) {
+            console.log('🧹 Version matches current - clearing update flags');
+            localStorage.removeItem('wordwave_update_available');
+            localStorage.removeItem('wordwave_update_version');
+        }
+
         // Only two states based on flag
         if (localStorage.getItem('wordwave_update_available') === 'true') {
             // Install mode
@@ -596,6 +607,27 @@ class SettingsManager {
         const enableBtn = document.getElementById('enableNotifications');
         const statusDiv = document.getElementById('notificationStatus');
         const statusText = document.getElementById('statusText');
+
+        if (!pushToggle) return;
+
+        // Check saved notification preference first
+        const savedPrefs = localStorage.getItem('wordwave_notifications');
+        if (savedPrefs) {
+            try {
+                const prefs = JSON.parse(savedPrefs);
+                if (prefs.subscribed) {
+                    pushToggle.checked = true;
+                    enableBtn?.classList.add('d-none');
+                    statusText.textContent = 'Notifications enabled ✓';
+                    statusDiv.className = 'alert alert-success';
+                    statusDiv.classList.remove('d-none');
+                    console.log('📱 Restored notification state from localStorage');
+                    return;
+                }
+            } catch (e) {
+                console.log('Failed to parse notification preferences');
+            }
+        }
 
         if (!window.notificationManager?.initialized) {
             statusText.textContent = 'Initializing notifications...';
