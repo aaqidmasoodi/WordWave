@@ -99,7 +99,7 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '5.9.2';
+        const currentVersion = '5.9.3';
         const storedVersion = localStorage.getItem('wordwave_update_version');
         
         // If stored version matches current, clear all update flags
@@ -566,23 +566,26 @@ class SettingsManager {
 
         // Wait for notification manager to initialize
         setTimeout(() => {
-            pushToggle.checked = window.notificationManager.isSubscribed();
             this.updateNotificationUI();
-        }, 1000);
+        }, 2000);
+
+        // Check status every 5 seconds
+        setInterval(() => {
+            this.updateNotificationUI();
+        }, 5000);
 
         // Handle toggle
         pushToggle.addEventListener('change', async (e) => {
             if (e.target.checked) {
-                // Request permission - this triggers OneSignal prompt
                 const granted = await window.notificationManager.requestPermission();
                 if (!granted) {
                     e.target.checked = false;
                 }
-                this.updateNotificationUI();
             } else {
                 await window.notificationManager.unsubscribe();
-                this.updateNotificationUI();
             }
+            
+            setTimeout(() => this.updateNotificationUI(), 1000);
         });
     }
 
@@ -591,19 +594,24 @@ class SettingsManager {
     }
 
     updateNotificationUI() {
+        if (!window.notificationManager) return;
+        
+        const status = window.notificationManager.getStatus();
         const pushToggle = document.getElementById('pushNotifications');
         const statusDiv = document.getElementById('notificationStatus');
         const statusText = document.getElementById('statusText');
 
         if (!pushToggle) return;
 
-        const isSubscribed = window.notificationManager.isSubscribed();
-        
-        pushToggle.checked = isSubscribed;
+        pushToggle.checked = status.subscribed;
 
-        if (isSubscribed) {
-            statusText.textContent = 'Notifications enabled ✓';
+        if (status.subscribed && status.userId) {
+            statusText.textContent = `✅ Connected! User ID: ${status.userId.substring(0, 8)}...`;
             statusDiv.className = 'alert alert-success';
+            statusDiv.classList.remove('d-none');
+        } else if (!status.initialized) {
+            statusText.textContent = 'Initializing OneSignal...';
+            statusDiv.className = 'alert alert-info';
             statusDiv.classList.remove('d-none');
         } else if (Notification.permission === 'denied') {
             statusText.textContent = 'Notifications blocked. Enable in browser settings.';
