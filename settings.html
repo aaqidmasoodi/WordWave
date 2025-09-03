@@ -136,6 +136,48 @@
                 </div>
             </div>
 
+            <!-- API Configuration -->
+            <div class="card border-0 shadow-sm mb-3">
+                <div class="card-body py-3">
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                                <i class="bi bi-key text-warning"></i>
+                            </div>
+                            <div>
+                                <div class="fw-medium mb-0">Groq API Key</div>
+                                <small class="text-muted">For voice translation feature</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline-primary btn-sm" id="editApiKeyBtn">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- API Key Status -->
+                    <div id="apiKeyStatus" class="mb-2">
+                        <small class="text-muted" id="apiKeyStatusText">No API key configured</small>
+                    </div>
+                    
+                    <!-- Edit API Key Form (Hidden by default) -->
+                    <div id="editApiKeyForm" class="d-none">
+                        <div class="mb-3">
+                            <label for="groqApiKey" class="form-label">Groq API Key</label>
+                            <input type="password" class="form-control" id="groqApiKey" placeholder="Enter your Groq API key">
+                            <div class="form-text">Get your free API key from <a href="https://console.groq.com" target="_blank">console.groq.com</a></div>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-primary btn-sm" id="saveApiKeyBtn">
+                                <i class="bi bi-check-lg me-1"></i>Save
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm" id="cancelApiKeyBtn">
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Reset Progress -->
             <div class="card border-0 shadow-sm">
                 <div class="card-body py-3">

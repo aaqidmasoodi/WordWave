@@ -8,6 +8,7 @@ class SettingsManager {
         this.updateAppInfo();
         this.calculateStorageUsage();
         this.updateProfile();
+        this.updateApiKeyStatus();
         // Set initial button state based on update availability
         this.updateButtonState();
     }
@@ -46,6 +47,29 @@ class SettingsManager {
                 } else {
                     this.checkForUpdates();
                 }
+            });
+        }
+
+        // API Key editing
+        const editApiKeyBtn = document.getElementById('editApiKeyBtn');
+        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
+        const cancelApiKeyBtn = document.getElementById('cancelApiKeyBtn');
+        
+        if (editApiKeyBtn) {
+            editApiKeyBtn.addEventListener('click', () => {
+                this.showEditApiKey();
+            });
+        }
+        
+        if (saveApiKeyBtn) {
+            saveApiKeyBtn.addEventListener('click', () => {
+                this.saveApiKey();
+            });
+        }
+        
+        if (cancelApiKeyBtn) {
+            cancelApiKeyBtn.addEventListener('click', () => {
+                this.hideEditApiKey();
             });
         }
 
@@ -421,6 +445,66 @@ class SettingsManager {
         const updateCard = document.getElementById('updateNotificationCard');
         if (updateCard) {
             updateCard.remove();
+        }
+    }
+
+    // API Key Management
+    updateApiKeyStatus() {
+        const apiKey = localStorage.getItem('groqApiKey');
+        const statusText = document.getElementById('apiKeyStatusText');
+        
+        if (statusText) {
+            if (apiKey && apiKey.trim()) {
+                statusText.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i>API key configured';
+            } else {
+                statusText.innerHTML = '<i class="bi bi-x-circle text-muted me-1"></i>No API key configured';
+            }
+        }
+    }
+
+    showEditApiKey() {
+        const form = document.getElementById('editApiKeyForm');
+        const input = document.getElementById('groqApiKey');
+        
+        if (form && input) {
+            // Load current API key
+            const currentKey = localStorage.getItem('groqApiKey') || '';
+            input.value = currentKey;
+            
+            form.classList.remove('d-none');
+            input.focus();
+        }
+    }
+
+    hideEditApiKey() {
+        const form = document.getElementById('editApiKeyForm');
+        if (form) {
+            form.classList.add('d-none');
+        }
+    }
+
+    saveApiKey() {
+        const input = document.getElementById('groqApiKey');
+        if (input) {
+            const apiKey = input.value.trim();
+            
+            if (apiKey) {
+                localStorage.setItem('groqApiKey', apiKey);
+            } else {
+                localStorage.removeItem('groqApiKey');
+            }
+            
+            this.updateApiKeyStatus();
+            this.hideEditApiKey();
+            
+            // Show success feedback
+            const statusText = document.getElementById('apiKeyStatusText');
+            if (statusText) {
+                statusText.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i>Saved successfully';
+                setTimeout(() => {
+                    this.updateApiKeyStatus();
+                }, 2000);
+            }
         }
     }
 }

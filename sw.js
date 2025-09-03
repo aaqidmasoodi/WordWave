@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v5.4.6';
+const CACHE_NAME = 'wordwave-v5.5.0';
 
 // Clear all old caches aggressively
 self.addEventListener('activate', event => {
@@ -46,6 +46,7 @@ const urlsToCache = [
   '/flashcards.html',
   '/quiz.html',
   '/sentences.html',
+  '/synthesiser.html',
   '/foundations.html',
   '/progress.html',
   '/settings.html',
@@ -63,6 +64,7 @@ const urlsToCache = [
   '/js/flashcards.js',
   '/js/quiz.js',
   '/js/sentences.js',
+  '/js/synthesiser.js',
   '/js/foundations.js',
   '/js/progress.js',
   '/components/header/header.html',
