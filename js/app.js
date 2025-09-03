@@ -521,7 +521,7 @@ class EnglishLearningApp {
 
     checkUpdateBanner() {
         // Check if update is available using global state
-        if (window.appState && window.appState.isUpdateAvailable()) {
+        if (window.appState && typeof window.appState.isUpdateAvailable === 'function' && window.appState.isUpdateAvailable()) {
             console.log('🔍 Update flag is true, showing banner');
             this.showUpdateBanner();
         }

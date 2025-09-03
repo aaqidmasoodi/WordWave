@@ -210,11 +210,15 @@ class AppState {
             lastStudyDate: null,
             totalStudyTime: 0,
             quizzesTaken: 0,
-            quizzesTaken: 0
+            voiceTranslations: [],
+            updateAvailable: false
         };
         
         this.clearAllSessions();
         this.saveUserData();
+        
+        // Clear Groq API key
+        localStorage.removeItem('groqApiKey');
         
         // Reset all global UI states
         if (window.flashcardState) {
@@ -224,9 +228,18 @@ class AppState {
             window.sentenceState = null;
         }
         
+        // Refresh synthesiser page if it exists
+        if (window.voiceSynthesiser) {
+            window.voiceSynthesiser.loadTranslations();
+        }
+        
+        // Update voice translations UI
+        this.updateVoiceTranslationsUI();
+        
         // Also clear the old localStorage keys for compatibility
         localStorage.removeItem('englishLearningUserData');
         localStorage.removeItem('wordWaveUserData');
+        localStorage.removeItem('voiceTranslations'); // Clear old voice translations storage
     }
     
     // Voice Translations Management
