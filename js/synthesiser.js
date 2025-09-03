@@ -158,7 +158,9 @@ class VoiceSynthesiser {
             });
             
             if (!transcriptionResponse.ok) {
-                throw new Error('Speech recognition failed');
+                const errorText = await transcriptionResponse.text();
+                console.error('API Error:', transcriptionResponse.status, errorText);
+                throw new Error(`Speech recognition failed: ${transcriptionResponse.status} - ${errorText}`);
             }
             
             const transcriptionData = await transcriptionResponse.json();
