@@ -72,23 +72,8 @@
     <link href="styles/animations.css" rel="stylesheet">
     <link href="styles/native.css" rel="stylesheet">
     
-    <script>
-        // Load OneSignal asynchronously
-        (function() {
-            const script = document.createElement('script');
-            script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
-            script.async = true;
-            script.onload = function() {
-                console.log('✅ OneSignal loaded successfully');
-                window.oneSignalLoaded = true;
-            };
-            script.onerror = function() {
-                console.error('❌ OneSignal failed to load from CDN');
-                window.oneSignalLoaded = false;
-            };
-            document.head.appendChild(script);
-        })();
-    </script>
+    <!-- OneSignal -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 </head>
 <body>
     <!-- Main Content -->
