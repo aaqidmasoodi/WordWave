@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v5.8.0';
+const CACHE_NAME = 'wordwave-v5.8.1';
 
 // Clear all old caches aggressively
 self.addEventListener('activate', event => {
@@ -15,7 +15,8 @@ self.addEventListener('activate', event => {
             );
         }).then(() => {
             console.log('✅ SW Activated, old caches cleared:', CACHE_NAME);
-            // NEVER auto-claim - wait for user permission
+            // Force claim all clients immediately (Android fix)
+            return self.clients.claim();
         })
     );
 });
@@ -27,6 +28,51 @@ self.addEventListener('message', event => {
         console.log('⏭️ Skipping waiting, activating immediately');
         self.skipWaiting();
     }
+});
+
+// Android Chrome fix: Force reload after update
+self.addEventListener('controllerchange', () => {
+    console.log('🔄 Controller changed - reloading page for Android');
+    if (navigator.userAgent.includes('Android')) {
+        window.location.reload();
+    }
+});
+
+// Fetch handler with Android-specific cache busting
+self.addEventListener('fetch', event => {
+    // Skip non-GET requests
+    if (event.request.method !== 'GET') return;
+    
+    // Skip external requests
+    if (!event.request.url.startsWith(self.location.origin)) return;
+    
+    event.respondWith(
+        caches.open(CACHE_NAME).then(cache => {
+            return cache.match(event.request).then(response => {
+                if (response) {
+                    // Android fix: Always check network for HTML files
+                    if (event.request.url.includes('.html') || event.request.url === self.location.origin + '/') {
+                        return fetch(event.request).then(networkResponse => {
+                            if (networkResponse.ok) {
+                                cache.put(event.request, networkResponse.clone());
+                                return networkResponse;
+                            }
+                            return response; // Fallback to cache
+                        }).catch(() => response);
+                    }
+                    return response;
+                }
+                
+                // Not in cache, fetch from network
+                return fetch(event.request).then(networkResponse => {
+                    if (networkResponse.ok) {
+                        cache.put(event.request, networkResponse.clone());
+                    }
+                    return networkResponse;
+                });
+            });
+        })
+    );
 });
 
 // Service Worker - ABSOLUTELY NO AUTO-UPDATES

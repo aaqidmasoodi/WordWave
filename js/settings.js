@@ -365,10 +365,18 @@ class SettingsManager {
             // Apply the update
             this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
             
-            // Wait a moment then reload
-            setTimeout(() => {
-                window.location.reload();
-            }, 1500);
+            // Android Chrome fix: Force hard reload
+            if (navigator.userAgent.includes('Android')) {
+                setTimeout(() => {
+                    console.log('🔄 Android detected - forcing hard reload');
+                    window.location.reload(true);
+                }, 1000);
+            } else {
+                // iOS/other browsers: Normal reload
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            }
         }
     }
 
