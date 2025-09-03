@@ -58,6 +58,42 @@ html {
     border: 1px solid var(--gray-200);
 }
 
+.translations-container .container {
+    height: 100%;
+    max-width: 1320px;
+}
+
+@media (max-width: 1399.98px) {
+    .translations-container .container {
+        max-width: 1140px;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .translations-container .container {
+        max-width: 960px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .translations-container .container {
+        max-width: 720px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .translations-container .container {
+        max-width: 540px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .translations-container .container {
+        max-width: none;
+    }
+}
+}
+
 .translations-header {
     background: var(--gray-50);
     padding: 20px;

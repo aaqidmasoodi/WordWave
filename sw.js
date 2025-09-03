@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v5.7.0';
+const CACHE_NAME = 'wordwave-v5.7.1';
 
 // Clear all old caches aggressively
 self.addEventListener('activate', event => {
