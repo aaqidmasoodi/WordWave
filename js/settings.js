@@ -7,11 +7,36 @@ class SettingsManager {
         this.setupEventListeners();
         this.updateAppInfo();
         this.calculateStorageUsage();
+        this.updateProfile();
         // Set initial button state based on update availability
         this.updateButtonState();
     }
 
     setupEventListeners() {
+        // Profile editing
+        const editProfileBtn = document.getElementById('editProfileBtn');
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
+        const cancelProfileBtn = document.getElementById('cancelProfileBtn');
+        const editProfileForm = document.getElementById('editProfileForm');
+        
+        if (editProfileBtn) {
+            editProfileBtn.addEventListener('click', () => {
+                this.showEditProfile();
+            });
+        }
+        
+        if (saveProfileBtn) {
+            saveProfileBtn.addEventListener('click', () => {
+                this.saveProfile();
+            });
+        }
+        
+        if (cancelProfileBtn) {
+            cancelProfileBtn.addEventListener('click', () => {
+                this.hideEditProfile();
+            });
+        }
+
         // Check for updates button
         const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
         if (checkUpdatesBtn) {
@@ -60,6 +85,84 @@ class SettingsManager {
             this.isInstallMode = false;
         }
         btn.disabled = false;
+    }
+
+    // Profile Management
+    updateProfile() {
+        const profile = window.appState?.getProfile() || { name: 'User', avatar: 'U' };
+        
+        const avatarElement = document.getElementById('settingsAvatar');
+        const nameElement = document.getElementById('settingsUserName');
+        
+        if (avatarElement) {
+            avatarElement.textContent = profile.avatar;
+        }
+        
+        if (nameElement) {
+            nameElement.textContent = profile.name;
+        }
+    }
+
+    showEditProfile() {
+        const form = document.getElementById('editProfileForm');
+        const nameInput = document.getElementById('profileName');
+        const profile = window.appState?.getProfile() || { name: 'User' };
+        
+        if (nameInput) {
+            nameInput.value = profile.name;
+        }
+        
+        if (form) {
+            form.classList.remove('d-none');
+        }
+    }
+
+    hideEditProfile() {
+        const form = document.getElementById('editProfileForm');
+        if (form) {
+            form.classList.add('d-none');
+        }
+    }
+
+    saveProfile() {
+        const nameInput = document.getElementById('profileName');
+        const name = nameInput?.value.trim();
+        
+        if (!name) {
+            alert('Please enter a valid name');
+            return;
+        }
+        
+        // Update profile in state
+        if (window.appState) {
+            window.appState.updateProfile({ name });
+        }
+        
+        // Update UI immediately
+        this.updateProfile();
+        
+        // Update sidebar immediately (with small delay to ensure DOM is ready)
+        setTimeout(() => {
+            if (window.sidebarComponent) {
+                window.sidebarComponent.updateProfile();
+            }
+        }, 100);
+        
+        // Hide form
+        this.hideEditProfile();
+        
+        // Show success feedback
+        const saveBtn = document.getElementById('saveProfileBtn');
+        if (saveBtn) {
+            const originalText = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Saved!';
+            saveBtn.disabled = true;
+            
+            setTimeout(() => {
+                saveBtn.innerHTML = originalText;
+                saveBtn.disabled = false;
+            }, 1500);
+        }
     }
 
     async checkForUpdates() {

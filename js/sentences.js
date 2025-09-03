@@ -4,6 +4,17 @@ class SentenceManager {
         this.userData = window.app.userData;
         this.sessionResults = []; // Track swipe results
         
+        // Check if user has enough learned words first
+        const learnedWordsCount = this.userData.learnedWords ? this.userData.learnedWords.length : 0;
+        if (learnedWordsCount < 5) {
+            console.log('❌ Not enough words learned for sentences:', learnedWordsCount);
+            this.sessionSentences = [];
+            this.init();
+            return;
+        }
+        
+        console.log('✅ Sufficient words learned, starting sentence session');
+        
         // Try to load existing session first
         this.loadSessionState();
         

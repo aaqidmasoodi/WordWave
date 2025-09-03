@@ -7,6 +7,14 @@ class AppState {
     constructor() {
         this.state = {
             user: {
+                // User Profile
+                profile: {
+                    name: 'User',
+                    avatar: 'U',
+                    joinDate: new Date().toISOString()
+                },
+                
+                // Learning Data
                 learnedWords: [],
                 reviewWords: [],
                 learnedSentences: [],
@@ -45,6 +53,22 @@ class AppState {
     updateUserData(updates) {
         this.state.user = { ...this.state.user, ...updates };
         this.saveUserData();
+    }
+
+    // Profile Management
+    updateProfile(profileData) {
+        this.state.user.profile = { ...this.state.user.profile, ...profileData };
+        
+        // Auto-update avatar if name changes
+        if (profileData.name) {
+            this.state.user.profile.avatar = profileData.name.charAt(0).toUpperCase();
+        }
+        
+        this.saveUserData();
+    }
+
+    getProfile() {
+        return this.state.user.profile;
     }
 
     // Session methods

@@ -39,6 +39,9 @@ class SidebarComponent {
         
         if (!burgerMenu || !sidebarOverlay) return;
         
+        // Update profile display
+        this.updateProfile();
+        
         // Open sidebar
         burgerMenu.addEventListener('click', () => {
             sidebarOverlay.classList.add('active');
@@ -58,9 +61,34 @@ class SidebarComponent {
             }
         });
     }
+
+    updateProfile() {
+        // Get profile from state with safety checks
+        let profile = { name: 'User', avatar: 'U' };
+        
+        if (window.appState && typeof window.appState.getProfile === 'function') {
+            try {
+                profile = window.appState.getProfile() || profile;
+            } catch (error) {
+                console.warn('Error getting profile from appState:', error);
+            }
+        }
+        
+        // Update sidebar elements
+        const avatarElement = document.getElementById('sidebarAvatar');
+        const nameElement = document.getElementById('sidebarUserName');
+        
+        if (avatarElement) {
+            avatarElement.textContent = profile.avatar;
+        }
+        
+        if (nameElement) {
+            nameElement.textContent = profile.name;
+        }
+    }
 }
 
 // Initialize sidebar when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    new SidebarComponent();
+    window.sidebarComponent = new SidebarComponent();
 });
