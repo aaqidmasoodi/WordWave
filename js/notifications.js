@@ -47,6 +47,10 @@ class OneSignalNotificationManager {
                 autoRegister: false,
                 autoResubscribe: true,
                 notifyButton: { enable: false },
+                serviceWorkerParam: {
+                    scope: '/OneSignalSDKWorker.js'
+                },
+                serviceWorkerPath: 'OneSignalSDKWorker.js',
                 welcomeNotification: {
                     disable: false,
                     title: "Thanks for subscribing to WordWave!",
@@ -138,7 +142,7 @@ class OneSignalNotificationManager {
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
                 subscription_date: new Date().toISOString(),
-                app_version: '5.9.7'
+                app_version: '5.9.8'
             };
 
             OneSignal.User.addTags(tags);
