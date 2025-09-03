@@ -520,21 +520,10 @@ class EnglishLearningApp {
     }
 
     checkUpdateBanner() {
-        // Check if update is available and show banner
-        if (localStorage.getItem('wordwave_update_available') === 'true') {
-            console.log('🔍 Update flag is true, verifying actual update availability...');
-            
-            // Verify if there's actually an update available
-            this.verifyUpdateAvailability().then(hasUpdate => {
-                if (hasUpdate) {
-                    console.log('✅ Update verified, showing banner');
-                    this.showUpdateBanner();
-                } else {
-                    console.log('❌ No actual update found, clearing stale flag');
-                    localStorage.removeItem('wordwave_update_available');
-                    localStorage.removeItem('wordwave_update_timestamp');
-                }
-            });
+        // Check if update is available using global state
+        if (window.appState && window.appState.isUpdateAvailable()) {
+            console.log('🔍 Update flag is true, showing banner');
+            this.showUpdateBanner();
         }
     }
 

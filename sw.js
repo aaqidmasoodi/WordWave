@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wordwave-v5.5.1';
+const CACHE_NAME = 'wordwave-v5.5.2';
 
 // Clear all old caches aggressively
 self.addEventListener('activate', event => {
@@ -32,9 +32,31 @@ self.addEventListener('message', event => {
 
 // Force immediate activation and control
 self.addEventListener('install', event => {
-    console.log('📦 SW Installing:', CACHE_NAME);
-    // Skip waiting immediately
-    self.skipWaiting();
+    console.log('🔍 SW Installing:', CACHE_NAME, '- DETECTION ONLY, NO AUTO-INSTALL');
+    
+    // Notify clients that update is available, but DON'T auto-install
+    self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+            client.postMessage({
+                type: 'UPDATE_AVAILABLE',
+                version: CACHE_NAME
+            });
+        });
+    });
+    
+    // Cache files but DON'T skip waiting
+    if (!isLocalhost) {
+        event.waitUntil(
+            caches.open(CACHE_NAME)
+                .then(cache => {
+                    console.log('📦 Caching files for future installation');
+                    return cache.addAll(urlsToCache);
+                })
+        );
+    }
+    
+    // DO NOT call self.skipWaiting() - wait for user permission
+    console.log('✋ Service worker ready but waiting for user to install');
 });
 
 // Disable caching on localhost for development
@@ -77,27 +99,6 @@ const urlsToCache = [
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
   'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css'
 ];
-
-// Install event
-self.addEventListener('install', event => {
-  // Skip caching on localhost
-  if (isLocalhost) {
-    console.log('🚫 Skipping cache on localhost for development');
-    self.skipWaiting();
-    return;
-  }
-  
-  console.log('Service worker installing - new version available');
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
-  // DO NOT skip waiting automatically - wait for user permission
-  console.log('Service worker installed but waiting for user activation');
-});
 
 // Fetch event
 self.addEventListener('fetch', event => {
