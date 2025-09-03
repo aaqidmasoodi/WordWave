@@ -23,14 +23,14 @@ class BottomNavComponent {
         // Get current page name from URL
         const currentPage = window.location.pathname.split('/').pop().replace('.html', '') || 'index';
         
-        // Find and activate the corresponding nav link
-        const navLinks = document.querySelectorAll('.bottom-nav .nav-link');
-        navLinks.forEach(link => {
-            const pageName = link.getAttribute('data-page');
+        // Find and activate the corresponding nav item (including quiz fab)
+        const navItems = document.querySelectorAll('.nav-item, .quiz-fab');
+        navItems.forEach(item => {
+            const pageName = item.getAttribute('data-page');
             if (pageName === currentPage) {
-                link.classList.add('active');
+                item.classList.add('active');
             } else {
-                link.classList.remove('active');
+                item.classList.remove('active');
             }
         });
     }
