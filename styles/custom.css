@@ -92,7 +92,7 @@ html {
         max-width: none;
     }
 }
-}
+
 
 .translations-header {
     background: var(--gray-50);
@@ -752,9 +752,10 @@ body {
 }
 
 .foundation-item .urdu {
-    font-size: 0.7rem;
-    margin-top: 2px;
-    color: var(--gray-500);
+    font-size: 1rem;
+    margin-top: 4px;
+    color: var(--gray-600);
+    font-weight: 500;
 }
 
 .foundation-item.active .urdu {

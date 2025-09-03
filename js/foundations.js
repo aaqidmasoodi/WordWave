@@ -21,9 +21,6 @@ class FoundationsManager {
             item.innerHTML = `
                 <div class="letter">${letter.letter.toUpperCase()}</div>
                 <div class="urdu">${letter.urdu}</div>
-                <button class="btn btn-sm btn-link p-0 mt-1 speak-btn" onclick="window.app.speakText('${letter.letter}')">
-                    <i class="bi bi-volume-up text-muted"></i>
-                </button>
             `;
             item.addEventListener('click', () => {
                 // Just play sound, no detail display needed
@@ -43,9 +40,6 @@ class FoundationsManager {
             item.innerHTML = `
                 <div class="number">${number.number}</div>
                 <div class="urdu">${number.urdu}</div>
-                <button class="btn btn-sm btn-link p-0 mt-1 speak-btn" onclick="window.app.speakText('${number.word}')">
-                    <i class="bi bi-volume-up text-muted"></i>
-                </button>
             `;
             item.addEventListener('click', () => {
                 // Just play sound, no detail display needed
