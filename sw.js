@@ -1,7 +1,7 @@
 // WordWave Service Worker with OneSignal Integration
-const CACHE_NAME = 'wordwave-v6.0.3';
+const CACHE_NAME = 'wordwave-v6.0.4';
 
-// Import OneSignal service worker functionality
+// Import OneSignal service worker functionality FIRST
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
 const urlsToCache = [
@@ -31,6 +31,14 @@ const urlsToCache = [
     '/icons/icon-512x512.png',
     '/manifest.json'
 ];
+
+// Handle messages from main thread - MUST be at top level
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'SKIP_WAITING') {
+        console.log('⚡ Received SKIP_WAITING message - activating new SW');
+        self.skipWaiting();
+    }
+});
 
 // Install event
 self.addEventListener('install', (event) => {
@@ -76,12 +84,4 @@ self.addEventListener('fetch', (event) => {
                 return response || fetch(event.request);
             })
     );
-});
-
-// Handle messages from main thread
-self.addEventListener('message', (event) => {
-    if (event.data && event.data.type === 'SKIP_WAITING') {
-        console.log('⚡ Received SKIP_WAITING message - activating new SW');
-        self.skipWaiting();
-    }
 });
