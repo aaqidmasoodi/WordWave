@@ -520,10 +520,23 @@ class EnglishLearningApp {
     }
 
     checkUpdateBanner() {
-        // Check persistent localStorage flag
-        if (localStorage.getItem('wordwave_update_available') === 'true') {
-            console.log('🔍 Update flag found in localStorage, showing banner');
-            this.showUpdateBanner();
+        // SIMPLE: Only show if flag is true, and verify it's actually needed
+        const updateFlag = localStorage.getItem('wordwave_update_available');
+        console.log('🔍 Checking update banner - flag:', updateFlag);
+        
+        if (updateFlag === 'true') {
+            // Verify there's actually an update available
+            this.verifyUpdateAvailability().then(hasUpdate => {
+                if (hasUpdate) {
+                    console.log('✅ Update verified - showing banner');
+                    this.showUpdateBanner();
+                } else {
+                    console.log('❌ No actual update - clearing flag');
+                    localStorage.removeItem('wordwave_update_available');
+                    localStorage.removeItem('wordwave_update_timestamp');
+                    localStorage.removeItem('wordwave_update_version');
+                }
+            });
         }
     }
 
@@ -588,10 +601,11 @@ class EnglishLearningApp {
             if (registration && (registration.waiting || registration.installing)) {
                 console.log('🔄 Installing update...');
                 
-                // Clear the update flag FIRST
+                // Clear ALL update flags FIRST
                 localStorage.removeItem('wordwave_update_available');
                 localStorage.removeItem('wordwave_update_timestamp');
-                console.log('🧹 Cleared update flags');
+                localStorage.removeItem('wordwave_update_version');
+                console.log('🧹 Cleared ALL update flags');
                 
                 // Apply the update
                 const workerToActivate = registration.waiting || registration.installing;
@@ -615,9 +629,10 @@ class EnglishLearningApp {
                     }
                 }
                 
-                // Clear all update flags
+                // Clear ALL update flags
                 localStorage.removeItem('wordwave_update_available');
                 localStorage.removeItem('wordwave_update_timestamp');
+                localStorage.removeItem('wordwave_update_version');
                 
                 // Clear all caches
                 if ('caches' in window) {

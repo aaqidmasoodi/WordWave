@@ -82,7 +82,7 @@ class PWAInstaller {
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
-        this.currentVersion = '5.8.3'; // Current app version
+        this.currentVersion = '5.8.4'; // Current app version
         this.init();
     }
 
@@ -97,7 +97,7 @@ class PWAUpdateManager {
                     this.checkVersionAndClearFlags();
                     
                     // Check if there's already a waiting service worker
-                    if (registration.waiting) {
+                    if (registration.waiting && !this.isCurrentVersion()) {
                         console.log('🔄 Update available immediately');
                         this.setUpdateFlag();
                     }
@@ -115,22 +115,11 @@ class PWAUpdateManager {
                         window.location.reload();
                     });
 
-                    // REDUCED frequency - check every 5 minutes instead of 30 seconds
-                    setInterval(() => {
-                        console.log('🔍 Auto-checking for updates...');
-                        registration.update().then(() => {
-                            // Only set flag if there's actually a new version
-                            setTimeout(() => {
-                                if (registration.waiting && !this.isCurrentVersion()) {
-                                    console.log('🔄 Auto-detected NEW version update');
-                                    this.setUpdateFlag();
-                                    window.dispatchEvent(new CustomEvent('updateAvailable'));
-                                } else {
-                                    console.log('✅ No new version detected');
-                                }
-                            }, 1000);
-                        });
-                    }, 300000); // 5 minutes instead of 30 seconds
+                    // DISABLED automatic checking - only manual checks
+                    // setInterval(() => {
+                    //     console.log('🔍 Auto-checking for updates...');
+                    //     registration.update();
+                    // }, 300000);
                 })
                 .catch(registrationError => {
                     console.log('SW registration failed: ', registrationError);
