@@ -1,8 +1,8 @@
-const CACHE_NAME = 'wordwave-v5.5.3';
+const CACHE_NAME = 'wordwave-v5.5.4';
 
 // Clear all old caches aggressively
 self.addEventListener('activate', event => {
-    console.log('🔄 SW Activating:', CACHE_NAME);
+    console.log('🔄 SW Activating:', CACHE_NAME, '- USER INITIATED ONLY');
     event.waitUntil(
         caches.keys().then(cacheNames => {
             return Promise.all(
@@ -14,9 +14,8 @@ self.addEventListener('activate', event => {
                 })
             );
         }).then(() => {
-            console.log('✅ SW Activated and old caches cleared:', CACHE_NAME);
-            // Take control immediately
-            return self.clients.claim();
+            console.log('✅ SW Activated, old caches cleared:', CACHE_NAME);
+            // NEVER auto-claim - wait for user permission
         })
     );
 });
@@ -30,33 +29,33 @@ self.addEventListener('message', event => {
     }
 });
 
-// Force immediate activation and control
+// Service Worker - ABSOLUTELY NO AUTO-UPDATES
 self.addEventListener('install', event => {
-    console.log('🔍 SW Installing:', CACHE_NAME, '- DETECTION ONLY, NO AUTO-INSTALL');
+    console.log('🔍 New SW detected:', CACHE_NAME, '- WAITING FOR USER PERMISSION');
     
-    // Notify clients that update is available, but DON'T auto-install
-    self.clients.matchAll().then(clients => {
-        clients.forEach(client => {
-            client.postMessage({
-                type: 'UPDATE_AVAILABLE',
-                version: CACHE_NAME
-            });
-        });
-    });
-    
-    // Cache files but DON'T skip waiting
+    // Cache files but NEVER skip waiting
     if (!isLocalhost) {
         event.waitUntil(
             caches.open(CACHE_NAME)
                 .then(cache => {
-                    console.log('📦 Caching files for future installation');
+                    console.log('📦 Files cached, waiting for user to install');
                     return cache.addAll(urlsToCache);
                 })
         );
     }
     
-    // DO NOT call self.skipWaiting() - wait for user permission
-    console.log('✋ Service worker ready but waiting for user to install');
+    // Set localStorage flag that persists across sessions
+    self.clients.matchAll().then(clients => {
+        clients.forEach(client => {
+            client.postMessage({
+                type: 'UPDATE_DETECTED',
+                version: CACHE_NAME
+            });
+        });
+    });
+    
+    // NEVER call self.skipWaiting() automatically
+    console.log('✋ Service worker installed but WAITING for user permission');
 });
 
 // Disable caching on localhost for development

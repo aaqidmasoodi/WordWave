@@ -179,14 +179,14 @@
                 navigator.serviceWorker.addEventListener('message', event => {
                     console.log('📨 Received SW message:', event.data);
                     
-                    if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+                    if (event.data && event.data.type === 'UPDATE_DETECTED') {
                         console.log('🔄 Update detected:', event.data.version);
                         
-                        // Set update available flag in global state
-                        if (window.appState) {
-                            window.appState.setUpdateAvailable(true);
-                            console.log('✅ Update flag set, banner and button will update');
-                        }
+                        // Set persistent localStorage flag
+                        localStorage.setItem('wordwave_update_available', 'true');
+                        localStorage.setItem('wordwave_update_version', event.data.version);
+                        
+                        console.log('✅ Update flag set in localStorage');
                     }
                 });
             });

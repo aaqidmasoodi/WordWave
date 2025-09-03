@@ -520,9 +520,9 @@ class EnglishLearningApp {
     }
 
     checkUpdateBanner() {
-        // Check if update is available using global state
-        if (window.appState && typeof window.appState.isUpdateAvailable === 'function' && window.appState.isUpdateAvailable()) {
-            console.log('🔍 Update flag is true, showing banner');
+        // Check persistent localStorage flag
+        if (localStorage.getItem('wordwave_update_available') === 'true') {
+            console.log('🔍 Update flag found in localStorage, showing banner');
             this.showUpdateBanner();
         }
     }
