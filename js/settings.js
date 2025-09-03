@@ -13,6 +13,8 @@ class SettingsManager {
         this.updateApiKeyStatus();
         // Set initial button state based on update availability
         this.updateButtonState();
+        // Initialize notification settings
+        this.initNotificationSettings();
     }
 
     setupEventListeners() {
@@ -534,6 +536,99 @@ class SettingsManager {
                 }, 2000);
             }
         }
+    }
+
+    initNotificationSettings() {
+        const pushToggle = document.getElementById('pushNotifications');
+        const enableBtn = document.getElementById('enableNotifications');
+        const statusDiv = document.getElementById('notificationStatus');
+        const statusText = document.getElementById('statusText');
+
+        if (!pushToggle || !window.notificationManager) return;
+
+        // Check current status after a short delay to ensure OneSignal is ready
+        setTimeout(() => {
+            this.updateNotificationStatus();
+        }, 1000);
+
+        // Handle toggle
+        pushToggle.addEventListener('change', async (e) => {
+            if (e.target.checked) {
+                const success = await window.notificationManager.requestPermission();
+                if (success) {
+                    await window.notificationManager.subscribe();
+                    window.notificationManager.setUserProperties();
+                    this.updateNotificationStatus();
+                } else {
+                    e.target.checked = false;
+                    this.showNotificationError('Permission denied. Please enable in browser settings.');
+                }
+            } else {
+                await window.notificationManager.unsubscribe();
+                this.updateNotificationStatus();
+            }
+        });
+
+        // Handle enable button
+        enableBtn?.addEventListener('click', async () => {
+            const success = await window.notificationManager.requestPermission();
+            if (success) {
+                await window.notificationManager.subscribe();
+                window.notificationManager.setUserProperties();
+                pushToggle.checked = true;
+                this.updateNotificationStatus();
+            } else {
+                this.showNotificationError('Permission denied. Please enable in browser settings.');
+            }
+        });
+    }
+
+    updateNotificationStatus() {
+        const pushToggle = document.getElementById('pushNotifications');
+        const enableBtn = document.getElementById('enableNotifications');
+        const statusDiv = document.getElementById('notificationStatus');
+        const statusText = document.getElementById('statusText');
+
+        if (!window.notificationManager?.initialized) {
+            statusText.textContent = 'Initializing notifications...';
+            statusDiv.className = 'alert alert-info';
+            statusDiv.classList.remove('d-none');
+            return;
+        }
+
+        const isSubscribed = window.notificationManager.getSubscriptionStatus();
+        
+        if (isSubscribed) {
+            pushToggle.checked = true;
+            enableBtn?.classList.add('d-none');
+            statusText.textContent = 'Notifications enabled ✓';
+            statusDiv.className = 'alert alert-success';
+            statusDiv.classList.remove('d-none');
+        } else {
+            pushToggle.checked = false;
+            if (Notification.permission === 'denied') {
+                enableBtn?.classList.add('d-none');
+                statusText.textContent = 'Notifications blocked. Enable in browser settings.';
+                statusDiv.className = 'alert alert-warning';
+                statusDiv.classList.remove('d-none');
+            } else {
+                enableBtn?.classList.remove('d-none');
+                statusDiv.classList.add('d-none');
+            }
+        }
+    }
+
+    showNotificationError(message) {
+        const statusDiv = document.getElementById('notificationStatus');
+        const statusText = document.getElementById('statusText');
+        
+        statusText.textContent = message;
+        statusDiv.className = 'alert alert-danger';
+        statusDiv.classList.remove('d-none');
+        
+        setTimeout(() => {
+            statusDiv.classList.add('d-none');
+        }, 5000);
     }
 }
 

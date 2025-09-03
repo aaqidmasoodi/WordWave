@@ -745,7 +745,12 @@ class EnglishLearningApp {
         return vocabularyData.filter(word => {
             if (currentLevel === 'Beginner') return word.difficulty === 'Beginner';
             if (currentLevel === 'Medium') return word.difficulty === 'Beginner' || word.difficulty === 'Medium';
-            return true; // Hard level - all words available
+            // Update user properties for notifications when words are learned
+        if (window.notificationManager?.initialized) {
+            window.notificationManager.setUserProperties();
+        }
+        
+        return true; // Hard level - all words available
         });
     }
 

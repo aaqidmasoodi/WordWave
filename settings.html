@@ -75,6 +75,33 @@
                 </div>
             </div>
 
+            <!-- Notifications Section -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <h2 class="h6 text-muted mb-3">
+                        <i class="bi bi-bell me-2"></i>Notifications
+                    </h2>
+                    
+                    <div class="d-flex align-items-center justify-content-between mb-3">
+                        <div>
+                            <div class="fw-medium">Push Notifications</div>
+                            <small class="text-muted">Get reminders to practice and app updates</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="pushNotifications">
+                        </div>
+                    </div>
+                    
+                    <div id="notificationStatus" class="alert alert-info d-none">
+                        <small><i class="bi bi-info-circle me-1"></i><span id="statusText"></span></small>
+                    </div>
+                    
+                    <button id="enableNotifications" class="btn btn-primary btn-sm d-none">
+                        <i class="bi bi-bell me-1"></i>Enable Notifications
+                    </button>
+                </div>
+            </div>
+
             <!-- App Updates -->
             <div class="card border-0 shadow-sm mb-3">
                 <div class="card-body py-3">
@@ -207,6 +234,7 @@
     <script src="js/app.js"></script>
     <script src="js/pwa.js"></script>
     <script src="js/version.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/settings.js"></script>
     <script src="components/header/header.js"></script>
     <script src="components/sidebar/sidebar.js"></script>

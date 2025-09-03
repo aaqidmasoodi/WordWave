@@ -26,7 +26,24 @@
     <link href="styles/custom.css" rel="stylesheet">
     <link href="styles/animations.css" rel="stylesheet">
     <link href="styles/native.css" rel="stylesheet">
-    <link href="styles/native.css" rel="stylesheet">
+    
+    <script>
+        // Load OneSignal asynchronously
+        (function() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js';
+            script.async = true;
+            script.onload = function() {
+                console.log('✅ OneSignal loaded successfully');
+                window.oneSignalLoaded = true;
+            };
+            script.onerror = function() {
+                console.error('❌ OneSignal failed to load from CDN');
+                window.oneSignalLoaded = false;
+            };
+            document.head.appendChild(script);
+        })();
+    </script>
 </head>
 <body>
     <!-- Main Content -->
@@ -153,6 +170,7 @@
 
     <script src="js/data.js"></script>
     <script src="js/state.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="js/app.js"></script>
     <script src="js/pwa.js"></script>
     <script src="components/header/header.js"></script>
