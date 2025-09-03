@@ -82,7 +82,7 @@ class PWAInstaller {
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
-        this.currentVersion = '5.9.8'; // Current app version
+        this.currentVersion = '5.9.9'; // Current app version
         this.init();
     }
 

@@ -99,7 +99,7 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '5.9.8';
+        const currentVersion = '5.9.9';
         const storedVersion = localStorage.getItem('wordwave_update_version');
         
         // If stored version matches current, clear all update flags
@@ -559,22 +559,17 @@ class SettingsManager {
 
     initNotificationSettings() {
         const pushToggle = document.getElementById('pushNotifications');
-        const statusDiv = document.getElementById('notificationStatus');
-        const statusText = document.getElementById('statusText');
 
         if (!pushToggle) return;
 
-        // Wait for notification manager to initialize
+        // Set initial state from saved data
         setTimeout(() => {
-            this.updateNotificationUI();
-        }, 2000);
+            if (window.notificationManager) {
+                pushToggle.checked = window.notificationManager.isSubscribed();
+            }
+        }, 1000);
 
-        // Check status every 5 seconds
-        setInterval(() => {
-            this.updateNotificationUI();
-        }, 5000);
-
-        // Handle toggle
+        // Handle toggle - simple and clean
         pushToggle.addEventListener('change', async (e) => {
             if (e.target.checked) {
                 const granted = await window.notificationManager.requestPermission();
@@ -584,42 +579,15 @@ class SettingsManager {
             } else {
                 await window.notificationManager.unsubscribe();
             }
-            
-            setTimeout(() => this.updateNotificationUI(), 1000);
         });
     }
 
     updateNotificationStatus() {
-        this.updateNotificationUI();
+        // Keep for compatibility but do nothing
     }
 
     updateNotificationUI() {
-        if (!window.notificationManager) return;
-        
-        const status = window.notificationManager.getStatus();
-        const pushToggle = document.getElementById('pushNotifications');
-        const statusDiv = document.getElementById('notificationStatus');
-        const statusText = document.getElementById('statusText');
-
-        if (!pushToggle) return;
-
-        pushToggle.checked = status.subscribed;
-
-        if (status.subscribed && status.userId) {
-            statusText.textContent = `✅ Connected! User ID: ${status.userId.substring(0, 8)}...`;
-            statusDiv.className = 'alert alert-success';
-            statusDiv.classList.remove('d-none');
-        } else if (!status.initialized) {
-            statusText.textContent = 'Initializing OneSignal...';
-            statusDiv.className = 'alert alert-info';
-            statusDiv.classList.remove('d-none');
-        } else if (Notification.permission === 'denied') {
-            statusText.textContent = 'Notifications blocked. Enable in browser settings.';
-            statusDiv.className = 'alert alert-warning';
-            statusDiv.classList.remove('d-none');
-        } else {
-            statusDiv.classList.add('d-none');
-        }
+        // Keep for compatibility but do nothing
     }
 
     showNotificationError(message) {

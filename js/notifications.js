@@ -1,4 +1,4 @@
-// Simple OneSignal Integration - FIXED
+// Simple OneSignal Integration - Clean UI
 class OneSignalNotificationManager {
     constructor() {
         this.appId = '5bca53ce-c039-480f-b9e9-c09771bb33c3';
@@ -7,7 +7,10 @@ class OneSignalNotificationManager {
         this.connected = false;
         this.userId = null;
         
-        // Wait for DOM to be ready, then initialize
+        // Load saved state
+        this.loadState();
+        
+        // Initialize after DOM ready
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.init());
         } else {
@@ -16,53 +19,44 @@ class OneSignalNotificationManager {
     }
 
     async init() {
-        console.log('🔄 Initializing OneSignal...');
-        
-        // Wait for OneSignal to be available - much longer timeout
+        // Silent initialization - no console logs for users
         let attempts = 0;
-        const maxAttempts = 100; // 20 seconds total
+        const maxAttempts = 50;
         
         while (typeof OneSignal === 'undefined' && attempts < maxAttempts) {
             await new Promise(resolve => setTimeout(resolve, 200));
             attempts++;
-            
-            if (attempts % 10 === 0) {
-                console.log(`⏳ Still waiting for OneSignal... attempt ${attempts}/${maxAttempts}`);
-            }
         }
 
         if (typeof OneSignal === 'undefined') {
-            console.error('❌ OneSignal not available after 20 seconds');
-            this.updateConnectionStatus(false);
-            this.initialized = true; // Mark as initialized to prevent hanging
+            this.handleInitFailure();
             return;
         }
 
         try {
-            console.log('🚀 OneSignal found! Initializing...');
-            
             await OneSignal.init({
                 appId: this.appId,
                 allowLocalhostAsSecureOrigin: true,
                 autoRegister: false,
                 autoResubscribe: true,
                 notifyButton: { enable: false },
-                serviceWorkerParam: {
-                    scope: '/OneSignalSDKWorker.js'
-                },
+                // Fix service worker conflicts
+                serviceWorkerParam: { scope: '/' },
                 serviceWorkerPath: 'OneSignalSDKWorker.js',
+                // Disable session tracking to prevent errors
+                sessionThreshold: 0,
                 welcomeNotification: {
                     disable: false,
                     title: "Thanks for subscribing to WordWave!",
-                    message: "You'll receive study reminders and progress updates! 📚"
+                    message: "You'll receive study reminders! 📚"
                 }
             });
 
-            // Set up event listeners
+            // Set up minimal event listeners
             OneSignal.User.PushSubscription.addEventListener('change', (event) => {
-                console.log('🔔 Subscription changed:', event);
                 this.subscribed = event.current.optedIn;
                 this.userId = OneSignal.User.onesignalId;
+                this.saveState();
                 this.updateUI();
                 
                 if (this.subscribed) {
@@ -72,61 +66,62 @@ class OneSignalNotificationManager {
 
             this.initialized = true;
             this.connected = true;
-            
-            // Check current status
             this.subscribed = OneSignal.User.PushSubscription.optedIn;
             this.userId = OneSignal.User.onesignalId;
             
-            console.log('✅ OneSignal initialized successfully!');
-            console.log('📱 Current subscription status:', this.subscribed);
-            console.log('🆔 User ID:', this.userId);
-            
+            this.saveState();
             this.updateConnectionStatus(true);
             this.updateUI();
 
         } catch (error) {
-            console.error('❌ OneSignal initialization error:', error);
-            this.updateConnectionStatus(false);
-            this.initialized = true;
+            this.handleInitFailure();
         }
+    }
+
+    handleInitFailure() {
+        this.initialized = true;
+        this.connected = false;
+        this.subscribed = false;
+        this.saveState();
+        this.updateConnectionStatus(false);
+        this.updateUI();
     }
 
     async requestPermission() {
         if (!this.initialized || !this.connected) {
-            console.log('⏳ OneSignal not ready');
             return false;
         }
 
         try {
-            console.log('🔔 Requesting notification permission...');
             const permission = await OneSignal.Notifications.requestPermission();
             
             if (permission) {
-                console.log('✅ Permission granted!');
                 await OneSignal.User.PushSubscription.optIn();
                 this.subscribed = true;
                 this.userId = OneSignal.User.onesignalId;
+                this.saveState();
                 this.setUserTags();
                 return true;
-            } else {
-                console.log('❌ Permission denied');
-                return false;
             }
+            return false;
         } catch (error) {
-            console.error('❌ Permission request failed:', error);
             return false;
         }
     }
 
     async unsubscribe() {
-        if (!this.initialized || !this.connected) return;
+        if (!this.initialized || !this.connected) {
+            this.subscribed = false;
+            this.saveState();
+            return;
+        }
 
         try {
             await OneSignal.User.PushSubscription.optOut();
             this.subscribed = false;
-            console.log('🔕 Unsubscribed successfully');
+            this.saveState();
         } catch (error) {
-            console.error('❌ Unsubscribe failed:', error);
+            // Silent fail
         }
     }
 
@@ -141,14 +136,12 @@ class OneSignalNotificationManager {
                 words_learned: userData?.learnedWords?.length || 0,
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
-                subscription_date: new Date().toISOString(),
-                app_version: '5.9.8'
+                app_version: '5.9.9'
             };
 
             OneSignal.User.addTags(tags);
-            console.log('🏷️ User tags set:', tags);
         } catch (error) {
-            console.error('❌ Failed to set user tags:', error);
+            // Silent fail
         }
     }
 
@@ -157,12 +150,12 @@ class OneSignalNotificationManager {
         const indicator = document.getElementById('notificationIndicator');
         
         if (indicator) {
-            if (connected) {
+            if (connected && this.subscribed) {
                 indicator.className = 'notification-indicator connected';
-                indicator.title = 'Connected to OneSignal';
+                indicator.title = 'Notifications enabled';
             } else {
                 indicator.className = 'notification-indicator disconnected';
-                indicator.title = 'Not connected to OneSignal';
+                indicator.title = 'Notifications disabled';
             }
         }
     }
@@ -170,30 +163,44 @@ class OneSignalNotificationManager {
     updateUI() {
         const toggle = document.getElementById('pushNotifications');
         const statusDiv = document.getElementById('notificationStatus');
-        const statusText = document.getElementById('statusText');
 
         if (!toggle) return;
 
+        // Simple: just set toggle based on subscription status
         toggle.checked = this.subscribed;
 
-        if (this.subscribed && this.userId) {
-            statusText.textContent = `✅ Connected! User ID: ${this.userId.substring(0, 8)}...`;
-            statusDiv.className = 'alert alert-success';
-            statusDiv.classList.remove('d-none');
-        } else if (!this.initialized) {
-            statusText.textContent = 'Initializing OneSignal...';
-            statusDiv.className = 'alert alert-info';
-            statusDiv.classList.remove('d-none');
-        } else if (!this.connected) {
-            statusText.textContent = 'OneSignal connection failed';
-            statusDiv.className = 'alert alert-danger';
-            statusDiv.classList.remove('d-none');
-        } else if (Notification.permission === 'denied') {
-            statusText.textContent = 'Notifications blocked. Enable in browser settings.';
-            statusDiv.className = 'alert alert-warning';
-            statusDiv.classList.remove('d-none');
-        } else {
+        // Hide status div - no more messages to user
+        if (statusDiv) {
             statusDiv.classList.add('d-none');
+        }
+
+        // Update connection indicator
+        this.updateConnectionStatus(this.connected);
+    }
+
+    // State management
+    saveState() {
+        const state = {
+            subscribed: this.subscribed,
+            connected: this.connected,
+            userId: this.userId,
+            lastUpdated: new Date().toISOString()
+        };
+        
+        localStorage.setItem('wordwave_notifications_state', JSON.stringify(state));
+    }
+
+    loadState() {
+        try {
+            const saved = localStorage.getItem('wordwave_notifications_state');
+            if (saved) {
+                const state = JSON.parse(saved);
+                this.subscribed = state.subscribed || false;
+                this.connected = state.connected || false;
+                this.userId = state.userId || null;
+            }
+        } catch (error) {
+            // Silent fail
         }
     }
 
@@ -204,10 +211,6 @@ class OneSignalNotificationManager {
 
     isConnected() {
         return this.connected;
-    }
-
-    getUserId() {
-        return this.userId;
     }
 
     getStatus() {
