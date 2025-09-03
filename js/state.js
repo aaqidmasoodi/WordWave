@@ -27,7 +27,10 @@ class AppState {
                 },
                 streakCount: 0,
                 lastStudyDate: null,
-                totalStudyTime: 0
+                totalStudyTime: 0,
+                
+                // Voice Translations
+                voiceTranslations: []
             },
             sessions: {
                 flashcards: null,
@@ -221,6 +224,57 @@ class AppState {
         // Also clear the old localStorage keys for compatibility
         localStorage.removeItem('englishLearningUserData');
         localStorage.removeItem('wordWaveUserData');
+    }
+    
+    // Voice Translations Management
+    getVoiceTranslations() {
+        return this.state.user.voiceTranslations || [];
+    }
+    
+    addVoiceTranslation(translation) {
+        if (!this.state.user.voiceTranslations) {
+            this.state.user.voiceTranslations = [];
+        }
+        this.state.user.voiceTranslations.unshift(translation); // Add to beginning
+        this.saveUserData();
+        
+        // Update header button state
+        this.updateVoiceTranslationsUI();
+    }
+    
+    deleteVoiceTranslation(id) {
+        if (!this.state.user.voiceTranslations) return;
+        this.state.user.voiceTranslations = this.state.user.voiceTranslations.filter(t => t.id !== id);
+        this.saveUserData();
+        
+        // Update header button state
+        this.updateVoiceTranslationsUI();
+    }
+    
+    clearAllVoiceTranslations() {
+        this.state.user.voiceTranslations = [];
+        this.saveUserData();
+        
+        // Update header button state
+        this.updateVoiceTranslationsUI();
+        
+        // Reload translations list
+        if (window.voiceSynthesiser) {
+            window.voiceSynthesiser.loadTranslations();
+        }
+    }
+    
+    updateVoiceTranslationsUI() {
+        const clearAllBtn = document.getElementById('clearAllBtn');
+        if (clearAllBtn) {
+            const hasTranslations = this.getVoiceTranslations().length > 0;
+            clearAllBtn.disabled = !hasTranslations;
+            if (hasTranslations) {
+                clearAllBtn.classList.remove('disabled');
+            } else {
+                clearAllBtn.classList.add('disabled');
+            }
+        }
     }
 }
 

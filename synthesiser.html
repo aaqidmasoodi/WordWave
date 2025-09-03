@@ -15,15 +15,7 @@
     <main class="synthesiser-main">
         
         <!-- Amazing Translations Interface -->
-        <div class="translations-container">
-            <div class="translations-header">
-                <div class="header-content">
-                    <button id="clearAllBtn" class="clear-all-btn d-none">
-                        <i class="bi bi-trash me-1"></i>Clear All
-                    </button>
-                </div>
-            </div>
-            
+        <div class="translations-container">            
             <div class="translations-scroll">
                 <div id="translationsList">
                     <div class="empty-state">
@@ -87,11 +79,11 @@
     <script src="components/sidebar/sidebar.js"></script>
     <script src="components/bottom-nav/bottom-nav.js"></script>
     <script>
-        // Initialize header
+        // Initialize header with clear all button
         initHeader({
             title: 'Voice Synthesiser',
             showBack: true,
-            rightContent: ''
+            rightContent: '<button id="clearAllBtn" class="btn btn-outline-danger btn-sm" disabled><i class="bi bi-trash me-1"></i>Clear All</button>'
         });
     </script>
 </body>

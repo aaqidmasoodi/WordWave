@@ -11,6 +11,11 @@ class VoiceSynthesiser {
         this.setupEventListeners();
         this.loadTranslations();
         this.setupRecording();
+        
+        // Update button state initially
+        setTimeout(() => {
+            window.appState.updateVoiceTranslationsUI();
+        }, 100);
     }
 
     setupEventListeners() {
@@ -218,23 +223,13 @@ class VoiceSynthesiser {
             timestamp: new Date().toISOString()
         };
         
-        // Get existing translations
-        const translations = JSON.parse(localStorage.getItem('voiceTranslations') || '[]');
-        translations.unshift(translation); // Add to beginning (newest first)
-        
-        // Keep only last 50 translations
-        if (translations.length > 50) {
-            translations.splice(50);
-        }
-        
-        localStorage.setItem('voiceTranslations', JSON.stringify(translations));
+        window.appState.addVoiceTranslation(translation);
         this.loadTranslations();
     }
 
     loadTranslations() {
-        const translations = JSON.parse(localStorage.getItem('voiceTranslations') || '[]');
+        const translations = window.appState.getVoiceTranslations();
         const translationsList = document.getElementById('translationsList');
-        const clearAllBtn = document.getElementById('clearAllBtn');
         
         if (!translationsList) return; // Exit if element doesn't exist
         
@@ -246,11 +241,8 @@ class VoiceSynthesiser {
                     <div class="empty-subtitle">Record your voice to see translations appear here</div>
                 </div>
             `;
-            if (clearAllBtn) clearAllBtn.classList.add('d-none');
             return;
         }
-        
-        if (clearAllBtn) clearAllBtn.classList.remove('d-none');
         
         translationsList.innerHTML = translations.map((translation, index) => `
             <div class="translation-card" style="animation-delay: ${index * 0.1}s">
@@ -283,9 +275,7 @@ class VoiceSynthesiser {
     }
 
     deleteTranslation(id) {
-        const translations = JSON.parse(localStorage.getItem('voiceTranslations') || '[]');
-        const filtered = translations.filter(t => t.id !== id);
-        localStorage.setItem('voiceTranslations', JSON.stringify(filtered));
+        window.appState.deleteVoiceTranslation(id);
         this.loadTranslations();
     }
 
@@ -360,6 +350,16 @@ class VoiceSynthesiser {
         }, 100);
     }
 }
+
+// Global click handler for clear all button (backup)
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'clearAllBtn') {
+        console.log('Clear all button clicked');
+        if (confirm('Are you sure you want to delete all translations?')) {
+            window.appState.clearAllVoiceTranslations();
+        }
+    }
+});
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
