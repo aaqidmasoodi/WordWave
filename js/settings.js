@@ -1,5 +1,7 @@
 class SettingsManager {
     constructor() {
+        this.isInstallMode = false;
+        this.waitingWorker = null;
         this.init();
     }
 
@@ -195,59 +197,149 @@ class SettingsManager {
         const message = document.getElementById('updateMessage');
         const updateAvailable = document.getElementById('updateAvailable');
 
-        // Show checking status
+        // Show amazing checking animation
         btn.disabled = true;
-        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
-        status.classList.remove('d-none', 'alert-success', 'alert-warning');
+        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Checking...';
+        status.classList.remove('d-none', 'alert-success', 'alert-warning', 'alert-danger');
         status.classList.add('alert-info');
-        message.textContent = 'Checking...';
+        message.innerHTML = '<i class="bi bi-search me-1"></i>Scanning for updates...';
 
         try {
+            // Get current version from cache name
+            const currentVersion = await this.getCurrentVersion();
+            console.log('📱 Current version:', currentVersion);
+            
+            // Clear any stale update flags first
+            localStorage.removeItem('wordwave_update_available');
+            localStorage.removeItem('wordwave_update_version');
+            
             if ('serviceWorker' in navigator) {
                 const registration = await navigator.serviceWorker.getRegistration();
                 if (registration) {
-                    console.log('🔍 Current SW state:', registration.active?.state);
-                    console.log('🔍 Waiting SW exists:', !!registration.waiting);
-                    console.log('🔍 Installing SW exists:', !!registration.installing);
-                    
-                    // Force update check - more aggressive for Chrome Android
+                    // Force update check with cache busting
+                    message.innerHTML = '<i class="bi bi-cloud-download me-1"></i>Checking server...';
                     await registration.update();
                     
-                    // Wait a bit for the update to process
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    // Wait for update to process
+                    await new Promise(resolve => setTimeout(resolve, 1500));
                     
-                    // Check again after forced update
+                    // Get fresh registration
                     const updatedRegistration = await navigator.serviceWorker.getRegistration();
-                    console.log('🔍 After update - Waiting SW:', !!updatedRegistration.waiting);
-                    console.log('🔍 After update - Installing SW:', !!updatedRegistration.installing);
                     
-                    // Check if there's a waiting service worker (new version)
+                    // Check if there's a waiting service worker (new version available)
                     if (updatedRegistration.waiting || updatedRegistration.installing) {
-                        // Update found - set flag and transform button
-                        localStorage.setItem('wordwave_update_available', 'true');
-                        localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
+                        const newVersion = await this.getWaitingVersion(updatedRegistration);
+                        console.log('🆕 New version found:', newVersion);
                         
-                        status.classList.remove('alert-info');
-                        status.classList.add('alert-success');
-                        message.innerHTML = 'Update available!';
-                        updateAvailable.classList.remove('d-none');
-                        
-                        // Transform button to install update
-                        this.updateButtonState();
-                        this.waitingWorker = updatedRegistration.waiting || updatedRegistration.installing;
-                        
-                    } else {
-                        // Try cache busting approach for stubborn browsers
-                        const cacheBuster = Date.now();
-                        const swUrl = `/sw.js?v=${cacheBuster}`;
-                        console.log('🔍 Trying cache-busted SW check:', swUrl);
-                        
-                        try {
-                            const response = await fetch(swUrl, { cache: 'no-cache' });
-                            if (response.ok) {
-                                console.log('🔍 SW file fetched successfully');
-                                // Re-register with cache buster
-                                const newRegistration = await navigator.serviceWorker.register(swUrl);
+                        // Compare versions properly
+                        if (this.isNewerVersion(newVersion, currentVersion)) {
+                            // 🎉 UPDATE AVAILABLE!
+                            localStorage.setItem('wordwave_update_available', 'true');
+                            localStorage.setItem('wordwave_update_version', newVersion);
+                            
+                            status.classList.remove('alert-info');
+                            status.classList.add('alert-success');
+                            message.innerHTML = `<i class="bi bi-download me-1"></i>Update available! <strong>${newVersion}</strong>`;
+                            updateAvailable.classList.remove('d-none');
+                            
+                            // Transform button to install mode
+                            this.isInstallMode = true;
+                            btn.innerHTML = '<i class="bi bi-download me-1"></i>Install Update';
+                            btn.classList.remove('btn-outline-primary');
+                            btn.classList.add('btn-success');
+                            btn.disabled = false;
+                            
+                            this.waitingWorker = updatedRegistration.waiting || updatedRegistration.installing;
+                            return;
+                        }
+                    }
+                    
+                    // No update found - you're up to date! 
+                    status.classList.remove('alert-info');
+                    status.classList.add('alert-success');
+                    message.innerHTML = `<i class="bi bi-check-circle me-1"></i>You're up to date! <strong>${currentVersion}</strong>`;
+                    updateAvailable.classList.add('d-none');
+                    
+                    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Up to Date';
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-outline-success');
+                    btn.disabled = true;
+                    
+                    // Re-enable button after 3 seconds
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check for Updates';
+                        btn.classList.remove('btn-outline-success');
+                        btn.classList.add('btn-outline-primary');
+                        btn.disabled = false;
+                    }, 3000);
+                    
+                } else {
+                    throw new Error('Service worker not registered');
+                }
+            } else {
+                throw new Error('Service workers not supported');
+            }
+            
+        } catch (error) {
+            console.error('❌ Update check failed:', error);
+            
+            status.classList.remove('alert-info');
+            status.classList.add('alert-danger');
+            message.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i>Check failed: ${error.message}`;
+            
+            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Try Again';
+            btn.disabled = false;
+        }
+    }
+    
+    async getCurrentVersion() {
+        try {
+            const cacheNames = await caches.keys();
+            const wordwaveCache = cacheNames.find(name => name.startsWith('wordwave-v'));
+            return wordwaveCache ? wordwaveCache.replace('wordwave-v', '') : '5.5.4';
+        } catch (error) {
+            return '5.5.4'; // fallback
+        }
+    }
+    
+    async getWaitingVersion(registration) {
+        try {
+            // Try to get version from waiting worker
+            const worker = registration.waiting || registration.installing;
+            if (worker && worker.scriptURL) {
+                // Extract version from script URL or use timestamp
+                const url = new URL(worker.scriptURL);
+                const version = url.searchParams.get('v');
+                if (version) {
+                    return `5.5.${version.slice(-3)}`; // Convert timestamp to version
+                }
+            }
+            
+            // Fallback: increment current version
+            const current = await this.getCurrentVersion();
+            const parts = current.split('.');
+            const patch = parseInt(parts[2] || 0) + 1;
+            return `${parts[0]}.${parts[1]}.${patch}`;
+        } catch (error) {
+            return '5.5.5'; // fallback
+        }
+    }
+    
+    isNewerVersion(newVer, currentVer) {
+        const parseVersion = (v) => v.split('.').map(n => parseInt(n) || 0);
+        const newParts = parseVersion(newVer);
+        const currentParts = parseVersion(currentVer);
+        
+        for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
+            const newPart = newParts[i] || 0;
+            const currentPart = currentParts[i] || 0;
+            
+            if (newPart > currentPart) return true;
+            if (newPart < currentPart) return false;
+        }
+        
+        return false; // versions are equal
+    }
                                 await new Promise(resolve => setTimeout(resolve, 1500));
                                 
                                 if (newRegistration.waiting || newRegistration.installing) {
