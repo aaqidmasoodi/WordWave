@@ -138,7 +138,7 @@ class OneSignalNotificationManager {
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
                 subscription_date: new Date().toISOString(),
-                app_version: '5.9.6'
+                app_version: '5.9.7'
             };
 
             OneSignal.User.addTags(tags);
