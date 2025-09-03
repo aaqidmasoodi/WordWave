@@ -82,6 +82,7 @@ class PWAInstaller {
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
+        this.currentVersion = '5.8.3'; // Current app version
         this.init();
     }
 
@@ -91,6 +92,9 @@ class PWAUpdateManager {
                 .then(registration => {
                     this.registration = registration;
                     console.log('SW registered: ', registration);
+                    
+                    // FORCE CLEAR update flags on init if version matches
+                    this.checkVersionAndClearFlags();
                     
                     // Check if there's already a waiting service worker
                     if (registration.waiting) {
@@ -111,20 +115,22 @@ class PWAUpdateManager {
                         window.location.reload();
                     });
 
-                    // Auto-check for updates every 30 seconds (more frequent for Chrome Android)
+                    // REDUCED frequency - check every 5 minutes instead of 30 seconds
                     setInterval(() => {
                         console.log('🔍 Auto-checking for updates...');
                         registration.update().then(() => {
-                            // Force check after update call
+                            // Only set flag if there's actually a new version
                             setTimeout(() => {
-                                if (registration.waiting || registration.installing) {
-                                    console.log('🔄 Auto-detected update after interval check');
+                                if (registration.waiting && !this.isCurrentVersion()) {
+                                    console.log('🔄 Auto-detected NEW version update');
                                     this.setUpdateFlag();
                                     window.dispatchEvent(new CustomEvent('updateAvailable'));
+                                } else {
+                                    console.log('✅ No new version detected');
                                 }
                             }, 1000);
                         });
-                    }, 30000);
+                    }, 300000); // 5 minutes instead of 30 seconds
                 })
                 .catch(registrationError => {
                     console.log('SW registration failed: ', registrationError);
@@ -132,16 +138,37 @@ class PWAUpdateManager {
         }
     }
 
+    checkVersionAndClearFlags() {
+        const storedVersion = localStorage.getItem('wordwave_app_version');
+        
+        if (storedVersion === this.currentVersion) {
+            console.log('🧹 Version matches - force clearing update flags');
+            this.clearUpdateFlag();
+        } else {
+            // Update stored version
+            localStorage.setItem('wordwave_app_version', this.currentVersion);
+            console.log('📝 Updated stored version to:', this.currentVersion);
+        }
+    }
+
+    isCurrentVersion() {
+        const storedVersion = localStorage.getItem('wordwave_app_version');
+        return storedVersion === this.currentVersion;
+    }
+
     handleUpdateFound(registration) {
         const newWorker = registration.installing;
         
         newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                console.log('✅ Update available - setting flag');
-                this.setUpdateFlag();
-                
-                // Dispatch event for home page to listen
-                window.dispatchEvent(new CustomEvent('updateAvailable'));
+                // Only set flag if it's actually a new version
+                if (!this.isCurrentVersion()) {
+                    console.log('✅ NEW VERSION available - setting flag');
+                    this.setUpdateFlag();
+                    window.dispatchEvent(new CustomEvent('updateAvailable'));
+                } else {
+                    console.log('✅ Same version - not setting flag');
+                }
             }
         });
     }
