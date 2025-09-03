@@ -42,14 +42,23 @@ class VoiceSynthesiser {
     async setupRecording() {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            this.mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+            // Try different audio formats for better API compatibility
+            let mimeType = 'audio/webm;codecs=opus';
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                mimeType = 'audio/webm';
+            }
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+                mimeType = 'audio/mp4';
+            }
+            
+            this.mediaRecorder = new MediaRecorder(stream, { mimeType });
             
             this.mediaRecorder.ondataavailable = (event) => {
                 this.audioChunks.push(event.data);
             };
             
             this.mediaRecorder.onstop = async () => {
-                const audioBlob = new Blob(this.audioChunks, { type: 'audio/webm' });
+                const audioBlob = new Blob(this.audioChunks, { type: this.mediaRecorder.mimeType });
                 this.audioChunks = [];
                 await this.processAudio(audioBlob);
             };
