@@ -12,20 +12,35 @@ class OneSignalNotificationManager {
     async init() {
         console.log('🔄 Initializing OneSignal...');
         
-        // Wait for OneSignal to load
+        // Wait for OneSignal script to load first
+        let scriptAttempts = 0;
+        while (window.oneSignalLoaded === undefined && scriptAttempts < 50) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            scriptAttempts++;
+        }
+
+        if (window.oneSignalLoaded === false) {
+            console.error('❌ OneSignal script failed to load from CDN');
+            this.updateConnectionStatus(false);
+            return;
+        }
+
+        // Now wait for OneSignal object to be available
         let attempts = 0;
-        while (typeof OneSignal === 'undefined' && attempts < 30) {
+        while (typeof OneSignal === 'undefined' && attempts < 50) {
             await new Promise(resolve => setTimeout(resolve, 200));
             attempts++;
         }
 
         if (typeof OneSignal === 'undefined') {
-            console.error('❌ OneSignal failed to load');
+            console.error('❌ OneSignal object not available');
             this.updateConnectionStatus(false);
             return;
         }
 
         try {
+            console.log('🚀 OneSignal object found, initializing...');
+            
             await OneSignal.init({
                 appId: this.appId,
                 allowLocalhostAsSecureOrigin: true,
@@ -62,7 +77,7 @@ class OneSignalNotificationManager {
             this.subscribed = OneSignal.User.PushSubscription.optedIn;
             this.userId = OneSignal.User.onesignalId;
             
-            console.log('✅ OneSignal initialized');
+            console.log('✅ OneSignal initialized successfully');
             console.log('📱 Subscribed:', this.subscribed);
             console.log('🆔 User ID:', this.userId);
             
@@ -155,7 +170,7 @@ class OneSignalNotificationManager {
             last_study_date: userData?.lastStudyDate || 'never',
             device_type: this.getDeviceType(),
             subscription_date: new Date().toISOString(),
-            app_version: '5.9.3'
+            app_version: '5.9.4'
         };
 
         OneSignal.User.addTags(tags);
