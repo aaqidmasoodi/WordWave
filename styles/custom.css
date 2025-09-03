@@ -101,7 +101,7 @@ html {
 }
 
 .translations-scroll {
-    height: calc(100% - 80px);
+    height: calc(100%);
     overflow-y: auto;
     padding: 20px;
     scroll-behavior: smooth;
