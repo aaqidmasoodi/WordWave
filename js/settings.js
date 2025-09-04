@@ -577,16 +577,17 @@ class SettingsManager {
 
         // Handle toggle - with iOS-specific improvements
         const handleToggle = async (e) => {
-            console.log('🔘 Toggle clicked:', e.target.checked);
+            const targetState = e.target.checked;
+            console.log('🔘 Toggle clicked - new state:', targetState);
             
-            // Prevent double-firing on iOS
-            e.preventDefault();
-            e.stopPropagation();
+            // Don't prevent default for change events, only for click/touch
+            if (e.type !== 'change') {
+                e.preventDefault();
+                e.stopPropagation();
+            }
             
-            const isChecked = !pushToggle.checked; // Flip the state
-            pushToggle.checked = isChecked;
-            
-            if (isChecked) {
+            if (targetState) {
+                // Toggle turned ON - request permission and subscribe
                 console.log('🔔 Requesting permission...');
                 const granted = await window.notificationManager.requestPermission();
                 console.log('🔔 Permission granted:', granted);
@@ -595,6 +596,7 @@ class SettingsManager {
                     console.log('🔔 Permission denied, toggle reset');
                 }
             } else {
+                // Toggle turned OFF - unsubscribe
                 console.log('🔕 Unsubscribing...');
                 await window.notificationManager.unsubscribe();
                 console.log('🔕 Unsubscribed');
