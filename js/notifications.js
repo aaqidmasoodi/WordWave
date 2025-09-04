@@ -59,11 +59,12 @@ class OneSignalNotificationManager {
                 this.saveState();
                 this.updateUI();
                 
-                // Only set tags after subscription is stable
-                if (this.subscribed) {
-                    console.log('⏰ Scheduling tag update in 8 seconds...');
-                    setTimeout(() => this.setUserTags(), 8000);
-                }
+                // Only set tags after subscription is stable - DISABLED to prevent 409 conflicts
+                // if (this.subscribed) {
+                //     console.log('⏰ Scheduling tag update in 8 seconds...');
+                //     setTimeout(() => this.setUserTags(), 8000);
+                // }
+                console.log('📋 Skipping tag update on subscription change to prevent 409 conflicts');
             });
 
             this.initialized = true;
@@ -79,11 +80,13 @@ class OneSignalNotificationManager {
             this.updateConnectionStatus(true);
             this.updateUI();
 
-            // Set tags after initialization is complete and stable
-            if (this.subscribed) {
-                console.log('⏰ Scheduling initial tag update in 10 seconds...');
-                setTimeout(() => this.setUserTags(), 10000);
-            }
+            // Set tags after initialization is complete and stable - DISABLED to prevent 409 conflicts
+            // Tags will only be set manually when user performs actions
+            // if (this.subscribed) {
+            //     console.log('⏰ Scheduling initial tag update in 10 seconds...');
+            //     setTimeout(() => this.setUserTags(), 10000);
+            // }
+            console.log('📋 Skipping automatic tag updates to prevent 409 conflicts');
 
         } catch (error) {
             console.error('❌ OneSignal initialization failed:', error);
@@ -120,7 +123,7 @@ class OneSignalNotificationManager {
                 this.userId = OneSignal.User.onesignalId;
                 console.log('🆔 New User ID:', this.userId);
                 this.saveState();
-                this.setUserTags();
+                // this.setUserTags(); // DISABLED to prevent 409 conflicts
                 console.log('✅ Successfully subscribed to notifications');
                 return true;
             } else {
@@ -152,6 +155,17 @@ class OneSignalNotificationManager {
         }
     }
 
+    // Manual tag update method - only call when absolutely necessary
+    manualTagUpdate() {
+        if (!this.subscribed || !this.connected) {
+            console.log('⏭️ Cannot update tags - not subscribed or connected');
+            return;
+        }
+
+        console.log('🏷️ Manual tag update requested...');
+        setTimeout(() => this.setUserTags(), 1000);
+    }
+
     setUserTags() {
         if (!this.subscribed || !this.connected) {
             console.log('⏭️ Skipping tag update - not subscribed or connected');
@@ -166,7 +180,7 @@ class OneSignalNotificationManager {
                 words_learned: userData?.learnedWords?.length || 0,
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
-                app_version: '6.0.8'
+                app_version: '6.0.9'
             };
 
             console.log('🏷️ Setting user tags:', tags);
