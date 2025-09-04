@@ -187,11 +187,34 @@ class SettingsManager {
             installType.textContent = isInstalled ? 'Installed PWA' : 'Web Browser';
         }
 
+        // Display current version from service worker cache
+        const appVersion = document.getElementById('appVersion');
+        if (appVersion) {
+            this.getCurrentVersion().then(version => {
+                appVersion.textContent = version;
+            });
+        }
+
         // Set last updated date
         const lastUpdated = document.getElementById('lastUpdated');
         if (lastUpdated) {
             const today = new Date().toLocaleDateString();
             lastUpdated.textContent = today;
+        }
+    }
+
+    async getCurrentVersion() {
+        try {
+            const cacheNames = await caches.keys();
+            const wordwaveCache = cacheNames.find(name => name.startsWith('wordwave-v'));
+            if (wordwaveCache) {
+                // Extract version from cache name (e.g., 'wordwave-v6.7.0' -> '6.7.0')
+                return wordwaveCache.replace('wordwave-v', '');
+            }
+            return 'Unknown';
+        } catch (error) {
+            console.error('Error getting version:', error);
+            return 'Unknown';
         }
     }
 
