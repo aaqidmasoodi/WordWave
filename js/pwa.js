@@ -53,9 +53,6 @@ class PWAUpdateManager {
                 this.registration = await navigator.serviceWorker.register('/sw.js');
                 console.log('✅ SW registered');
                 
-                // Clear any existing flags on app start
-                this.clearUpdateFlag();
-                
                 // Listen for new service worker
                 this.registration.addEventListener('updatefound', () => {
                     console.log('🔄 New service worker found');
@@ -67,6 +64,9 @@ class PWAUpdateManager {
                     console.log('🔄 Update available immediately');
                     this.setUpdateFlag();
                     this.waitingWorker = this.registration.waiting;
+                } else {
+                    // Only clear flags if no update is waiting
+                    this.clearUpdateFlag();
                 }
                 
                 // Listen for controller change (update installed)
