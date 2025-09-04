@@ -61,8 +61,8 @@ class OneSignalNotificationManager {
                 
                 // Only set tags after subscription is stable
                 if (this.subscribed) {
-                    console.log('⏰ Scheduling tag update in 3 seconds...');
-                    setTimeout(() => this.setUserTags(), 3000);
+                    console.log('⏰ Scheduling tag update in 8 seconds...');
+                    setTimeout(() => this.setUserTags(), 8000);
                 }
             });
 
@@ -81,8 +81,8 @@ class OneSignalNotificationManager {
 
             // Set tags after initialization is complete and stable
             if (this.subscribed) {
-                console.log('⏰ Scheduling initial tag update in 5 seconds...');
-                setTimeout(() => this.setUserTags(), 5000);
+                console.log('⏰ Scheduling initial tag update in 10 seconds...');
+                setTimeout(() => this.setUserTags(), 10000);
             }
 
         } catch (error) {
@@ -166,22 +166,35 @@ class OneSignalNotificationManager {
                 words_learned: userData?.learnedWords?.length || 0,
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
-                app_version: '6.0.7'
+                app_version: '6.0.8'
             };
 
             console.log('🏷️ Setting user tags:', tags);
 
-            // Add delay to avoid conflicts during initialization
+            // Add longer delay to avoid conflicts and check if method exists
             setTimeout(() => {
-                OneSignal.User.addTags(tags).then(() => {
-                    console.log('✅ User tags updated successfully');
-                }).catch(error => {
-                    // Silent fail for tag conflicts - not critical
-                    console.debug('⚠️ Tag update failed (non-critical):', error.message);
-                });
-            }, 2000);
+                try {
+                    if (OneSignal && OneSignal.User && OneSignal.User.addTags) {
+                        const result = OneSignal.User.addTags(tags);
+                        
+                        // Check if result is a Promise before calling .then()
+                        if (result && typeof result.then === 'function') {
+                            result.then(() => {
+                                console.log('✅ User tags updated successfully');
+                            }).catch(error => {
+                                console.debug('⚠️ Tag update failed (non-critical):', error.message);
+                            });
+                        } else {
+                            console.log('✅ User tags set (no Promise returned)');
+                        }
+                    } else {
+                        console.debug('⚠️ OneSignal.User.addTags not available');
+                    }
+                } catch (error) {
+                    console.debug('⚠️ Tag update error (non-critical):', error.message);
+                }
+            }, 5000); // Increased delay to 5 seconds
         } catch (error) {
-            // Silent fail for tag setting
             console.debug('⚠️ Failed to set user tags (non-critical):', error.message);
         }
     }

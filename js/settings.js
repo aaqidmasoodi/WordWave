@@ -99,7 +99,7 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '6.0.7';
+        const currentVersion = '6.0.8';
         const storedVersion = localStorage.getItem('wordwave_update_version');
         
         // If stored version matches current, clear all update flags
