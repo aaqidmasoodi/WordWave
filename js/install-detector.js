@@ -1,14 +1,35 @@
+console.log('🔧 Install detector script loaded');
+
 // Install Detection for WordWave PWA
 class InstallDetector {
     constructor() {
+        console.log('🔧 InstallDetector constructor called');
         this.init();
     }
 
     init() {
-        // Check if app is installed on page load
-        if (!this.isInstalled() && !this.isInstallPage()) {
+        const isMobile = this.isMobileDevice();
+        const isInstalled = this.isInstalled();
+        const isInstallPage = this.isInstallPage();
+        
+        console.log('🔍 Install Detection:', {
+            isMobile,
+            isInstalled,
+            isInstallPage,
+            userAgent: navigator.userAgent
+        });
+        
+        // Only redirect mobile devices to install page
+        if (isMobile && !isInstalled && !isInstallPage) {
             this.redirectToInstallPage();
+        } else {
+            console.log('✅ Allowing direct app access');
         }
+    }
+
+    isMobileDevice() {
+        // Check if device is mobile (phone/tablet)
+        return /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
 
     isInstalled() {
@@ -24,7 +45,7 @@ class InstallDetector {
 
     redirectToInstallPage() {
         // Redirect to install banner
-        console.log('🔄 Redirecting to install page - PWA not detected');
+        console.log('📱 Redirecting mobile device to install page');
         window.location.href = 'install-banner.html';
     }
 
@@ -33,14 +54,10 @@ class InstallDetector {
         localStorage.setItem('wordwave_bypass_install', 'true');
         console.log('🔓 Install check bypassed');
     }
-
-    // Check if install check is bypassed
-    isInstallBypassed() {
-        return localStorage.getItem('wordwave_bypass_install') === 'true';
-    }
 }
 
 // Initialize install detector
 if (typeof window !== 'undefined') {
+    console.log('🔧 Creating InstallDetector instance');
     window.installDetector = new InstallDetector();
 }

@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Install WordWave - Learn English Vocabulary</title>
+    <title>Install WordWave</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="styles/custom.css" rel="stylesheet">
     <style>
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .install-container {
-            min-height: 100vh;
+            height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -22,43 +23,46 @@
         }
         
         .install-card {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
             width: 100%;
-            overflow: hidden;
+            border: 1px solid #e9ecef;
+        }
+        
+        .app-header {
+            text-align: center;
+            padding: 24px 24px 16px;
+            border-bottom: 1px solid #e9ecef;
         }
         
         .app-icon {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            border-radius: 20px;
+            width: 48px;
+            height: 48px;
+            background: #0d6efd;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 2.5rem;
+            margin: 0 auto 12px;
             color: white;
-            margin: 0 auto 20px;
+            font-size: 1.5rem;
         }
         
-        .install-steps {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 20px 0;
+        .install-content {
+            padding: 20px 24px 24px;
+        }
+        
+        .platform-steps {
+            margin: 16px 0;
         }
         
         .step {
             display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            align-items: flex-start;
+            margin-bottom: 12px;
+            font-size: 0.9rem;
         }
         
         .step:last-child {
@@ -66,72 +70,68 @@
         }
         
         .step-number {
-            width: 30px;
-            height: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 20px;
+            height: 20px;
+            background: #0d6efd;
             color: white;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            margin-right: 15px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 12px;
             flex-shrink: 0;
+            margin-top: 1px;
         }
         
         .install-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 15px;
-            padding: 15px 30px;
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
             width: 100%;
-            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 500;
+            margin-bottom: 8px;
         }
         
-        .install-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        .continue-btn {
+            background: #6c757d;
+            border-color: #6c757d;
             color: white;
         }
         
-        .platform-icon {
-            font-size: 1.2rem;
-            margin-right: 8px;
+        .continue-btn:hover {
+            background: #5c636a;
+            border-color: #5c636a;
+            color: white;
         }
         
-        .feature-list {
-            list-style: none;
-            padding: 0;
-        }
-        
-        .feature-list li {
-            padding: 8px 0;
-            display: flex;
-            align-items: center;
-        }
-        
-        .feature-list li i {
-            color: #28a745;
-            margin-right: 10px;
+        .platform-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #495057;
         }
         
         .hidden {
             display: none !important;
         }
         
-        @media (max-width: 576px) {
-            .install-card {
-                margin: 10px;
-                border-radius: 15px;
+        @media (max-height: 600px) {
+            .install-container {
+                padding: 10px;
             }
             
-            .app-icon {
-                width: 60px;
-                height: 60px;
-                font-size: 2rem;
+            .app-header {
+                padding: 16px 20px 12px;
+            }
+            
+            .install-content {
+                padding: 16px 20px 20px;
+            }
+            
+            .step {
+                margin-bottom: 8px;
+                font-size: 0.85rem;
             }
         }
     </style>
@@ -139,136 +139,92 @@
 <body>
     <div class="install-container">
         <div class="install-card">
-            <div class="text-center p-4 pb-0">
+            <div class="app-header">
                 <div class="app-icon">
                     <i class="bi bi-book"></i>
                 </div>
-                <h1 class="h3 fw-bold mb-2">WordWave</h1>
-                <p class="text-muted mb-3">Learn English Vocabulary</p>
-                
-                <ul class="feature-list text-start">
-                    <li><i class="bi bi-check-circle-fill"></i> Interactive vocabulary learning</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Progress tracking & streaks</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Offline access</li>
-                    <li><i class="bi bi-check-circle-fill"></i> Push notifications</li>
-                </ul>
+                <h1 class="h5 mb-1">WordWave</h1>
+                <p class="text-muted small mb-0">Install app for the best experience</p>
             </div>
             
             <!-- iOS Instructions -->
-            <div id="ios-instructions" class="p-4 hidden">
-                <h4 class="h5 fw-bold mb-3">
-                    <i class="bi bi-apple platform-icon"></i>
-                    Install on iPhone/iPad
-                </h4>
+            <div id="ios-instructions" class="install-content hidden">
+                <div class="platform-title">
+                    <i class="bi bi-apple me-2"></i>Install on iPhone/iPad
+                </div>
                 
-                <div class="install-steps">
+                <div class="platform-steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <div>
-                            <strong>Tap the Share button</strong><br>
-                            <small class="text-muted">Look for <i class="bi bi-share"></i> at the bottom of Safari</small>
-                        </div>
+                        <div>Tap <i class="bi bi-share"></i> Share button at the bottom</div>
                     </div>
                     
                     <div class="step">
                         <div class="step-number">2</div>
-                        <div>
-                            <strong>Select "Add to Home Screen"</strong><br>
-                            <small class="text-muted">Scroll down and tap <i class="bi bi-plus-square"></i> Add to Home Screen</small>
-                        </div>
+                        <div>Select "Add to Home Screen"</div>
                     </div>
                     
                     <div class="step">
                         <div class="step-number">3</div>
-                        <div>
-                            <strong>Tap "Add"</strong><br>
-                            <small class="text-muted">Confirm to add WordWave to your home screen</small>
-                        </div>
+                        <div>Tap "Add" to confirm</div>
                     </div>
                 </div>
                 
-                <button class="install-btn" onclick="continueToApp()">
-                    <i class="bi bi-arrow-right me-2"></i>
+                <button class="btn btn-primary install-btn" onclick="continueToApp()">
                     Continue to App
                 </button>
             </div>
             
             <!-- Android Instructions -->
-            <div id="android-instructions" class="p-4 hidden">
-                <h4 class="h5 fw-bold mb-3">
-                    <i class="bi bi-android platform-icon"></i>
-                    Install on Android
-                </h4>
+            <div id="android-instructions" class="install-content hidden">
+                <div class="platform-title">
+                    <i class="bi bi-android me-2"></i>Install on Android
+                </div>
                 
-                <div class="install-steps">
+                <div class="platform-steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <div>
-                            <strong>Tap "Install" when prompted</strong><br>
-                            <small class="text-muted">Look for the install banner at the top</small>
-                        </div>
+                        <div>Tap "Install" when prompted</div>
                     </div>
                     
                     <div class="step">
                         <div class="step-number">2</div>
-                        <div>
-                            <strong>Or use Chrome menu</strong><br>
-                            <small class="text-muted">Tap <i class="bi bi-three-dots-vertical"></i> → "Add to Home screen"</small>
-                        </div>
-                    </div>
-                    
-                    <div class="step">
-                        <div class="step-number">3</div>
-                        <div>
-                            <strong>Confirm installation</strong><br>
-                            <small class="text-muted">Tap "Add" to install WordWave</small>
-                        </div>
+                        <div>Or use menu <i class="bi bi-three-dots-vertical"></i> → "Add to Home screen"</div>
                     </div>
                 </div>
                 
-                <button class="install-btn" id="android-install-btn" onclick="installPWA()">
-                    <i class="bi bi-download me-2"></i>
-                    Install App
+                <button class="btn btn-primary install-btn" id="android-install-btn" onclick="installPWA()">
+                    <i class="bi bi-download me-2"></i>Install App
                 </button>
                 
-                <button class="install-btn mt-2" onclick="continueToApp()" style="background: #6c757d;">
-                    <i class="bi bi-arrow-right me-2"></i>
+                <button class="btn continue-btn install-btn" onclick="continueToApp()">
                     Continue in Browser
                 </button>
             </div>
             
             <!-- Desktop Instructions -->
-            <div id="desktop-instructions" class="p-4 hidden">
-                <h4 class="h5 fw-bold mb-3">
-                    <i class="bi bi-laptop platform-icon"></i>
-                    Install on Desktop
-                </h4>
+            <div id="desktop-instructions" class="install-content hidden">
+                <div class="platform-title">
+                    <i class="bi bi-laptop me-2"></i>Install on Desktop
+                </div>
                 
-                <div class="install-steps">
+                <div class="platform-steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <div>
-                            <strong>Look for install icon</strong><br>
-                            <small class="text-muted">Check address bar for <i class="bi bi-plus-circle"></i> install icon</small>
-                        </div>
+                        <div>Look for install icon <i class="bi bi-plus-circle"></i> in address bar</div>
                     </div>
                     
                     <div class="step">
                         <div class="step-number">2</div>
-                        <div>
-                            <strong>Click "Install"</strong><br>
-                            <small class="text-muted">Follow the browser prompts to install</small>
-                        </div>
+                        <div>Click "Install" to add to desktop</div>
                     </div>
                 </div>
                 
-                <button class="install-btn" onclick="installPWA()">
-                    <i class="bi bi-download me-2"></i>
-                    Install App
+                <button class="btn btn-primary install-btn" onclick="installPWA()">
+                    <i class="bi bi-download me-2"></i>Install App
                 </button>
                 
-                <button class="install-btn mt-2" onclick="continueToApp()" style="background: #6c757d;">
-                    <i class="bi bi-arrow-right me-2"></i>
+                <button class="btn continue-btn install-btn" onclick="continueToApp()">
                     Continue in Browser
                 </button>
             </div>
@@ -278,11 +234,9 @@
     <script>
         let deferredPrompt;
         
-        // Detect platform and show appropriate instructions
         function detectPlatform() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
             const isAndroid = /Android/.test(navigator.userAgent);
-            const isMobile = /Mobi|Android/i.test(navigator.userAgent);
             
             if (isIOS) {
                 document.getElementById('ios-instructions').classList.remove('hidden');
@@ -293,52 +247,41 @@
             }
         }
         
-        // Check if already installed
         function isInstalled() {
             return window.matchMedia('(display-mode: standalone)').matches || 
                    window.navigator.standalone === true;
         }
         
-        // Listen for beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            
-            // Show install button for Android
-            const installBtn = document.getElementById('android-install-btn');
-            if (installBtn) {
-                installBtn.style.display = 'block';
-            }
         });
         
-        // Install PWA function
         async function installPWA() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 
                 if (outcome === 'accepted') {
-                    console.log('PWA installed');
-                    setTimeout(() => {
-                        continueToApp();
-                    }, 1000);
+                    setTimeout(() => continueToApp(), 1000);
                 }
                 
                 deferredPrompt = null;
             } else {
-                // Fallback - continue to app
                 continueToApp();
             }
         }
         
-        // Continue to main app
         function continueToApp() {
+            // Set desktop browser mode if on desktop
+            const isDesktop = !(/Mobi|Android/i.test(navigator.userAgent));
+            if (isDesktop) {
+                localStorage.setItem('wordwave_desktop_browser', 'true');
+            }
             window.location.href = 'index.html';
         }
         
-        // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            // If already installed, redirect to app
             if (isInstalled()) {
                 continueToApp();
                 return;
@@ -347,12 +290,8 @@
             detectPlatform();
         });
         
-        // Listen for app installed event
         window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
-            setTimeout(() => {
-                continueToApp();
-            }, 1000);
+            setTimeout(() => continueToApp(), 1000);
         });
     </script>
 </body>
