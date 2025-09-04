@@ -15,12 +15,18 @@ class SettingsManager {
     }
 
     setupEventListeners() {
+        console.log('🔧 Setting up event listeners...');
+        
         // Profile editing
         const editProfileBtn = document.getElementById('editProfileBtn');
+        console.log('📝 Edit profile button:', editProfileBtn);
         if (editProfileBtn) {
             editProfileBtn.addEventListener('click', () => {
+                console.log('📝 Edit profile clicked');
                 this.showEditProfile();
             });
+        } else {
+            console.error('❌ Edit profile button not found');
         }
 
         const saveProfileBtn = document.getElementById('saveProfileBtn');
@@ -39,10 +45,14 @@ class SettingsManager {
 
         // API Key editing
         const editApiKeyBtn = document.getElementById('editApiKeyBtn');
+        console.log('🔑 Edit API key button:', editApiKeyBtn);
         if (editApiKeyBtn) {
             editApiKeyBtn.addEventListener('click', () => {
+                console.log('🔑 Edit API key clicked');
                 this.showEditApiKey();
             });
+        } else {
+            console.error('❌ Edit API key button not found');
         }
 
         const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
@@ -66,6 +76,8 @@ class SettingsManager {
                 this.resetProgress();
             });
         }
+        
+        console.log('✅ Event listeners setup complete');
     }
 
     // Profile Management
@@ -86,14 +98,12 @@ class SettingsManager {
 
     showEditProfile() {
         const editForm = document.getElementById('editProfileForm');
-        const profileDisplay = document.getElementById('profileDisplay');
-        const nameInput = document.getElementById('profileNameInput');
+        const nameInput = document.getElementById('profileName');
         
-        if (editForm && profileDisplay && nameInput) {
+        if (editForm && nameInput) {
             const currentName = window.appState?.getProfile()?.name || 'User';
             nameInput.value = currentName;
             
-            profileDisplay.classList.add('d-none');
             editForm.classList.remove('d-none');
             nameInput.focus();
         }
@@ -101,16 +111,14 @@ class SettingsManager {
 
     hideEditProfile() {
         const editForm = document.getElementById('editProfileForm');
-        const profileDisplay = document.getElementById('profileDisplay');
         
-        if (editForm && profileDisplay) {
+        if (editForm) {
             editForm.classList.add('d-none');
-            profileDisplay.classList.remove('d-none');
         }
     }
 
     saveProfile() {
-        const nameInput = document.getElementById('profileNameInput');
+        const nameInput = document.getElementById('profileName');
         const name = nameInput?.value?.trim();
         
         if (!name) {
@@ -252,14 +260,12 @@ class SettingsManager {
 
     showEditApiKey() {
         const editForm = document.getElementById('editApiKeyForm');
-        const statusDisplay = document.getElementById('apiKeyStatusDisplay');
-        const keyInput = document.getElementById('apiKeyInput');
+        const keyInput = document.getElementById('groqApiKey');
         
-        if (editForm && statusDisplay && keyInput) {
+        if (editForm && keyInput) {
             const currentKey = localStorage.getItem('groqApiKey') || '';
             keyInput.value = currentKey;
             
-            statusDisplay.classList.add('d-none');
             editForm.classList.remove('d-none');
             keyInput.focus();
         }
@@ -267,16 +273,14 @@ class SettingsManager {
 
     hideEditApiKey() {
         const editForm = document.getElementById('editApiKeyForm');
-        const statusDisplay = document.getElementById('apiKeyStatusDisplay');
         
-        if (editForm && statusDisplay) {
+        if (editForm) {
             editForm.classList.add('d-none');
-            statusDisplay.classList.remove('d-none');
         }
     }
 
     saveApiKey() {
-        const keyInput = document.getElementById('apiKeyInput');
+        const keyInput = document.getElementById('groqApiKey');
         const apiKey = keyInput?.value?.trim();
         
         if (apiKey) {
@@ -381,5 +385,7 @@ class SettingsManager {
 
 // Initialize settings when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('🚀 DOM loaded, initializing SettingsManager...');
     window.settingsManager = new SettingsManager();
+    console.log('✅ SettingsManager initialized:', window.settingsManager);
 });
