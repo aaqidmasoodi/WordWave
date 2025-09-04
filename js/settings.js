@@ -47,7 +47,10 @@ class SettingsManager {
         if (checkUpdatesBtn) {
             checkUpdatesBtn.addEventListener('click', () => {
                 if (this.isInstallMode) {
-                    this.installUpdate();
+                    // Use PWA manager to install update
+                    if (window.pwaUpdateManager) {
+                        window.pwaUpdateManager.installUpdate();
+                    }
                 } else {
                     this.checkForUpdates();
                 }
@@ -235,53 +238,53 @@ class SettingsManager {
         message.innerHTML = '<i class="bi bi-search me-1"></i>Checking for updates...';
 
         try {
-            // Use the same simple logic as PWA manager
-            const registration = await navigator.serviceWorker.getRegistration();
-            
-            if (registration && registration.waiting) {
-                console.log('✅ Update available - waiting service worker found');
+            // Just trigger the PWA manager to check for updates
+            if (window.pwaUpdateManager) {
+                const success = await window.pwaUpdateManager.forceUpdateCheck();
                 
-                // Set the same flags as PWA manager
-                localStorage.setItem('wordwave_update_available', 'true');
-                localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
-                
-                status.classList.remove('alert-info');
-                status.classList.add('alert-success');
-                message.innerHTML = `<i class="bi bi-download me-1"></i>Update available!`;
-                updateAvailable.classList.remove('d-none');
-                
-                this.isInstallMode = true;
-                btn.innerHTML = '<i class="bi bi-download me-1"></i>Install Update';
-                btn.classList.remove('btn-outline-primary');
-                btn.classList.add('btn-success');
-                btn.disabled = false;
-                
-                this.waitingWorker = registration.waiting;
-                
+                if (success) {
+                    // Wait a moment for the PWA manager to process any updates
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    
+                    // Check if PWA manager found an update
+                    const hasUpdate = PWAUpdateManager.isUpdateAvailable();
+                    
+                    if (hasUpdate) {
+                        status.classList.remove('alert-info');
+                        status.classList.add('alert-success');
+                        message.innerHTML = '<i class="bi bi-download me-1"></i>Update available!';
+                        updateAvailable.classList.remove('d-none');
+                        
+                        this.isInstallMode = true;
+                        btn.innerHTML = '<i class="bi bi-download me-1"></i>Install Update';
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-success');
+                        btn.disabled = false;
+                        
+                    } else {
+                        status.classList.remove('alert-info');
+                        status.classList.add('alert-success');
+                        message.innerHTML = '<i class="bi bi-check-circle me-1"></i>You\'re up to date!';
+                        updateAvailable.classList.add('d-none');
+                        
+                        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Up to Date';
+                        btn.classList.remove('btn-outline-primary');
+                        btn.classList.add('btn-outline-success');
+                        btn.disabled = true;
+                        
+                        // Re-enable button after 3 seconds
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check for Updates';
+                            btn.classList.remove('btn-outline-success');
+                            btn.classList.add('btn-outline-primary');
+                            btn.disabled = false;
+                        }, 3000);
+                    }
+                } else {
+                    throw new Error('Update check failed');
+                }
             } else {
-                console.log('✅ No updates available');
-                
-                status.classList.remove('alert-info');
-                status.classList.add('alert-success');
-                message.innerHTML = '<i class="bi bi-check-circle me-1"></i>You\'re up to date!';
-                updateAvailable.classList.add('d-none');
-                
-                // Clear any stale flags
-                localStorage.removeItem('wordwave_update_available');
-                localStorage.removeItem('wordwave_update_timestamp');
-                
-                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Up to Date';
-                btn.classList.remove('btn-outline-primary');
-                btn.classList.add('btn-outline-success');
-                btn.disabled = true;
-                
-                // Re-enable button after 3 seconds
-                setTimeout(() => {
-                    btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check for Updates';
-                    btn.classList.remove('btn-outline-success');
-                    btn.classList.add('btn-outline-primary');
-                    btn.disabled = false;
-                }, 3000);
+                throw new Error('PWA manager not available');
             }
             
         } catch (error) {

@@ -156,6 +156,24 @@ class PWAUpdateManager {
         }
     }
 
+    // Force check for updates (called by settings button)
+    async forceUpdateCheck() {
+        console.log('🔍 Force checking for updates...');
+        
+        if (this.registration) {
+            try {
+                // Force service worker to check for updates
+                await this.registration.update();
+                console.log('✅ Update check completed');
+                return true;
+            } catch (error) {
+                console.error('❌ Update check failed:', error);
+                return false;
+            }
+        }
+        return false;
+    }
+
     // Static methods for other components
     static isUpdateAvailable() {
         return localStorage.getItem('wordwave_update_available') === 'true';
