@@ -78,47 +78,6 @@
 <body>
     <!-- Main Content -->
     <main class="main-content">
-        <!-- Update Available Banner -->
-        <div id="updateBanner" class="d-none" style="
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 12px 20px;
-            margin: 0;
-            border: none;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-        ">
-            <div class="d-flex align-items-center justify-content-between">
-                <div class="d-flex align-items-center">
-                    <div style="
-                        background: rgba(255,255,255,0.2);
-                        border-radius: 50%;
-                        width: 32px;
-                        height: 32px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        margin-right: 12px;
-                    ">
-                        <i class="bi bi-arrow-up-circle-fill" style="font-size: 16px;"></i>
-                    </div>
-                    <div>
-                        <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">New Update Available</div>
-                        <div style="font-size: 12px; opacity: 0.9;">Tap to install the latest version</div>
-                    </div>
-                </div>
-                <button type="button" class="btn btn-light btn-sm" id="installUpdateFromBanner" style="
-                    font-weight: 600;
-                    font-size: 12px;
-                    padding: 6px 16px;
-                    border-radius: 20px;
-                    border: none;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                ">
-                    Install
-                </button>
-            </div>
-        </div>
-        
         <div class="container py-4">
             <!-- Word of the Day -->
             <div class="card border-0 shadow-sm mb-4 word-of-day-gradient">
@@ -202,7 +161,6 @@
     <script src="js/data.js"></script>
     <script src="js/state.js"></script>
     <script src="js/notifications.js"></script>
-    <script src="js/update-ui.js"></script>
     <script src="js/app.js"></script>
     <script src="js/pwa.js"></script>
     <script src="components/header/header.js"></script>
@@ -220,33 +178,10 @@
                 navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
                         console.log('SW registered: ', registration);
-                        
-                        // Android Chrome fix: Force update check
-                        if (navigator.userAgent.includes('Android')) {
-                            registration.update();
-                        }
                     })
                     .catch(registrationError => {
                         console.log('SW registration failed: ', registrationError);
                     });
-                
-                // Listen for update detection messages
-                navigator.serviceWorker.addEventListener('message', event => {
-                    // Only log our own messages, ignore OneSignal
-                    if (event.data && (event.data.type === 'UPDATE_DETECTED' || event.data.type === 'SW_UPDATED')) {
-                        console.log('📨 Received SW message:', event.data);
-                    }
-                    
-                    if (event.data && event.data.type === 'UPDATE_DETECTED') {
-                        console.log('🔄 Update detected:', event.data.version);
-                        
-                        // Set persistent localStorage flag
-                        localStorage.setItem('wordwave_update_available', 'true');
-                        localStorage.setItem('wordwave_update_version', event.data.version);
-                        
-                        console.log('✅ Update flag set in localStorage');
-                    }
-                });
             });
         }
     </script>

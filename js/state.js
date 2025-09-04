@@ -288,17 +288,6 @@ class AppState {
             }
         }
     }
-    
-    // Simple update flag management for PWA manager
-    setUpdateFlag(available) {
-        if (available) {
-            localStorage.setItem('wordwave_update_available', 'true');
-            localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
-        } else {
-            localStorage.removeItem('wordwave_update_available');
-            localStorage.removeItem('wordwave_update_timestamp');
-        }
-    }
 }
 
 // Create global instance

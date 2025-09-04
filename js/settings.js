@@ -1,7 +1,6 @@
+// Settings Manager
 class SettingsManager {
     constructor() {
-        this.isInstallMode = false;
-        this.waitingWorker = null;
         this.init();
     }
 
@@ -11,8 +10,6 @@ class SettingsManager {
         this.calculateStorageUsage();
         this.updateProfile();
         this.updateApiKeyStatus();
-        // Set initial button state based on update availability
-        this.updateButtonState();
         // Initialize notification settings
         this.initNotificationSettings();
     }
@@ -20,131 +17,55 @@ class SettingsManager {
     setupEventListeners() {
         // Profile editing
         const editProfileBtn = document.getElementById('editProfileBtn');
-        const saveProfileBtn = document.getElementById('saveProfileBtn');
-        const cancelProfileBtn = document.getElementById('cancelProfileBtn');
-        const editProfileForm = document.getElementById('editProfileForm');
-        
         if (editProfileBtn) {
             editProfileBtn.addEventListener('click', () => {
                 this.showEditProfile();
             });
         }
-        
+
+        const saveProfileBtn = document.getElementById('saveProfileBtn');
         if (saveProfileBtn) {
             saveProfileBtn.addEventListener('click', () => {
                 this.saveProfile();
             });
         }
-        
+
+        const cancelProfileBtn = document.getElementById('cancelProfileBtn');
         if (cancelProfileBtn) {
             cancelProfileBtn.addEventListener('click', () => {
                 this.hideEditProfile();
             });
         }
 
-        // Check for updates button
-        const checkUpdatesBtn = document.getElementById('checkUpdatesBtn');
-        if (checkUpdatesBtn) {
-            checkUpdatesBtn.addEventListener('click', () => {
-                if (this.isInstallMode) {
-                    // Use PWA manager to install update
-                    if (window.pwaUpdateManager) {
-                        window.pwaUpdateManager.installUpdate();
-                    }
-                } else {
-                    this.checkForUpdates();
-                }
-            });
-        }
-
         // API Key editing
         const editApiKeyBtn = document.getElementById('editApiKeyBtn');
-        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
-        const cancelApiKeyBtn = document.getElementById('cancelApiKeyBtn');
-        
         if (editApiKeyBtn) {
             editApiKeyBtn.addEventListener('click', () => {
                 this.showEditApiKey();
             });
         }
-        
+
+        const saveApiKeyBtn = document.getElementById('saveApiKeyBtn');
         if (saveApiKeyBtn) {
             saveApiKeyBtn.addEventListener('click', () => {
                 this.saveApiKey();
             });
         }
-        
+
+        const cancelApiKeyBtn = document.getElementById('cancelApiKeyBtn');
         if (cancelApiKeyBtn) {
             cancelApiKeyBtn.addEventListener('click', () => {
                 this.hideEditApiKey();
             });
         }
 
-        // Install update button
-        const installUpdateBtn = document.getElementById('installUpdateBtn');
-        if (installUpdateBtn) {
-            installUpdateBtn.addEventListener('click', () => {
-                // Use the global PWA manager instance
-                if (window.pwaUpdateManager) {
-                    window.pwaUpdateManager.installUpdate();
-                } else {
-                    // Fallback - clear flag and reload
-                    localStorage.removeItem('wordwave_update_available');
-                    window.location.reload();
-                }
-            });
-        }
-
-        // Reset progress button
+        // Reset progress
         const resetProgressBtn = document.getElementById('resetProgressBtn');
         if (resetProgressBtn) {
             resetProgressBtn.addEventListener('click', () => {
                 this.resetProgress();
             });
         }
-    }
-
-    updateButtonState() {
-        const btn = document.getElementById('checkUpdatesBtn');
-        if (!btn) return;
-
-        // Simple flag check - no version comparison
-        const hasUpdate = localStorage.getItem('wordwave_update_available') === 'true';
-        
-        if (hasUpdate) {
-            // Install mode
-            btn.innerHTML = '<i class="bi bi-download"></i> Install Update';
-            btn.classList.remove('btn-outline-primary');
-            btn.classList.add('btn-primary');
-            this.isInstallMode = true;
-        } else {
-            // Check mode
-            btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Check for Updates';
-            btn.classList.remove('btn-primary');
-            btn.classList.add('btn-outline-primary');
-            this.isInstallMode = false;
-        }
-        btn.disabled = false;
-    }
-
-    // Version comparison helper
-    isNewerVersion(newVersion, currentVersion) {
-        const parseVersion = (version) => {
-            return version.replace(/[^\d.]/g, '').split('.').map(num => parseInt(num) || 0);
-        };
-        
-        const newParts = parseVersion(newVersion);
-        const currentParts = parseVersion(currentVersion);
-        
-        for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
-            const newPart = newParts[i] || 0;
-            const currentPart = currentParts[i] || 0;
-            
-            if (newPart > currentPart) return true;
-            if (newPart < currentPart) return false;
-        }
-        
-        return false; // versions are equal
     }
 
     // Profile Management
@@ -164,29 +85,33 @@ class SettingsManager {
     }
 
     showEditProfile() {
-        const form = document.getElementById('editProfileForm');
-        const nameInput = document.getElementById('profileName');
-        const profile = window.appState?.getProfile() || { name: 'User' };
+        const editForm = document.getElementById('editProfileForm');
+        const profileDisplay = document.getElementById('profileDisplay');
+        const nameInput = document.getElementById('profileNameInput');
         
-        if (nameInput) {
-            nameInput.value = profile.name;
-        }
-        
-        if (form) {
-            form.classList.remove('d-none');
+        if (editForm && profileDisplay && nameInput) {
+            const currentName = window.appState?.getProfile()?.name || 'User';
+            nameInput.value = currentName;
+            
+            profileDisplay.classList.add('d-none');
+            editForm.classList.remove('d-none');
+            nameInput.focus();
         }
     }
 
     hideEditProfile() {
-        const form = document.getElementById('editProfileForm');
-        if (form) {
-            form.classList.add('d-none');
+        const editForm = document.getElementById('editProfileForm');
+        const profileDisplay = document.getElementById('profileDisplay');
+        
+        if (editForm && profileDisplay) {
+            editForm.classList.add('d-none');
+            profileDisplay.classList.remove('d-none');
         }
     }
 
     saveProfile() {
-        const nameInput = document.getElementById('profileName');
-        const name = nameInput?.value.trim();
+        const nameInput = document.getElementById('profileNameInput');
+        const name = nameInput?.value?.trim();
         
         if (!name) {
             alert('Please enter a valid name');
@@ -214,174 +139,40 @@ class SettingsManager {
         // Show success feedback
         const saveBtn = document.getElementById('saveProfileBtn');
         if (saveBtn) {
-            const originalText = saveBtn.innerHTML;
-            saveBtn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Saved!';
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = 'Saved!';
             saveBtn.disabled = true;
             
             setTimeout(() => {
-                saveBtn.innerHTML = originalText;
+                saveBtn.textContent = originalText;
                 saveBtn.disabled = false;
             }, 1500);
         }
     }
 
-    async checkForUpdates() {
-        const btn = document.getElementById('checkUpdatesBtn');
-        const status = document.getElementById('updateStatus');
-        const message = document.getElementById('updateMessage');
-        const updateAvailable = document.getElementById('updateAvailable');
-
-        btn.disabled = true;
-        btn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Checking...';
-        status.classList.remove('d-none', 'alert-success', 'alert-warning', 'alert-danger');
-        status.classList.add('alert-info');
-        message.innerHTML = '<i class="bi bi-search me-1"></i>Checking for updates...';
-
-        try {
-            // Just trigger the PWA manager to check for updates
-            if (window.pwaUpdateManager) {
-                const hasUpdate = await window.pwaUpdateManager.forceUpdateCheck();
-                
-                if (hasUpdate) {
-                    status.classList.remove('alert-info');
-                    status.classList.add('alert-success');
-                    message.innerHTML = '<i class="bi bi-download me-1"></i>Update available!';
-                    updateAvailable.classList.remove('d-none');
-                    
-                    this.isInstallMode = true;
-                    btn.innerHTML = '<i class="bi bi-download me-1"></i>Install Update';
-                    btn.classList.remove('btn-outline-primary');
-                    btn.classList.add('btn-success');
-                    btn.disabled = false;
-                    
-                } else {
-                    status.classList.remove('alert-info');
-                    status.classList.add('alert-success');
-                    message.innerHTML = '<i class="bi bi-check-circle me-1"></i>You\'re up to date!';
-                    updateAvailable.classList.add('d-none');
-                    
-                    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Up to Date';
-                    btn.classList.remove('btn-outline-primary');
-                    btn.classList.add('btn-outline-success');
-                    btn.disabled = true;
-                    
-                    // Re-enable button after 3 seconds
-                    setTimeout(() => {
-                        btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check for Updates';
-                        btn.classList.remove('btn-outline-success');
-                        btn.classList.add('btn-outline-primary');
-                        btn.disabled = false;
-                    }, 3000);
-                }
-            } else {
-                throw new Error('PWA manager not available');
-            }
-            
-        } catch (error) {
-            console.error('❌ Update check failed:', error);
-            
-            status.classList.remove('alert-info');
-            status.classList.add('alert-danger');
-            message.innerHTML = `<i class="bi bi-exclamation-triangle me-1"></i>Check failed: ${error.message}`;
-            
-            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Try Again';
-            btn.disabled = false;
-        }
-    }
-    
-    async getCurrentVersion() {
-        try {
-            const cacheNames = await caches.keys();
-            const wordwaveCache = cacheNames.find(name => name.startsWith('wordwave-v'));
-            return wordwaveCache ? wordwaveCache.replace('wordwave-v', '') : '5.5.4';
-        } catch (error) {
-            return '5.5.4'; // fallback
-        }
-    }
-    
-    async getWaitingVersion(registration) {
-        try {
-            // Try to get version from waiting worker
-            const worker = registration.waiting || registration.installing;
-            if (worker && worker.scriptURL) {
-                // Extract version from script URL or use timestamp
-                const url = new URL(worker.scriptURL);
-                const version = url.searchParams.get('v');
-                if (version) {
-                    return `5.5.${version.slice(-3)}`; // Convert timestamp to version
-                }
-            }
-            
-            // Fallback: increment current version
-            const current = await this.getCurrentVersion();
-            const parts = current.split('.');
-            const patch = parseInt(parts[2] || 0) + 1;
-            return `${parts[0]}.${parts[1]}.${patch}`;
-        } catch (error) {
-            return '5.5.5'; // fallback
-        }
-    }
-    
-    isNewerVersion(newVer, currentVer) {
-        const parseVersion = (v) => v.split('.').map(n => parseInt(n) || 0);
-        const newParts = parseVersion(newVer);
-        const currentParts = parseVersion(currentVer);
-        
-        for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
-            const newPart = newParts[i] || 0;
-            const currentPart = currentParts[i] || 0;
-            
-            if (newPart > currentPart) return true;
-            if (newPart < currentPart) return false;
-        }
-        
-        return false; // versions are equal
-    }
-
     async resetProgress() {
-        const btn = document.getElementById('resetProgressBtn');
-        
-        if (confirm('Are you sure you want to reset your learning progress? This will clear all your progress, streaks, and learned words. This cannot be undone.')) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i>';
-            
+        if (confirm('Are you sure you want to reset all your progress? This action cannot be undone.')) {
             try {
-                // Reset app state directly
-                if (window.app && window.app.state) {
-                    window.app.state.state.user = {
-                        learnedWords: [],
-                        reviewWords: [],
-                        learnedSentences: [],
-                        reviewSentences: [],
-                        currentDifficulty: 'beginner',
-                        sessionLength: {
-                            flashcards: 10,
-                            sentences: 10,
-                            quiz: 10
-                        },
-                        streakCount: 0,
-                        lastStudyDate: null,
-                        totalStudyTime: 0,
-                        quizzesTaken: 0
-                    };
-                    
-                    window.app.state.clearAllSessions();
-                    window.app.state.saveUserData();
+                // Reset user data
+                if (window.appState) {
+                    window.appState.resetUserData();
                 }
                 
-                // Show success immediately
-                btn.innerHTML = '<i class="bi bi-check"></i>';
-                alert('All progress has been reset successfully!');
+                // Clear all localStorage data except API key
+                const apiKey = localStorage.getItem('groqApiKey');
+                localStorage.clear();
+                if (apiKey) {
+                    localStorage.setItem('groqApiKey', apiKey);
+                }
                 
-                // Redirect after a short delay
-                setTimeout(() => {
-                    window.location.href = '/';
-                }, 1000);
+                // Show success message
+                alert('Progress has been reset successfully!');
+                
+                // Reload the page to reflect changes
+                window.location.reload();
                 
             } catch (error) {
                 console.error('Error resetting progress:', error);
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i>';
                 alert('Error resetting progress. Please try again.');
             }
         }
@@ -411,7 +202,7 @@ class SettingsManager {
         try {
             if ('storage' in navigator && 'estimate' in navigator.storage) {
                 const estimate = await navigator.storage.estimate();
-                const usedMB = (estimate.usage / (1024 * 1024)).toFixed(1);
+                const usedMB = (estimate.usage / (1024 * 1024)).toFixed(2);
                 storageElement.textContent = `${usedMB} MB`;
             } else {
                 storageElement.textContent = 'Unknown';
@@ -422,28 +213,6 @@ class SettingsManager {
         }
     }
 
-    clearUpdateIndicators() {
-        // Remove badge from settings link
-        const updateBadge = document.querySelector('.update-badge');
-        if (updateBadge) {
-            updateBadge.remove();
-        }
-
-        // Reset check button style
-        const checkBtn = document.getElementById('checkUpdatesBtn');
-        if (checkBtn) {
-            checkBtn.classList.remove('btn-success');
-            checkBtn.classList.add('btn-outline-primary');
-            checkBtn.title = '';
-        }
-
-        // Remove dashboard update notification
-        const updateCard = document.getElementById('updateNotificationCard');
-        if (updateCard) {
-            updateCard.remove();
-        }
-    }
-
     // API Key Management
     updateApiKeyStatus() {
         const apiKey = localStorage.getItem('groqApiKey');
@@ -451,68 +220,65 @@ class SettingsManager {
         
         if (statusText) {
             if (apiKey && apiKey.trim()) {
-                statusText.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i>API key configured';
+                statusText.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i>API Key configured';
             } else {
-                statusText.innerHTML = '<i class="bi bi-x-circle text-muted me-1"></i>No API key configured';
+                statusText.innerHTML = '<i class="bi bi-exclamation-triangle text-warning me-1"></i>No API Key set';
             }
         }
     }
 
     showEditApiKey() {
-        const form = document.getElementById('editApiKeyForm');
-        const input = document.getElementById('groqApiKey');
+        const editForm = document.getElementById('editApiKeyForm');
+        const statusDisplay = document.getElementById('apiKeyStatusDisplay');
+        const keyInput = document.getElementById('apiKeyInput');
         
-        if (form && input) {
-            // Load current API key
+        if (editForm && statusDisplay && keyInput) {
             const currentKey = localStorage.getItem('groqApiKey') || '';
-            input.value = currentKey;
+            keyInput.value = currentKey;
             
-            form.classList.remove('d-none');
-            input.focus();
+            statusDisplay.classList.add('d-none');
+            editForm.classList.remove('d-none');
+            keyInput.focus();
         }
     }
 
     hideEditApiKey() {
-        const form = document.getElementById('editApiKeyForm');
-        if (form) {
-            form.classList.add('d-none');
+        const editForm = document.getElementById('editApiKeyForm');
+        const statusDisplay = document.getElementById('apiKeyStatusDisplay');
+        
+        if (editForm && statusDisplay) {
+            editForm.classList.add('d-none');
+            statusDisplay.classList.remove('d-none');
         }
     }
 
     saveApiKey() {
-        const input = document.getElementById('groqApiKey');
-        if (input) {
-            const apiKey = input.value.trim();
-            
-            if (apiKey) {
-                localStorage.setItem('groqApiKey', apiKey);
-            } else {
-                localStorage.removeItem('groqApiKey');
-            }
-            
-            this.updateApiKeyStatus();
-            this.hideEditApiKey();
-            
-            // Show success feedback
-            const statusText = document.getElementById('apiKeyStatusText');
-            if (statusText) {
-                statusText.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i>Saved successfully';
-                setTimeout(() => {
-                    this.updateApiKeyStatus();
-                }, 2000);
-            }
+        const keyInput = document.getElementById('apiKeyInput');
+        const apiKey = keyInput?.value?.trim();
+        
+        if (apiKey) {
+            localStorage.setItem('groqApiKey', apiKey);
+        } else {
+            localStorage.removeItem('groqApiKey');
+        }
+        
+        this.updateApiKeyStatus();
+        this.hideEditApiKey();
+        
+        // Show success feedback
+        const statusText = document.getElementById('apiKeyStatusText');
+        if (statusText) {
+            statusText.innerHTML = '<i class="bi bi-check-circle text-success me-1"></i>Saved successfully';
+            setTimeout(() => {
+                this.updateApiKeyStatus();
+            }, 2000);
         }
     }
 
+    // Notification Management
     initNotificationSettings() {
         const pushButton = document.getElementById('pushNotifications');
-
-        if (!pushButton) {
-            console.warn('⚠️ Push notification button not found');
-            return;
-        }
-
-        console.log('🔘 Initializing notification button');
+        if (!pushButton) return;
 
         // Set initial state from saved data
         setTimeout(() => {
@@ -524,14 +290,19 @@ class SettingsManager {
         }, 1000);
 
         // Handle button click
-        pushButton.addEventListener('click', async (e) => {
+        pushButton.addEventListener('click', async () => {
+            if (!window.notificationManager) {
+                console.error('❌ Notification manager not available');
+                return;
+            }
+
             const isCurrentlySubscribed = window.notificationManager.isSubscribed();
             console.log('🔘 Button clicked - currently subscribed:', isCurrentlySubscribed);
             
             // Disable button during operation
             pushButton.disabled = true;
-            pushButton.textContent = 'Processing...';
-            
+            pushButton.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Processing...';
+
             try {
                 if (isCurrentlySubscribed) {
                     // Currently subscribed - unsubscribe
@@ -577,32 +348,15 @@ class SettingsManager {
 
     showNotificationError(message) {
         const statusDiv = document.getElementById('notificationStatus');
-        const statusText = document.getElementById('statusText');
-        
-        statusText.textContent = message;
-        statusDiv.className = 'alert alert-danger';
-        statusDiv.classList.remove('d-none');
-        
-        setTimeout(() => {
-            statusDiv.classList.add('d-none');
-        }, 5000);
+        if (statusDiv) {
+            statusDiv.innerHTML = `<small><i class="bi bi-exclamation-triangle me-1"></i>${message}</small>`;
+            statusDiv.className = 'alert alert-warning';
+            statusDiv.classList.remove('d-none');
+        }
     }
 }
 
-// Initialize settings when DOM is ready
+// Initialize settings when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    new SettingsManager();
+    window.settingsManager = new SettingsManager();
 });
-
-// Add CSS for spinning animation
-const style = document.createElement('style');
-style.textContent = `
-    .spin {
-        animation: spin 1s linear infinite;
-    }
-    @keyframes spin {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-`;
-document.head.appendChild(style);
