@@ -1,0 +1,18 @@
+{
+  "lessons": {
+    "lesson_1": {
+      "video 1": "RXoi5UDrqHc",
+      "video 2": "Gm9Zhz9x3Kc"
+    },
+    "lesson_2": {
+      "video 1": "JXrN-qjECvg",
+      "video 2": "UE6xh6yYIyY"
+    }
+  },
+  "podcasts": {
+    "podcast_1": {
+      "video 1": "nPb13TPsnoE"
+    }
+    
+  }
+}

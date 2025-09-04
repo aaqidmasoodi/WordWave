@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>WordWave | Learning Material</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="styles/custom.css" rel="stylesheet">
+    <link href="styles/animations.css" rel="stylesheet">
+    <link href="styles/native.css" rel="stylesheet">
+    <link href="components/player/player.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="learning-container">
+            <!-- Lessons Section -->
+            <div id="lessonsSection">
+                <div id="lessonsListView">
+                    <div class="lessons-scroll-container">
+                        <div class="row" id="lessonsGrid">
+                            <!-- Lessons will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="lessonDetailView" class="d-none">
+                    <!-- Back Button Row -->
+                    <div class="back-button-row">
+                        <button class="btn btn-sm btn-outline-secondary" id="backToLessonsBtn">
+                            <i class="bi bi-arrow-left me-1"></i>Back
+                        </button>
+                        <div class="flex-grow-1">
+                            <h6 id="currentVideoTitle" class="mb-0">Select a video</h6>
+                            <small class="text-muted" id="currentVideoSubtitle"></small>
+                        </div>
+                    </div>
+                    
+                    <!-- Fixed Player - 30% of viewport -->
+                    <div class="fixed-player">
+                        <div id="videoPlayer" class="video-player"></div>
+                    </div>
+                    
+                    <!-- Scrollable Video List - remaining viewport -->
+                    <div class="videos-scroll-container">
+                        <div class="videos-header">
+                            <h6 id="lessonTitle" class="mb-0"></h6>
+                        </div>
+                        <div id="lessonVideosGrid" class="videos-list">
+                            <!-- Lesson videos will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Podcasts Section -->
+            <div id="podcastsSection" class="d-none">
+                <div id="podcastsListView">
+                    <div class="lessons-scroll-container">
+                        <div class="row" id="podcastsGrid">
+                            <!-- Podcasts will be populated here -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="podcastPlayerView" class="d-none">
+                    <!-- Back Button Row -->
+                    <div class="back-button-row">
+                        <button class="btn btn-sm btn-outline-secondary" id="backToPodcastsBtn">
+                            <i class="bi bi-arrow-left me-1"></i>Back
+                        </button>
+                        <div class="flex-grow-1">
+                            <h6 id="currentPodcastTitle" class="mb-0">Select a podcast</h6>
+                            <small class="text-muted">Podcast</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Fixed Player - 30% of viewport -->
+                    <div class="fixed-player">
+                        <div id="podcastPlayer" class="video-player"></div>
+                    </div>
+                    
+                    <!-- Scrollable Podcast List - remaining viewport -->
+                    <div class="videos-scroll-container">
+                        <div class="videos-header">
+                            <h6 id="podcastTitle" class="mb-0"></h6>
+                        </div>
+                        <div id="allPodcastsGrid" class="videos-list">
+                            <!-- All podcasts will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Include Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/learning-material.js"></script>
+    <script src="components/header/header.js"></script>
+    <script src="components/sidebar/sidebar.js"></script>
+    <script src="components/bottom-nav/bottom-nav.js"></script>
+    <script src="components/player/player.js"></script>
+    
+    <script>
+        initHeader({
+            title: 'Learning Material',
+            rightContent: '<div class="btn-group" role="group"><button type="button" class="btn btn-sm btn-outline-primary active" id="lessonsTab">Lessons</button><button type="button" class="btn btn-sm btn-outline-primary" id="podcastsTab">Podcasts</button></div>'
+        });
+    </script>
+</body>
+</html>
