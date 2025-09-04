@@ -240,48 +240,38 @@ class SettingsManager {
         try {
             // Just trigger the PWA manager to check for updates
             if (window.pwaUpdateManager) {
-                const success = await window.pwaUpdateManager.forceUpdateCheck();
+                const hasUpdate = await window.pwaUpdateManager.forceUpdateCheck();
                 
-                if (success) {
-                    // Wait a moment for the PWA manager to process any updates
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                if (hasUpdate) {
+                    status.classList.remove('alert-info');
+                    status.classList.add('alert-success');
+                    message.innerHTML = '<i class="bi bi-download me-1"></i>Update available!';
+                    updateAvailable.classList.remove('d-none');
                     
-                    // Check if PWA manager found an update
-                    const hasUpdate = PWAUpdateManager.isUpdateAvailable();
+                    this.isInstallMode = true;
+                    btn.innerHTML = '<i class="bi bi-download me-1"></i>Install Update';
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-success');
+                    btn.disabled = false;
                     
-                    if (hasUpdate) {
-                        status.classList.remove('alert-info');
-                        status.classList.add('alert-success');
-                        message.innerHTML = '<i class="bi bi-download me-1"></i>Update available!';
-                        updateAvailable.classList.remove('d-none');
-                        
-                        this.isInstallMode = true;
-                        btn.innerHTML = '<i class="bi bi-download me-1"></i>Install Update';
-                        btn.classList.remove('btn-outline-primary');
-                        btn.classList.add('btn-success');
-                        btn.disabled = false;
-                        
-                    } else {
-                        status.classList.remove('alert-info');
-                        status.classList.add('alert-success');
-                        message.innerHTML = '<i class="bi bi-check-circle me-1"></i>You\'re up to date!';
-                        updateAvailable.classList.add('d-none');
-                        
-                        btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Up to Date';
-                        btn.classList.remove('btn-outline-primary');
-                        btn.classList.add('btn-outline-success');
-                        btn.disabled = true;
-                        
-                        // Re-enable button after 3 seconds
-                        setTimeout(() => {
-                            btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check for Updates';
-                            btn.classList.remove('btn-outline-success');
-                            btn.classList.add('btn-outline-primary');
-                            btn.disabled = false;
-                        }, 3000);
-                    }
                 } else {
-                    throw new Error('Update check failed');
+                    status.classList.remove('alert-info');
+                    status.classList.add('alert-success');
+                    message.innerHTML = '<i class="bi bi-check-circle me-1"></i>You\'re up to date!';
+                    updateAvailable.classList.add('d-none');
+                    
+                    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Up to Date';
+                    btn.classList.remove('btn-outline-primary');
+                    btn.classList.add('btn-outline-success');
+                    btn.disabled = true;
+                    
+                    // Re-enable button after 3 seconds
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check for Updates';
+                        btn.classList.remove('btn-outline-success');
+                        btn.classList.add('btn-outline-primary');
+                        btn.disabled = false;
+                    }, 3000);
                 }
             } else {
                 throw new Error('PWA manager not available');

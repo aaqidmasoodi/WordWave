@@ -173,14 +173,59 @@ class PWAUpdateManager {
             try {
                 // Force service worker to check for updates
                 await this.registration.update();
-                console.log('✅ Update check completed');
-                return true;
+                
+                // Wait a moment for the update to process
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Get fresh registration and check for waiting worker
+                const updatedRegistration = await navigator.serviceWorker.getRegistration();
+                const hasWaitingWorker = !!(updatedRegistration && updatedRegistration.waiting);
+                
+                console.log('✅ Update check completed - waiting worker:', hasWaitingWorker);
+                
+                if (hasWaitingWorker) {
+                    // Manually trigger the same logic as handleUpdateFound
+                    return await this.checkForGenuineUpdate(updatedRegistration.waiting);
+                } else {
+                    // No waiting worker - clear any stale flags using state manager
+                    this.clearUpdateFlag();
+                    return false;
+                }
             } catch (error) {
                 console.error('❌ Update check failed:', error);
+                // Clear flags on error too
+                this.clearUpdateFlag();
                 return false;
             }
         }
         return false;
+    }
+
+    // Check if this is a genuine update (different cache name)
+    async checkForGenuineUpdate(newWorker) {
+        console.log('🔍 Checking for genuine update...');
+        
+        const cacheNames = await caches.keys();
+        const currentCacheName = await this.getCurrentCacheName();
+        
+        console.log('  Current cache:', currentCacheName);
+        console.log('  All caches:', cacheNames);
+        
+        const newerCaches = cacheNames.filter(name => 
+            name.startsWith('wordwave-v') && name !== currentCacheName
+        );
+        
+        if (newerCaches.length > 0) {
+            console.log('✅ GENUINE UPDATE DETECTED - new cache:', newerCaches[0]);
+            this.setUpdateFlag();
+            this.waitingWorker = newWorker;
+            window.dispatchEvent(new CustomEvent('updateAvailable'));
+            return true;
+        } else {
+            console.log('🔕 No genuine update - same cache name, clearing stale flags');
+            this.clearUpdateFlag();
+            return false;
+        }
     }
 
     // Static methods for other components
