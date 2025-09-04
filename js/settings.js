@@ -81,7 +81,14 @@ class SettingsManager {
         const installUpdateBtn = document.getElementById('installUpdateBtn');
         if (installUpdateBtn) {
             installUpdateBtn.addEventListener('click', () => {
-                this.installUpdate();
+                // Use the global PWA manager instance
+                if (window.pwaUpdateManager) {
+                    window.pwaUpdateManager.installUpdate();
+                } else {
+                    // Fallback - clear flag and reload
+                    localStorage.removeItem('wordwave_update_available');
+                    window.location.reload();
+                }
             });
         }
 
@@ -363,43 +370,6 @@ class SettingsManager {
         }
         
         return false; // versions are equal
-    }
-
-    async installUpdate() {
-        const btn = document.getElementById('checkUpdatesBtn');
-        const updateAvailable = document.getElementById('updateAvailable');
-        
-        if (this.waitingWorker) {
-            btn.disabled = true;
-            btn.innerHTML = '<i class="bi bi-arrow-clockwise spin"></i> Installing...';
-            
-            // Clear the update flag
-            localStorage.removeItem('wordwave_update_available');
-            
-            // Clear all sessions to prevent compatibility issues
-            console.log('🧹 Clearing all sessions for update compatibility...');
-            localStorage.removeItem('wordwave_flashcard_session');
-            localStorage.removeItem('wordwave_sentence_session');
-            localStorage.removeItem('flashcardSession');
-            localStorage.removeItem('sentenceSession');
-            localStorage.removeItem('quizSession');
-            
-            // Apply the update
-            this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-            
-            // Android Chrome fix: Force hard reload
-            if (navigator.userAgent.includes('Android')) {
-                setTimeout(() => {
-                    console.log('🔄 Android detected - forcing hard reload');
-                    window.location.reload(true);
-                }, 1000);
-            } else {
-                // iOS/other browsers: Normal reload
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1500);
-            }
-        }
     }
 
     async resetProgress() {

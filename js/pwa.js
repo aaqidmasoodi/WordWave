@@ -133,5 +133,5 @@ class PWAUpdateManager {
 // Initialize PWA features
 document.addEventListener('DOMContentLoaded', () => {
     new PWAInstaller();
-    new PWAUpdateManager();
+    window.pwaUpdateManager = new PWAUpdateManager();
 });

@@ -14,6 +14,18 @@ class UpdateUIManager {
                 this.checkAndShowUpdateUI();
             }
         });
+        
+        // Listen for updateAvailable event from PWA manager
+        window.addEventListener('updateAvailable', () => {
+            this.checkAndShowUpdateUI();
+        });
+        
+        // Listen for controllerchange to hide UI when update is installed
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                this.hideUpdateIndicators();
+            });
+        }
     }
 
     checkAndShowUpdateUI() {
