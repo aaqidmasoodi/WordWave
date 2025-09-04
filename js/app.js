@@ -145,7 +145,7 @@ class EnglishLearningApp {
     init() {
         // Debug version information
         console.log('🔍 App initializing...');
-        console.log('🔍 Expected version: 6.1.5');
+        console.log('🔍 Expected version: 6.1.6');
         console.log('🔍 Update flag status:', localStorage.getItem('wordwave_update_available'));
         
         // Force clear any stale update flags on init
