@@ -1,5 +1,5 @@
 // WordWave Service Worker with OneSignal Integration
-const CACHE_NAME = 'wordwave-v6.2.6';
+const CACHE_NAME = 'wordwave-v6.2.7';
 
 // Import OneSignal service worker functionality FIRST
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
@@ -48,12 +48,24 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('📦 Files cached, waiting for user to install');
-                return cache.addAll(urlsToCache);
+                console.log('📦 Caching files...');
+                // Cache files individually to handle errors better
+                return Promise.all(
+                    urlsToCache.map(url => {
+                        return cache.add(url).catch(error => {
+                            console.warn('⚠️ Failed to cache:', url, error);
+                            // Continue even if some files fail to cache
+                            return Promise.resolve();
+                        });
+                    })
+                );
             })
             .then(() => {
-                console.log('✋ Service worker installed but WAITING for user permission');
+                console.log('✅ Service worker installed successfully');
                 // Don't skip waiting - let user decide when to update
+            })
+            .catch(error => {
+                console.error('❌ Service worker installation failed:', error);
             })
     );
 });
@@ -88,6 +100,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
+    // Skip very large files (over 10MB)
+    if (event.request.url.includes('.svg') && event.request.headers.get('content-length') > 10485760) {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
             .then((cachedResponse) => {
@@ -102,6 +119,9 @@ self.addEventListener('fetch', (event) => {
                                     caches.open(CACHE_NAME)
                                         .then(cache => {
                                             cache.put(event.request, responseClone);
+                                        })
+                                        .catch(error => {
+                                            console.warn('⚠️ Failed to update cache:', error);
                                         });
                                 }
                             })
@@ -120,6 +140,12 @@ self.addEventListener('fetch', (event) => {
                             return networkResponse;
                         }
                         
+                        // Don't cache very large responses
+                        const contentLength = networkResponse.headers.get('content-length');
+                        if (contentLength && parseInt(contentLength) > 10485760) {
+                            return networkResponse;
+                        }
+                        
                         // Clone the response
                         const responseToCache = networkResponse.clone();
                         
@@ -127,6 +153,9 @@ self.addEventListener('fetch', (event) => {
                         caches.open(CACHE_NAME)
                             .then((cache) => {
                                 cache.put(event.request, responseToCache);
+                            })
+                            .catch(error => {
+                                console.warn('⚠️ Failed to cache response:', error);
                             });
                         
                         return networkResponse;

@@ -82,7 +82,7 @@ class PWAInstaller {
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
-        this.currentVersion = '6.2.6'; // Current app version
+        this.currentVersion = '6.2.7'; // Current app version
         this.init();
     }
 
@@ -129,17 +129,25 @@ class PWAUpdateManager {
 
     checkVersionAndClearFlags() {
         const storedVersion = localStorage.getItem('wordwave_app_version');
+        const updateFlag = localStorage.getItem('wordwave_update_available');
         
-        if (storedVersion === this.currentVersion) {
-            console.log('🧹 Version matches - force clearing ALL update flags');
+        console.log('🔍 Version check:', {
+            current: this.currentVersion,
+            stored: storedVersion,
+            updateFlag: updateFlag
+        });
+        
+        // Always clear flags when app loads with current version
+        if (storedVersion === this.currentVersion || !storedVersion) {
+            console.log('🧹 Clearing ALL update flags - version matches or not set');
             this.clearUpdateFlag();
             // Also clear settings.js version flag
             localStorage.removeItem('wordwave_update_version');
-        } else {
-            // Update stored version
             localStorage.setItem('wordwave_app_version', this.currentVersion);
-            console.log('📝 Updated stored version to:', this.currentVersion);
-            // Clear old flags when version changes
+        } else {
+            // Version mismatch - update stored version and clear flags
+            console.log('📝 Version mismatch - updating stored version');
+            localStorage.setItem('wordwave_app_version', this.currentVersion);
             this.clearUpdateFlag();
             localStorage.removeItem('wordwave_update_version');
         }
@@ -176,7 +184,17 @@ class PWAUpdateManager {
     clearUpdateFlag() {
         localStorage.removeItem('wordwave_update_available');
         localStorage.removeItem('wordwave_update_timestamp');
-        console.log('🚩 Update flag cleared');
+        localStorage.removeItem('wordwave_update_version');
+        console.log('🚩 All update flags cleared');
+    }
+
+    // Static method to force clear all update flags
+    static forceCleanUpdateFlags() {
+        localStorage.removeItem('wordwave_update_available');
+        localStorage.removeItem('wordwave_update_timestamp');
+        localStorage.removeItem('wordwave_update_version');
+        localStorage.setItem('wordwave_app_version', '6.2.7');
+        console.log('🧹 FORCE CLEARED all update flags and set current version');
     }
 
     // Static methods for other components to use
