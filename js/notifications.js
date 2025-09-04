@@ -31,13 +31,15 @@ class OneSignalNotificationManager {
         }
 
         try {
+            console.log('🔄 Initializing OneSignal with combined service worker...');
+            
             await OneSignal.init({
                 appId: this.appId,
                 allowLocalhostAsSecureOrigin: true,
                 autoRegister: false,
                 autoResubscribe: true,
                 notifyButton: { enable: false },
-                // Use our merged service worker
+                // Use our combined service worker (sw.js contains both PWA and OneSignal functionality)
                 serviceWorkerPath: 'sw.js',
                 serviceWorkerParam: { scope: '/' },
                 welcomeNotification: {
@@ -47,7 +49,22 @@ class OneSignalNotificationManager {
                 }
             });
 
+            console.log('✅ OneSignal initialized successfully with combined service worker');
+
             OneSignal.User.PushSubscription.addEventListener('change', (event) => {
+                console.log('📱 Subscription status changed:', event.current.optedIn);
+                this.subscribed = event.current.optedIn;
+                this.userId = OneSignal.User.onesignalId;
+                console.log('🆔 User ID:', this.userId);
+                this.saveState();
+                this.updateUI();
+                
+                // Only set tags after subscription is stable
+                if (this.subscribed) {
+                    console.log('⏰ Scheduling tag update in 3 seconds...');
+                    setTimeout(() => this.setUserTags(), 3000);
+                }
+            });
                 this.subscribed = event.current.optedIn;
                 this.userId = OneSignal.User.onesignalId;
                 this.saveState();
@@ -64,71 +81,92 @@ class OneSignalNotificationManager {
             this.subscribed = OneSignal.User.PushSubscription.optedIn;
             this.userId = OneSignal.User.onesignalId;
             
+            console.log('🚀 OneSignal fully initialized');
+            console.log('📊 Status - Connected:', this.connected, 'Subscribed:', this.subscribed);
+            console.log('🆔 Current User ID:', this.userId);
+            
             this.saveState();
             this.updateConnectionStatus(true);
             this.updateUI();
 
             // Set tags after initialization is complete and stable
             if (this.subscribed) {
+                console.log('⏰ Scheduling initial tag update in 5 seconds...');
                 setTimeout(() => this.setUserTags(), 5000);
             }
 
         } catch (error) {
-            console.error('OneSignal init failed:', error);
+            console.error('❌ OneSignal initialization failed:', error);
             this.handleInitFailure();
         }
     }
 
     handleInitFailure() {
+        console.warn('⚠️ OneSignal initialization failed - falling back to local state');
         this.initialized = true;
         this.connected = false;
         this.subscribed = false;
         this.saveState();
         this.updateConnectionStatus(false);
         this.updateUI();
+        console.log('📱 Notification system running in offline mode');
     }
 
     async requestPermission() {
         if (!this.initialized || !this.connected) {
+            console.warn('⚠️ Cannot request permission - OneSignal not initialized or connected');
             return false;
         }
 
         try {
+            console.log('🔔 Requesting notification permission...');
             const permission = await OneSignal.Notifications.requestPermission();
+            console.log('📋 Permission result:', permission);
             
             if (permission) {
+                console.log('✅ Permission granted, opting in...');
                 await OneSignal.User.PushSubscription.optIn();
                 this.subscribed = true;
                 this.userId = OneSignal.User.onesignalId;
+                console.log('🆔 New User ID:', this.userId);
                 this.saveState();
                 this.setUserTags();
+                console.log('✅ Successfully subscribed to notifications');
                 return true;
+            } else {
+                console.log('❌ Permission denied');
             }
             return false;
         } catch (error) {
-            console.error('Permission request failed:', error);
+            console.error('❌ Permission request failed:', error);
             return false;
         }
     }
 
     async unsubscribe() {
         if (!this.initialized || !this.connected) {
+            console.log('📱 Unsubscribing locally (OneSignal not connected)');
             this.subscribed = false;
             this.saveState();
             return;
         }
 
         try {
+            console.log('📱 Unsubscribing from OneSignal...');
             await OneSignal.User.PushSubscription.optOut();
             this.subscribed = false;
             this.saveState();
+            console.log('✅ Successfully unsubscribed');
         } catch (error) {
-            console.error('Unsubscribe failed:', error);
+            console.error('❌ Unsubscribe failed:', error);
         }
     }
 
     setUserTags() {
-        if (!this.subscribed || !this.connected) return;
+        if (!this.subscribed || !this.connected) {
+            console.log('⏭️ Skipping tag update - not subscribed or connected');
+            return;
+        }
 
         try {
             const userData = window.appState?.getUserData();
@@ -138,19 +176,23 @@ class OneSignalNotificationManager {
                 words_learned: userData?.learnedWords?.length || 0,
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
-                app_version: '6.0.5'
+                app_version: '6.0.6'
             };
+
+            console.log('🏷️ Setting user tags:', tags);
 
             // Add delay to avoid conflicts during initialization
             setTimeout(() => {
-                OneSignal.User.addTags(tags).catch(error => {
+                OneSignal.User.addTags(tags).then(() => {
+                    console.log('✅ User tags updated successfully');
+                }).catch(error => {
                     // Silent fail for tag conflicts - not critical
-                    console.debug('Tag update failed (non-critical):', error);
+                    console.debug('⚠️ Tag update failed (non-critical):', error.message);
                 });
             }, 2000);
         } catch (error) {
             // Silent fail for tag setting
-            console.debug('Failed to set user tags (non-critical):', error);
+            console.debug('⚠️ Failed to set user tags (non-critical):', error.message);
         }
     }
 
