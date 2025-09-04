@@ -126,7 +126,8 @@ class PWAUpdateManager {
                     this.waitingWorker = newWorker;
                     window.dispatchEvent(new CustomEvent('updateAvailable'));
                 } else {
-                    console.log('🔕 No genuine update - same cache name, ignoring');
+                    console.log('🔕 No genuine update - same cache name, clearing stale flags');
+                    this.clearUpdateFlag();
                 }
             }
         });

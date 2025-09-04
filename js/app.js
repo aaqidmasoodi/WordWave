@@ -170,11 +170,6 @@ class EnglishLearningApp {
         // Check for available updates and show banner
         this.checkUpdateBanner();
         
-        // Listen for update events
-        window.addEventListener('updateAvailable', () => {
-            this.showUpdateBanner();
-        });
-        
         // Wait for header to load before updating dashboard
         const initDashboard = () => {
             this.updateDashboard();
@@ -532,110 +527,6 @@ class EnglishLearningApp {
     }
 
 
-
-    showUpdateBanner() {
-        const banner = document.getElementById('updateBanner');
-        if (banner) {
-            banner.classList.remove('d-none');
-            
-            // Add click handler for install button
-            const installBtn = document.getElementById('installUpdateFromBanner');
-            if (installBtn && !installBtn.hasAttribute('data-listener')) {
-                installBtn.setAttribute('data-listener', 'true');
-                installBtn.addEventListener('click', () => {
-                    this.installUpdateFromBanner();
-                });
-            }
-        }
-    }
-
-    hideUpdateBanner() {
-        const banner = document.getElementById('updateBanner');
-        if (banner) {
-            banner.classList.add('d-none');
-        }
-    }
-
-    async installUpdateFromBanner() {
-        const installBtn = document.getElementById('installUpdateFromBanner');
-        if (installBtn) {
-            installBtn.disabled = true;
-            installBtn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Installing...';
-        }
-
-        try {
-            console.log('🔄 Starting update installation...');
-            
-            // Get service worker registration
-            const registration = await navigator.serviceWorker.getRegistration();
-            console.log('🔍 Registration found:', !!registration);
-            console.log('🔍 Waiting SW:', !!registration?.waiting);
-            console.log('🔍 Installing SW:', !!registration?.installing);
-            
-            if (registration && (registration.waiting || registration.installing)) {
-                console.log('🔄 Installing update...');
-                
-                // Clear ALL update flags FIRST
-                localStorage.removeItem('wordwave_update_available');
-                localStorage.removeItem('wordwave_update_timestamp');
-                localStorage.removeItem('wordwave_update_version');
-                console.log('🧹 Cleared ALL update flags');
-                
-                // Apply the update
-                const workerToActivate = registration.waiting || registration.installing;
-                workerToActivate.postMessage({ type: 'SKIP_WAITING' });
-                
-                // Force reload after a short delay
-                setTimeout(() => {
-                    console.log('🔄 Force reloading page...');
-                    window.location.reload(true);
-                }, 1000);
-                
-            } else {
-                console.log('❌ No waiting service worker found, performing nuclear reset');
-                
-                // Nuclear option: unregister all service workers and reload
-                if ('serviceWorker' in navigator) {
-                    const registrations = await navigator.serviceWorker.getRegistrations();
-                    for (let registration of registrations) {
-                        console.log('🗑️ Unregistering SW:', registration.scope);
-                        await registration.unregister();
-                    }
-                }
-                
-                // Clear ALL update flags
-                localStorage.removeItem('wordwave_update_available');
-                localStorage.removeItem('wordwave_update_timestamp');
-                localStorage.removeItem('wordwave_update_version');
-                
-                // Clear all caches
-                if ('caches' in window) {
-                    const cacheNames = await caches.keys();
-                    for (const cacheName of cacheNames) {
-                        console.log('🗑️ Deleting cache:', cacheName);
-                        await caches.delete(cacheName);
-                    }
-                }
-                
-                // Hide banner and reload
-                this.hideUpdateBanner();
-                console.log('🔄 Nuclear reset complete, reloading...');
-                window.location.reload(true);
-            }
-        } catch (error) {
-            console.error('Error installing update:', error);
-            
-            // Clear potentially stale flag
-            localStorage.removeItem('wordwave_update_available');
-            localStorage.removeItem('wordwave_update_timestamp');
-            this.hideUpdateBanner();
-            
-            if (installBtn) {
-                installBtn.disabled = false;
-                installBtn.innerHTML = '<i class="bi bi-download me-1"></i>Install';
-            }
-        }
-    }
 
     updateStreak() {
         const today = new Date().toDateString();
