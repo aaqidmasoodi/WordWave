@@ -5,9 +5,10 @@ class UpdateUIManager {
     }
 
     init() {
-        // Check for updates on page load
-        this.checkAndShowUpdateUI();
-        
+        // Small delay to let PWA manager initialize and clear stale flags first
+        setTimeout(() => {
+            this.checkAndShowUpdateUI();
+        }, 500);
         
         // Listen for storage changes
         window.addEventListener('storage', (e) => {
@@ -38,9 +39,8 @@ class UpdateUIManager {
             if (installBtn && !installBtn.hasAttribute('data-listener')) {
                 installBtn.setAttribute('data-listener', 'true');
                 installBtn.addEventListener('click', () => {
-                    if (window.pwaUpdateManager) {
-                        window.pwaUpdateManager.installUpdate();
-                    }
+                    // Redirect to settings page instead of installing directly
+                    window.location.href = '/settings.html';
                 });
             }
         }

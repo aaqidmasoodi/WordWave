@@ -1,5 +1,5 @@
 // WordWave Service Worker with OneSignal Integration
-const CACHE_NAME = 'wordwave-v6.4.1';
+const CACHE_NAME = 'wordwave-v6.4.2';
 
 // Import OneSignal service worker functionality FIRST
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
