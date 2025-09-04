@@ -231,7 +231,10 @@
                 
                 // Listen for update detection messages
                 navigator.serviceWorker.addEventListener('message', event => {
-                    console.log('📨 Received SW message:', event.data);
+                    // Only log our own messages, ignore OneSignal
+                    if (event.data && (event.data.type === 'UPDATE_DETECTED' || event.data.type === 'SW_UPDATED')) {
+                        console.log('📨 Received SW message:', event.data);
+                    }
                     
                     if (event.data && event.data.type === 'UPDATE_DETECTED') {
                         console.log('🔄 Update detected:', event.data.version);

@@ -1,15 +1,17 @@
 // WordWave Service Worker with OneSignal Integration
-const CACHE_NAME = 'wordwave-v6.3.4';
+const CACHE_NAME = 'wordwave-v6.3.5';
 
 // Import OneSignal service worker functionality FIRST
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
 // Handle messages from main thread - AFTER OneSignal import
 self.addEventListener('message', (event) => {
+    // Only handle our own messages, ignore OneSignal messages
     if (event.data && event.data.type === 'SKIP_WAITING') {
         console.log('⚡ Received SKIP_WAITING message - activating new SW');
         self.skipWaiting();
     }
+    // Ignore all other messages (OneSignal, etc.)
 });
 
 // Notify clients when we become the active service worker

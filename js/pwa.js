@@ -94,17 +94,40 @@ class PWAUpdateManager {
         }
     }
 
+    async getCurrentCacheName() {
+        // Get the current active cache name
+        const cacheNames = await caches.keys();
+        const currentCache = cacheNames.find(name => name.startsWith('wordwave-v'));
+        return currentCache || 'wordwave-v6.3.4';
+    }
+
     handleUpdateFound(registration) {
         const newWorker = registration.installing;
         
-        newWorker.addEventListener('statechange', () => {
+        newWorker.addEventListener('statechange', async () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller && !this.isInstalling) {
-                console.log('✅ NEW UPDATE AVAILABLE - setting flag');
-                this.setUpdateFlag();
-                this.waitingWorker = newWorker;
+                console.log('🔍 Checking for genuine update...');
                 
-                // Dispatch event for UI updates
-                window.dispatchEvent(new CustomEvent('updateAvailable'));
+                // Get all cache names
+                const cacheNames = await caches.keys();
+                const currentCacheName = await this.getCurrentCacheName();
+                
+                console.log('  Current cache:', currentCacheName);
+                console.log('  All caches:', cacheNames);
+                
+                // Check if there's a newer cache name (different version)
+                const newerCaches = cacheNames.filter(name => 
+                    name.startsWith('wordwave-v') && name !== currentCacheName
+                );
+                
+                if (newerCaches.length > 0) {
+                    console.log('✅ GENUINE UPDATE DETECTED - new cache:', newerCaches[0]);
+                    this.setUpdateFlag();
+                    this.waitingWorker = newWorker;
+                    window.dispatchEvent(new CustomEvent('updateAvailable'));
+                } else {
+                    console.log('🔕 No genuine update - same cache name, ignoring');
+                }
             }
         });
     }
