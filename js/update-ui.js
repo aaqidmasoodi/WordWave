@@ -8,10 +8,6 @@ class UpdateUIManager {
         // Check for updates on page load
         this.checkAndShowUpdateUI();
         
-        // Listen for updateAvailable event from PWA manager
-        window.addEventListener('updateAvailable', () => {
-            this.showUpdateBanner();
-        });
         
         // Listen for storage changes
         window.addEventListener('storage', (e) => {

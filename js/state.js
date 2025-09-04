@@ -30,10 +30,7 @@ class AppState {
                 totalStudyTime: 0,
                 
                 // Voice Translations
-                voiceTranslations: [],
-                
-                // App Updates
-                updateAvailable: false
+                voiceTranslations: []
             },
             sessions: {
                 flashcards: null,
@@ -210,8 +207,7 @@ class AppState {
             lastStudyDate: null,
             totalStudyTime: 0,
             quizzesTaken: 0,
-            voiceTranslations: [],
-            updateAvailable: false
+            voiceTranslations: []
         };
         
         this.clearAllSessions();
@@ -293,42 +289,14 @@ class AppState {
         }
     }
     
-    // Update Management
-    setUpdateAvailable(available) {
-        this.state.user.updateAvailable = available;
-        this.saveUserData();
-        
-        // Update UI elements
-        this.updateUpdateUI();
-    }
-    
-    isUpdateAvailable() {
-        return this.state.user.updateAvailable || false;
-    }
-    
-    updateUpdateUI() {
-        // Update home page banner
-        const updateBanner = document.getElementById('updateBanner');
-        if (updateBanner) {
-            if (this.isUpdateAvailable()) {
-                updateBanner.classList.remove('d-none');
-            } else {
-                updateBanner.classList.add('d-none');
-            }
-        }
-        
-        // Update settings button
-        const updateBtn = document.getElementById('updateBtn');
-        if (updateBtn) {
-            if (this.isUpdateAvailable()) {
-                updateBtn.textContent = 'Install Update';
-                updateBtn.classList.remove('btn-outline-primary');
-                updateBtn.classList.add('btn-primary');
-            } else {
-                updateBtn.textContent = 'Check for Updates';
-                updateBtn.classList.remove('btn-primary');
-                updateBtn.classList.add('btn-outline-primary');
-            }
+    // Simple update flag management for PWA manager
+    setUpdateFlag(available) {
+        if (available) {
+            localStorage.setItem('wordwave_update_available', 'true');
+            localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
+        } else {
+            localStorage.removeItem('wordwave_update_available');
+            localStorage.removeItem('wordwave_update_timestamp');
         }
     }
 }

@@ -134,15 +134,24 @@ class PWAUpdateManager {
     }
 
     setUpdateFlag() {
-        const timestamp = Date.now().toString();
-        localStorage.setItem('wordwave_update_available', 'true');
-        localStorage.setItem('wordwave_update_timestamp', timestamp);
-        console.log('🚩 Update flag SET with timestamp:', timestamp);
+        if (window.stateManager) {
+            window.stateManager.setUpdateFlag(true);
+        } else {
+            // Fallback if state manager not available
+            localStorage.setItem('wordwave_update_available', 'true');
+            localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
+        }
+        console.log('🚩 Update flag SET');
     }
 
     clearUpdateFlag() {
-        localStorage.removeItem('wordwave_update_available');
-        localStorage.removeItem('wordwave_update_timestamp');
+        if (window.stateManager) {
+            window.stateManager.setUpdateFlag(false);
+        } else {
+            // Fallback if state manager not available
+            localStorage.removeItem('wordwave_update_available');
+            localStorage.removeItem('wordwave_update_timestamp');
+        }
         console.log('🚩 Update flag CLEARED');
     }
 
