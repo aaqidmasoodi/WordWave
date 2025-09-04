@@ -99,7 +99,7 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '6.1.3';
+        const currentVersion = '6.1.4';
         const storedVersion = localStorage.getItem('wordwave_update_version');
         
         // If stored version matches current, clear all update flags
@@ -558,49 +558,66 @@ class SettingsManager {
     }
 
     initNotificationSettings() {
-        const pushToggle = document.getElementById('pushNotifications');
+        const pushButton = document.getElementById('pushNotifications');
 
-        if (!pushToggle) {
-            console.warn('⚠️ Push notification toggle not found');
+        if (!pushButton) {
+            console.warn('⚠️ Push notification button not found');
             return;
         }
 
-        console.log('🔘 Initializing notification toggle');
+        console.log('🔘 Initializing notification button');
 
         // Set initial state from saved data
         setTimeout(() => {
             if (window.notificationManager) {
-                pushToggle.checked = window.notificationManager.isSubscribed();
-                console.log('🔘 Toggle initial state:', pushToggle.checked);
+                const isSubscribed = window.notificationManager.isSubscribed();
+                this.updateNotificationButton(pushButton, isSubscribed);
+                console.log('🔘 Button initial state - subscribed:', isSubscribed);
             }
         }, 1000);
 
-        // Handle toggle - simplified for cross-browser compatibility
-        const handleToggle = async (e) => {
-            const targetState = e.target.checked;
-            console.log('🔘 Toggle clicked - new state:', targetState);
+        // Handle button click
+        pushButton.addEventListener('click', async (e) => {
+            const isCurrentlySubscribed = window.notificationManager.isSubscribed();
+            console.log('🔘 Button clicked - currently subscribed:', isCurrentlySubscribed);
             
-            if (targetState) {
-                // Toggle turned ON - request permission and subscribe
-                console.log('🔔 Requesting permission...');
-                const granted = await window.notificationManager.requestPermission();
-                console.log('🔔 Permission granted:', granted);
-                if (!granted) {
-                    e.target.checked = false;
-                    console.log('🔔 Permission denied, toggle reset');
+            // Disable button during operation
+            pushButton.disabled = true;
+            pushButton.textContent = 'Processing...';
+            
+            try {
+                if (isCurrentlySubscribed) {
+                    // Currently subscribed - unsubscribe
+                    console.log('🔕 Unsubscribing...');
+                    await window.notificationManager.unsubscribe();
+                    this.updateNotificationButton(pushButton, false);
+                    console.log('🔕 Unsubscribed');
+                } else {
+                    // Currently not subscribed - subscribe
+                    console.log('🔔 Requesting permission...');
+                    const granted = await window.notificationManager.requestPermission();
+                    console.log('🔔 Permission granted:', granted);
+                    this.updateNotificationButton(pushButton, granted);
                 }
-            } else {
-                // Toggle turned OFF - unsubscribe
-                console.log('🔕 Unsubscribing...');
-                await window.notificationManager.unsubscribe();
-                console.log('🔕 Unsubscribed');
+            } catch (error) {
+                console.error('❌ Notification operation failed:', error);
+                // Reset button state
+                this.updateNotificationButton(pushButton, isCurrentlySubscribed);
             }
-        };
-
-        // Use only change event for cross-browser compatibility
-        pushToggle.addEventListener('change', handleToggle);
+        });
         
-        console.log('🔘 Notification toggle initialized with cross-browser support');
+        console.log('🔘 Notification button initialized');
+    }
+
+    updateNotificationButton(button, isSubscribed) {
+        button.disabled = false;
+        if (isSubscribed) {
+            button.textContent = 'Disable Notifications';
+            button.className = 'btn btn-danger';
+        } else {
+            button.textContent = 'Enable Notifications';
+            button.className = 'btn btn-primary';
+        }
     }
 
     updateNotificationStatus() {
