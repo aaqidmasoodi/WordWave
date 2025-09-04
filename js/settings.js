@@ -228,87 +228,60 @@ class SettingsManager {
         const message = document.getElementById('updateMessage');
         const updateAvailable = document.getElementById('updateAvailable');
 
-        // Show amazing checking animation
         btn.disabled = true;
         btn.innerHTML = '<i class="bi bi-arrow-clockwise spin me-1"></i>Checking...';
         status.classList.remove('d-none', 'alert-success', 'alert-warning', 'alert-danger');
         status.classList.add('alert-info');
-        message.innerHTML = '<i class="bi bi-search me-1"></i>Scanning for updates...';
+        message.innerHTML = '<i class="bi bi-search me-1"></i>Checking for updates...';
 
         try {
-            // Get current version from cache name
-            const currentVersion = await this.getCurrentVersion();
-            console.log('📱 Current version:', currentVersion);
+            // Use the same simple logic as PWA manager
+            const registration = await navigator.serviceWorker.getRegistration();
             
-            // Clear any stale update flags first
-            localStorage.removeItem('wordwave_update_available');
-            localStorage.removeItem('wordwave_update_version');
-            
-            if ('serviceWorker' in navigator) {
-                const registration = await navigator.serviceWorker.getRegistration();
-                if (registration) {
-                    // Force update check with cache busting
-                    message.innerHTML = '<i class="bi bi-cloud-download me-1"></i>Checking server...';
-                    await registration.update();
-                    
-                    // Wait for update to process
-                    await new Promise(resolve => setTimeout(resolve, 1500));
-                    
-                    // Get fresh registration
-                    const updatedRegistration = await navigator.serviceWorker.getRegistration();
-                    
-                    // Check if there's a waiting service worker (new version available)
-                    if (updatedRegistration.waiting || updatedRegistration.installing) {
-                        const newVersion = await this.getWaitingVersion(updatedRegistration);
-                        console.log('🆕 New version found:', newVersion);
-                        
-                        // Compare versions properly
-                        if (this.isNewerVersion(newVersion, currentVersion)) {
-                            // 🎉 UPDATE AVAILABLE!
-                            localStorage.setItem('wordwave_update_available', 'true');
-                            localStorage.setItem('wordwave_update_version', newVersion);
-                            
-                            status.classList.remove('alert-info');
-                            status.classList.add('alert-success');
-                            message.innerHTML = `<i class="bi bi-download me-1"></i>Update available! <strong>${newVersion}</strong>`;
-                            updateAvailable.classList.remove('d-none');
-                            
-                            // Transform button to install mode
-                            this.isInstallMode = true;
-                            btn.innerHTML = '<i class="bi bi-download me-1"></i>Install Update';
-                            btn.classList.remove('btn-outline-primary');
-                            btn.classList.add('btn-success');
-                            btn.disabled = false;
-                            
-                            this.waitingWorker = updatedRegistration.waiting || updatedRegistration.installing;
-                            return;
-                        }
-                    }
-                    
-                    // No update found - you're up to date! 
-                    status.classList.remove('alert-info');
-                    status.classList.add('alert-success');
-                    message.innerHTML = `<i class="bi bi-check-circle me-1"></i>You're up to date! <strong>${currentVersion}</strong>`;
-                    updateAvailable.classList.add('d-none');
-                    
-                    btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Up to Date';
-                    btn.classList.remove('btn-outline-primary');
-                    btn.classList.add('btn-outline-success');
-                    btn.disabled = true;
-                    
-                    // Re-enable button after 3 seconds
-                    setTimeout(() => {
-                        btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check for Updates';
-                        btn.classList.remove('btn-outline-success');
-                        btn.classList.add('btn-outline-primary');
-                        btn.disabled = false;
-                    }, 3000);
-                    
-                } else {
-                    throw new Error('Service worker not registered');
-                }
+            if (registration && registration.waiting) {
+                console.log('✅ Update available - waiting service worker found');
+                
+                // Set the same flags as PWA manager
+                localStorage.setItem('wordwave_update_available', 'true');
+                localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
+                
+                status.classList.remove('alert-info');
+                status.classList.add('alert-success');
+                message.innerHTML = `<i class="bi bi-download me-1"></i>Update available!`;
+                updateAvailable.classList.remove('d-none');
+                
+                this.isInstallMode = true;
+                btn.innerHTML = '<i class="bi bi-download me-1"></i>Install Update';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-success');
+                btn.disabled = false;
+                
+                this.waitingWorker = registration.waiting;
+                
             } else {
-                throw new Error('Service workers not supported');
+                console.log('✅ No updates available');
+                
+                status.classList.remove('alert-info');
+                status.classList.add('alert-success');
+                message.innerHTML = '<i class="bi bi-check-circle me-1"></i>You\'re up to date!';
+                updateAvailable.classList.add('d-none');
+                
+                // Clear any stale flags
+                localStorage.removeItem('wordwave_update_available');
+                localStorage.removeItem('wordwave_update_timestamp');
+                
+                btn.innerHTML = '<i class="bi bi-check-lg me-1"></i>Up to Date';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-outline-success');
+                btn.disabled = true;
+                
+                // Re-enable button after 3 seconds
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i>Check for Updates';
+                    btn.classList.remove('btn-outline-success');
+                    btn.classList.add('btn-outline-primary');
+                    btn.disabled = false;
+                }, 3000);
             }
             
         } catch (error) {
