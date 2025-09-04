@@ -120,7 +120,7 @@ class OneSignalNotificationManager {
             const actualPermission = await OneSignal.Notifications.permission;
             console.log('📋 Actual permission state:', actualPermission);
             
-            if (actualPermission === 'granted' || permission === true) {
+            if (actualPermission === 'granted' || actualPermission === true || permission === true) {
                 console.log('✅ Permission granted, opting in...');
                 await OneSignal.User.PushSubscription.optIn();
                 this.subscribed = true;
