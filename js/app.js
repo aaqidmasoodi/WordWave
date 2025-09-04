@@ -526,44 +526,12 @@ class EnglishLearningApp {
     }
 
     checkUpdateBanner() {
-        // SIMPLE: Only show if flag is true, and verify it's actually needed
-        const updateFlag = localStorage.getItem('wordwave_update_available');
-        console.log('🔍 Checking update banner - flag:', updateFlag);
-        
-        if (updateFlag === 'true') {
-            // Verify there's actually an update available
-            this.verifyUpdateAvailability().then(hasUpdate => {
-                if (hasUpdate) {
-                    console.log('✅ Update verified - showing banner');
-                    this.showUpdateBanner();
-                } else {
-                    console.log('❌ No actual update - clearing flag');
-                    localStorage.removeItem('wordwave_update_available');
-                    localStorage.removeItem('wordwave_update_timestamp');
-                    localStorage.removeItem('wordwave_update_version');
-                }
-            });
-        }
+        // Update banner is now handled by update-ui.js and PWA manager
+        // This method is kept for compatibility but does nothing
+        console.log('🔍 Update banner handled by PWA manager');
     }
 
-    async verifyUpdateAvailability() {
-        try {
-            if ('serviceWorker' in navigator) {
-                const registration = await navigator.serviceWorker.getRegistration();
-                if (registration) {
-                    // Check if there's actually a waiting service worker
-                    const hasWaiting = !!registration.waiting;
-                    const hasInstalling = !!registration.installing;
-                    console.log('🔍 SW verification - waiting:', hasWaiting, 'installing:', hasInstalling);
-                    return hasWaiting || hasInstalling;
-                }
-            }
-            return false;
-        } catch (error) {
-            console.error('Error verifying update:', error);
-            return false;
-        }
-    }
+
 
     showUpdateBanner() {
         const banner = document.getElementById('updateBanner');
