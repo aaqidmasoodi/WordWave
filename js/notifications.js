@@ -65,16 +65,6 @@ class OneSignalNotificationManager {
                     setTimeout(() => this.setUserTags(), 3000);
                 }
             });
-                this.subscribed = event.current.optedIn;
-                this.userId = OneSignal.User.onesignalId;
-                this.saveState();
-                this.updateUI();
-                
-                // Only set tags after subscription is stable
-                if (this.subscribed) {
-                    setTimeout(() => this.setUserTags(), 3000);
-                }
-            });
 
             this.initialized = true;
             this.connected = true;
@@ -176,7 +166,7 @@ class OneSignalNotificationManager {
                 words_learned: userData?.learnedWords?.length || 0,
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
-                app_version: '6.0.6'
+                app_version: '6.0.7'
             };
 
             console.log('🏷️ Setting user tags:', tags);
