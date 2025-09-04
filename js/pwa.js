@@ -79,11 +79,13 @@ class PWAUpdateManager {
                     this.clearUpdateFlag();
                 }
                 
-                // Listen for controller change (update installed)
-                navigator.serviceWorker.addEventListener('controllerchange', () => {
-                    console.log('🔄 Controller changed - reloading');
-                    this.clearUpdateFlag();
-                    window.location.reload();
+                // Listen for actual service worker updates (not random controller changes)
+                navigator.serviceWorker.addEventListener('message', (event) => {
+                    if (event.data && event.data.type === 'SW_UPDATED') {
+                        console.log('🔄 Service worker updated - reloading');
+                        this.clearUpdateFlag();
+                        window.location.reload();
+                    }
                 });
                 
             } catch (error) {

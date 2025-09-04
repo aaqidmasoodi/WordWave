@@ -1,5 +1,5 @@
 // WordWave Service Worker with OneSignal Integration
-const CACHE_NAME = 'wordwave-v6.3.2';
+const CACHE_NAME = 'wordwave-v6.3.4';
 
 // Import OneSignal service worker functionality FIRST
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
@@ -10,6 +10,31 @@ self.addEventListener('message', (event) => {
         console.log('⚡ Received SKIP_WAITING message - activating new SW');
         self.skipWaiting();
     }
+});
+
+// Notify clients when we become the active service worker
+self.addEventListener('activate', (event) => {
+    console.log('🚀 Service worker activated: ' + CACHE_NAME);
+    
+    event.waitUntil(
+        caches.keys().then((cacheNames) => {
+            return Promise.all([
+                // Clean up old caches
+                ...cacheNames.map((cacheName) => {
+                    if (cacheName !== CACHE_NAME) {
+                        console.log('🗑️ Deleting old cache: ' + cacheName);
+                        return caches.delete(cacheName);
+                    }
+                }),
+                // Notify all clients that we've updated
+                self.clients.matchAll().then(clients => {
+                    clients.forEach(client => {
+                        client.postMessage({ type: 'SW_UPDATED' });
+                    });
+                })
+            ]);
+        })
+    );
 });
 
 const urlsToCache = [
@@ -65,23 +90,6 @@ self.addEventListener('install', (event) => {
     );
 });
 
-// Activate event
-self.addEventListener('activate', (event) => {
-    console.log('🚀 Service worker activated: ' + CACHE_NAME);
-    
-    event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames.map((cacheName) => {
-                    if (cacheName !== CACHE_NAME) {
-                        console.log('🗑️ Deleting old cache: ' + cacheName);
-                        return caches.delete(cacheName);
-                    }
-                })
-            );
-        })
-    );
-});
 
 // Fetch event - Improved caching strategy
 self.addEventListener('fetch', (event) => {
