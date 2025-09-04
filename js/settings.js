@@ -99,23 +99,41 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '6.2.5';
+        const currentVersion = '6.2.6';
         const storedVersion = localStorage.getItem('wordwave_update_version');
+        const pwaStoredVersion = localStorage.getItem('wordwave_app_version');
         
-        // If stored version matches current, clear all update flags
-        if (storedVersion === currentVersion) {
-            console.log('🧹 Version matches current - clearing update flags');
+        // If either stored version matches current, clear all update flags
+        if (storedVersion === currentVersion || pwaStoredVersion === currentVersion) {
+            console.log('🧹 Version matches current - clearing ALL update flags');
             localStorage.removeItem('wordwave_update_available');
             localStorage.removeItem('wordwave_update_version');
+            localStorage.removeItem('wordwave_update_timestamp');
+            // Ensure PWA version is also set correctly
+            localStorage.setItem('wordwave_app_version', currentVersion);
         }
 
-        // Only two states based on flag
-        if (localStorage.getItem('wordwave_update_available') === 'true') {
-            // Install mode
-            btn.innerHTML = '<i class="bi bi-download"></i> Install Update';
-            btn.classList.remove('btn-outline-primary');
-            btn.classList.add('btn-primary');
-            this.isInstallMode = true;
+        // Only show install mode if flag is set AND we don't have current version
+        const hasUpdateFlag = localStorage.getItem('wordwave_update_available') === 'true';
+        const isCurrentVersionStored = (pwaStoredVersion === currentVersion);
+        
+        if (hasUpdateFlag && !isCurrentVersionStored) {
+            // Install mode - but double check this is actually a newer version
+            const flaggedVersion = localStorage.getItem('wordwave_update_version');
+            if (flaggedVersion && this.isNewerVersion(flaggedVersion, currentVersion)) {
+                btn.innerHTML = '<i class="bi bi-download"></i> Install Update';
+                btn.classList.remove('btn-outline-primary');
+                btn.classList.add('btn-primary');
+                this.isInstallMode = true;
+            } else {
+                // False positive - clear flags and show check mode
+                localStorage.removeItem('wordwave_update_available');
+                localStorage.removeItem('wordwave_update_version');
+                btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Check for Updates';
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-outline-primary');
+                this.isInstallMode = false;
+            }
         } else {
             // Check mode
             btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Check for Updates';
@@ -124,6 +142,26 @@ class SettingsManager {
             this.isInstallMode = false;
         }
         btn.disabled = false;
+    }
+
+    // Version comparison helper
+    isNewerVersion(newVersion, currentVersion) {
+        const parseVersion = (version) => {
+            return version.replace(/[^\d.]/g, '').split('.').map(num => parseInt(num) || 0);
+        };
+        
+        const newParts = parseVersion(newVersion);
+        const currentParts = parseVersion(currentVersion);
+        
+        for (let i = 0; i < Math.max(newParts.length, currentParts.length); i++) {
+            const newPart = newParts[i] || 0;
+            const currentPart = currentParts[i] || 0;
+            
+            if (newPart > currentPart) return true;
+            if (newPart < currentPart) return false;
+        }
+        
+        return false; // versions are equal
     }
 
     // Profile Management

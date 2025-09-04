@@ -1,5 +1,5 @@
 // WordWave Service Worker with OneSignal Integration
-const CACHE_NAME = 'wordwave-v6.2.5';
+const CACHE_NAME = 'wordwave-v6.2.6';
 
 // Import OneSignal service worker functionality FIRST
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
@@ -76,13 +76,73 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Fetch event
+// Fetch event - Improved caching strategy
 self.addEventListener('fetch', (event) => {
+    // Skip non-GET requests
+    if (event.request.method !== 'GET') {
+        return;
+    }
+    
+    // Skip external requests
+    if (!event.request.url.startsWith(self.location.origin)) {
+        return;
+    }
+    
     event.respondWith(
         caches.match(event.request)
-            .then((response) => {
-                // Return cached version or fetch from network
-                return response || fetch(event.request);
+            .then((cachedResponse) => {
+                // If we have a cached response, return it
+                if (cachedResponse) {
+                    // For HTML files, also fetch from network to update cache
+                    if (event.request.destination === 'document') {
+                        fetch(event.request)
+                            .then(networkResponse => {
+                                if (networkResponse && networkResponse.status === 200) {
+                                    const responseClone = networkResponse.clone();
+                                    caches.open(CACHE_NAME)
+                                        .then(cache => {
+                                            cache.put(event.request, responseClone);
+                                        });
+                                }
+                            })
+                            .catch(() => {
+                                // Network failed, but we have cache
+                            });
+                    }
+                    return cachedResponse;
+                }
+                
+                // No cached response, fetch from network
+                return fetch(event.request)
+                    .then((networkResponse) => {
+                        // Check if we received a valid response
+                        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
+                            return networkResponse;
+                        }
+                        
+                        // Clone the response
+                        const responseToCache = networkResponse.clone();
+                        
+                        // Add to cache
+                        caches.open(CACHE_NAME)
+                            .then((cache) => {
+                                cache.put(event.request, responseToCache);
+                            });
+                        
+                        return networkResponse;
+                    })
+                    .catch(() => {
+                        // Network failed and no cache
+                        if (event.request.destination === 'document') {
+                            return new Response('App is offline', {
+                                status: 503,
+                                statusText: 'Service Unavailable',
+                                headers: new Headers({
+                                    'Content-Type': 'text/html'
+                                })
+                            });
+                        }
+                    });
             })
     );
 });

@@ -82,7 +82,7 @@ class PWAInstaller {
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
-        this.currentVersion = '6.2.5'; // Current app version
+        this.currentVersion = '6.2.6'; // Current app version
         this.init();
     }
 
@@ -131,12 +131,17 @@ class PWAUpdateManager {
         const storedVersion = localStorage.getItem('wordwave_app_version');
         
         if (storedVersion === this.currentVersion) {
-            console.log('🧹 Version matches - force clearing update flags');
+            console.log('🧹 Version matches - force clearing ALL update flags');
             this.clearUpdateFlag();
+            // Also clear settings.js version flag
+            localStorage.removeItem('wordwave_update_version');
         } else {
             // Update stored version
             localStorage.setItem('wordwave_app_version', this.currentVersion);
             console.log('📝 Updated stored version to:', this.currentVersion);
+            // Clear old flags when version changes
+            this.clearUpdateFlag();
+            localStorage.removeItem('wordwave_update_version');
         }
     }
 
