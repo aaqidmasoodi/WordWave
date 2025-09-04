@@ -99,7 +99,7 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '6.1.4';
+        const currentVersion = '6.1.5';
         const storedVersion = localStorage.getItem('wordwave_update_version');
         
         // If stored version matches current, clear all update flags
@@ -612,11 +612,11 @@ class SettingsManager {
     updateNotificationButton(button, isSubscribed) {
         button.disabled = false;
         if (isSubscribed) {
-            button.textContent = 'Disable Notifications';
-            button.className = 'btn btn-danger';
+            button.textContent = 'Disable';
+            button.className = 'btn btn-danger btn-sm';
         } else {
-            button.textContent = 'Enable Notifications';
-            button.className = 'btn btn-primary';
+            button.textContent = 'Enable';
+            button.className = 'btn btn-primary btn-sm';
         }
     }
 
