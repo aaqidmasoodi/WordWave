@@ -116,7 +116,11 @@ class OneSignalNotificationManager {
             const permission = await OneSignal.Notifications.requestPermission();
             console.log('📋 Permission result:', permission);
             
-            if (permission) {
+            // Check actual permission state instead of relying on return value
+            const actualPermission = await OneSignal.Notifications.permission;
+            console.log('📋 Actual permission state:', actualPermission);
+            
+            if (actualPermission === 'granted' || permission === true) {
                 console.log('✅ Permission granted, opting in...');
                 await OneSignal.User.PushSubscription.optIn();
                 this.subscribed = true;
@@ -127,7 +131,7 @@ class OneSignalNotificationManager {
                 console.log('✅ Successfully subscribed to notifications');
                 return true;
             } else {
-                console.log('❌ Permission denied');
+                console.log('❌ Permission denied or not granted');
             }
             return false;
         } catch (error) {
