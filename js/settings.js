@@ -560,26 +560,53 @@ class SettingsManager {
     initNotificationSettings() {
         const pushToggle = document.getElementById('pushNotifications');
 
-        if (!pushToggle) return;
+        if (!pushToggle) {
+            console.warn('⚠️ Push notification toggle not found');
+            return;
+        }
+
+        console.log('🔘 Initializing notification toggle');
 
         // Set initial state from saved data
         setTimeout(() => {
             if (window.notificationManager) {
                 pushToggle.checked = window.notificationManager.isSubscribed();
+                console.log('🔘 Toggle initial state:', pushToggle.checked);
             }
         }, 1000);
 
-        // Handle toggle - simple and clean
-        pushToggle.addEventListener('change', async (e) => {
-            if (e.target.checked) {
+        // Handle toggle - with iOS-specific improvements
+        const handleToggle = async (e) => {
+            console.log('🔘 Toggle clicked:', e.target.checked);
+            
+            // Prevent double-firing on iOS
+            e.preventDefault();
+            e.stopPropagation();
+            
+            const isChecked = !pushToggle.checked; // Flip the state
+            pushToggle.checked = isChecked;
+            
+            if (isChecked) {
+                console.log('🔔 Requesting permission...');
                 const granted = await window.notificationManager.requestPermission();
+                console.log('🔔 Permission granted:', granted);
                 if (!granted) {
-                    e.target.checked = false;
+                    pushToggle.checked = false;
+                    console.log('🔔 Permission denied, toggle reset');
                 }
             } else {
+                console.log('🔕 Unsubscribing...');
                 await window.notificationManager.unsubscribe();
+                console.log('🔕 Unsubscribed');
             }
-        });
+        };
+
+        // Add multiple event listeners for better iOS compatibility
+        pushToggle.addEventListener('change', handleToggle);
+        pushToggle.addEventListener('click', handleToggle);
+        pushToggle.addEventListener('touchend', handleToggle);
+        
+        console.log('🔘 Notification toggle initialized with iOS touch support');
     }
 
     updateNotificationStatus() {
