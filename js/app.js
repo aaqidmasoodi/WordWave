@@ -1,34 +1,78 @@
-// Swipe-to-Go-Back Prevention (All Platforms)
+// Browser Back Prevention (All Platforms)
 // Prevents browser back gesture by maintaining single history entry
 (function() {
-    // Replace current history entry immediately
+    let isInitialized = false;
+    
     const replaceCurrentState = () => {
-        window.history.replaceState({}, '', window.location.href);
-    };
-
-    replaceCurrentState();
-
-    // Hook into all link clicks
-    document.addEventListener('click', (e) => {
-        const link = e.target.closest('a');
-        if (link && link.href && !link.target && !link.download) {
-            setTimeout(replaceCurrentState, 10);
+        try {
+            window.history.replaceState({ preventBack: true }, '', window.location.href);
+            console.log('🔒 History replaced');
+        } catch (e) {
+            console.warn('Could not replace history state:', e);
         }
-    });
-
-    // Convert pushState to replaceState to prevent history growth
-    const originalPushState = window.history.pushState;
-    window.history.pushState = (...args) => {
-        window.history.replaceState(...args);
     };
 
-    // Handle edge cases
-    window.addEventListener('popstate', replaceCurrentState);
-    document.addEventListener('visibilitychange', () => {
-        if (!document.hidden) replaceCurrentState();
-    });
+    const initBackPrevention = () => {
+        if (isInitialized) return;
+        isInitialized = true;
 
-    console.log('🔒 Browser back prevention enabled');
+        // Replace current history entry immediately
+        replaceCurrentState();
+
+        // Add a dummy entry and immediately replace it
+        window.history.pushState({ preventBack: true }, '', window.location.href);
+        replaceCurrentState();
+
+        // Override pushState to always use replaceState
+        const originalPushState = window.history.pushState;
+        const originalReplaceState = window.history.replaceState;
+        
+        window.history.pushState = function(...args) {
+            console.log('🔒 Intercepted pushState, using replaceState instead');
+            originalReplaceState.apply(this, args);
+        };
+
+        // Handle popstate events (back button pressed)
+        window.addEventListener('popstate', (e) => {
+            console.log('🔒 Popstate detected, preventing back');
+            e.preventDefault();
+            e.stopPropagation();
+            replaceCurrentState();
+            // Push forward again
+            window.history.pushState({ preventBack: true }, '', window.location.href);
+            replaceCurrentState();
+        }, true);
+
+        // Handle all navigation
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a');
+            if (link && link.href && !link.target && !link.download && link.href.startsWith(window.location.origin)) {
+                setTimeout(replaceCurrentState, 50);
+            }
+        });
+
+        // Handle visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                setTimeout(replaceCurrentState, 100);
+            }
+        });
+
+        // Periodic replacement to ensure it stays
+        setInterval(replaceCurrentState, 5000);
+
+        console.log('🔒 Browser back prevention enabled');
+    };
+
+    // Initialize immediately if DOM is ready, otherwise wait
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initBackPrevention);
+    } else {
+        initBackPrevention();
+    }
+
+    // Also initialize on window load as backup
+    window.addEventListener('load', initBackPrevention);
 })();
 
 // js/app.js
