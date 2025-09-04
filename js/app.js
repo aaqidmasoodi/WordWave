@@ -103,6 +103,12 @@ class EnglishLearningApp {
     }
 
     recordUsageTime() {
+        // Safety check - ensure userData exists
+        if (!this.userData) {
+            console.debug('⚠️ userData not available for usage tracking');
+            return;
+        }
+
         const now = new Date();
         const hour = now.getHours();
         const day = now.getDay(); // 0 = Sunday
