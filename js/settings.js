@@ -99,7 +99,7 @@ class SettingsManager {
         if (!btn) return;
 
         // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '6.1.2';
+        const currentVersion = '6.1.3';
         const storedVersion = localStorage.getItem('wordwave_update_version');
         
         // If stored version matches current, clear all update flags
@@ -575,16 +575,10 @@ class SettingsManager {
             }
         }, 1000);
 
-        // Handle toggle - with iOS-specific improvements
+        // Handle toggle - simplified for cross-browser compatibility
         const handleToggle = async (e) => {
             const targetState = e.target.checked;
             console.log('🔘 Toggle clicked - new state:', targetState);
-            
-            // Don't prevent default for change events, only for click/touch
-            if (e.type !== 'change') {
-                e.preventDefault();
-                e.stopPropagation();
-            }
             
             if (targetState) {
                 // Toggle turned ON - request permission and subscribe
@@ -592,7 +586,7 @@ class SettingsManager {
                 const granted = await window.notificationManager.requestPermission();
                 console.log('🔔 Permission granted:', granted);
                 if (!granted) {
-                    pushToggle.checked = false;
+                    e.target.checked = false;
                     console.log('🔔 Permission denied, toggle reset');
                 }
             } else {
@@ -603,12 +597,10 @@ class SettingsManager {
             }
         };
 
-        // Add multiple event listeners for better iOS compatibility
+        // Use only change event for cross-browser compatibility
         pushToggle.addEventListener('change', handleToggle);
-        pushToggle.addEventListener('click', handleToggle);
-        pushToggle.addEventListener('touchend', handleToggle);
         
-        console.log('🔘 Notification toggle initialized with iOS touch support');
+        console.log('🔘 Notification toggle initialized with cross-browser support');
     }
 
     updateNotificationStatus() {
