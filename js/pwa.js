@@ -44,6 +44,7 @@ class PWAUpdateManager {
     constructor() {
         this.registration = null;
         this.waitingWorker = null;
+        this.isInstalling = false; // Track if we're currently installing
         this.init();
     }
 
@@ -86,7 +87,7 @@ class PWAUpdateManager {
         const newWorker = registration.installing;
         
         newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller && !this.isInstalling) {
                 console.log('✅ NEW UPDATE AVAILABLE - setting flag');
                 this.setUpdateFlag();
                 this.waitingWorker = newWorker;
@@ -113,6 +114,7 @@ class PWAUpdateManager {
     installUpdate() {
         if (this.waitingWorker) {
             console.log('🔄 Installing update...');
+            this.isInstalling = true; // Prevent flag from being set again
             this.clearUpdateFlag();
             this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
         }
