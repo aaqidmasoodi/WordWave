@@ -10,85 +10,429 @@
     <link href="styles/animations.css" rel="stylesheet">
     <link href="styles/native.css" rel="stylesheet">
     <link href="components/player/player.css" rel="stylesheet">
+    <style>
+        .lessons-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        @media (min-width: 576px) {
+            .lessons-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .lessons-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        .lesson-card, .podcast-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            background: white;
+        }
+        
+        .lesson-card:hover, .podcast-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .card-thumbnail {
+            position: relative;
+            aspect-ratio: 16/9;
+            overflow: hidden;
+        }
+        
+        .card-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .thumbnail-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, rgba(0,0,0,0.3), rgba(0,0,0,0.1));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        
+        .lesson-card:hover .thumbnail-overlay,
+        .podcast-card:hover .thumbnail-overlay {
+            opacity: 1;
+        }
+        
+        .play-icon {
+            color: white;
+            font-size: 2rem;
+        }
+        
+        .card-badges {
+            position: absolute;
+            top: 6px;
+            left: 6px;
+            right: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+        
+        .card-content {
+            padding: 12px;
+        }
+        
+        .card-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: inherit;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .card-description {
+            font-size: 0.75rem;
+            color: #6c757d;
+            line-height: 1.3;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: inherit;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .card-meta {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+        }
+        
+        .badge {
+            font-size: 0.65rem;
+            padding: 2px 6px;
+        }
+        
+        .player-container {
+            aspect-ratio: 16/9;
+            max-height: 40vh;
+        }
+        
+        .video-player {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .video-list-item, .podcast-list-item {
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+        
+        .video-list-item:hover, .podcast-list-item:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .video-list-item:last-child, .podcast-list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .video-item-thumbnail {
+            width: 80px;
+            height: 45px;
+            border-radius: 4px;
+            overflow: hidden;
+            flex-shrink: 0;
+            position: relative;
+        }
+        
+        .video-item-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .video-item-play {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .video-item-content {
+            flex: 1;
+            min-width: 0;
+            padding-left: 12px;
+        }
+        
+        .video-item-title {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+            line-height: 1.3;
+        }
+        
+        .video-item-meta {
+            font-size: 0.7rem;
+            color: #6c757d;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .modal-body {
+            max-height: 100%;
+            overflow-y: auto;
+        }
+        
+        .modal {
+            padding-top: 60px;
+        }
+        
+        .path-card, .supp-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: white;
+        }
+        
+        .path-title, .supp-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+        
+        .path-description, .supp-description {
+            font-size: 0.8rem;
+            color: #6c757d;
+            margin-bottom: 8px;
+        }
+        
+        .supp-item {
+            display: flex;
+            align-items: center;
+            padding: 6px;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            margin-bottom: 6px;
+            background: #f8f9fa;
+        }
+        
+        .supp-thumbnail {
+            width: 40px;
+            height: 22px;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        .supp-thumbnail img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .supp-content {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .supp-name {
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+        
+        .btn-watch {
+            font-size: 0.7rem;
+            padding: 2px 8px;
+        }
+    </style>
 </head>
 <body>
     <!-- Main Content -->
-    <main class="main-content">
-        <div class="learning-container">
+    <main class="main-content" style="height: 100vh; overflow: hidden;">
+        <div class="learning-container h-100 d-flex flex-column">
             <!-- Lessons Section -->
-            <div id="lessonsSection">
-                <div id="lessonsListView">
-                    <div class="lessons-scroll-container">
-                        <div class="row" id="lessonsGrid">
+            <div id="lessonsSection" class="h-100 d-flex flex-column">
+                <div id="lessonsListView" class="h-100 d-flex flex-column">
+                    <!-- Compact Filter Bar -->
+                    <div class="filter-bar p-2 border-bottom bg-light">
+                        <div class="d-flex gap-2">
+                            <select class="form-select form-select-sm flex-grow-1" id="levelFilter">
+                                <option value="">All Levels</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="elementary">Elementary</option>
+                                <option value="pre-intermediate">Pre-Intermediate</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="upper-intermediate">Upper-Intermediate</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                            <button class="btn btn-outline-primary btn-sm" id="learningPathsBtn">
+                                <i class="bi bi-map"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scrollable Content -->
+                    <div class="flex-grow-1 overflow-auto p-2">
+                        <div id="lessonsGrid" class="lessons-grid">
                             <!-- Lessons will be populated here -->
                         </div>
                     </div>
                 </div>
                 
-                <div id="lessonDetailView" class="d-none">
-                    <!-- Back Button Row -->
-                    <div class="back-button-row">
-                        <button class="btn btn-sm btn-outline-secondary" id="backToLessonsBtn">
-                            <i class="bi bi-arrow-left me-1"></i>Back
+                <div id="lessonDetailView" class="d-none h-100 d-flex flex-column">
+                    <!-- Compact Header -->
+                    <div class="detail-header p-2 border-bottom bg-light d-flex align-items-center">
+                        <button class="btn btn-sm btn-outline-secondary me-2" id="backToLessonsBtn">
+                            <i class="bi bi-arrow-left"></i>
                         </button>
-                        <div class="flex-grow-1">
-                            <h6 id="currentVideoTitle" class="mb-0">Select a video</h6>
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 id="currentVideoTitle" class="mb-0 text-truncate">Select a video</h6>
                             <small class="text-muted" id="currentVideoSubtitle"></small>
                         </div>
                     </div>
                     
-                    <!-- Fixed Player - 30% of viewport -->
-                    <div class="fixed-player">
+                    <!-- Player -->
+                    <div class="player-container bg-black">
                         <div id="videoPlayer" class="video-player"></div>
                     </div>
                     
-                    <!-- Scrollable Video List - remaining viewport -->
-                    <div class="videos-scroll-container">
-                        <div class="videos-header">
-                            <h6 id="lessonTitle" class="mb-0"></h6>
+                    <!-- Video List -->
+                    <div class="flex-grow-1 overflow-auto">
+                        <div class="p-2 border-bottom">
+                            <h6 id="lessonTitle" class="mb-1"></h6>
+                            <p class="text-muted small mb-0" id="lessonDescription"></p>
                         </div>
-                        <div id="lessonVideosGrid" class="videos-list">
-                            <!-- Lesson videos will be populated here -->
+                        <div id="lessonVideosGrid" class="video-list">
+                            <!-- Videos will be populated here -->
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Podcasts Section -->
-            <div id="podcastsSection" class="d-none">
-                <div id="podcastsListView">
-                    <div class="lessons-scroll-container">
-                        <div class="row" id="podcastsGrid">
+            <div id="podcastsSection" class="d-none h-100 d-flex flex-column">
+                <div id="podcastsListView" class="h-100 d-flex flex-column">
+                    <!-- Compact Filter Bar -->
+                    <div class="filter-bar p-2 border-bottom bg-light">
+                        <div class="d-flex gap-1">
+                            <select class="form-select form-select-sm" id="podcastLevelFilter">
+                                <option value="">Level</option>
+                                <option value="beginner">Beginner</option>
+                                <option value="elementary">Elementary</option>
+                                <option value="pre-intermediate">Pre-Int</option>
+                                <option value="intermediate">Intermediate</option>
+                                <option value="upper-intermediate">Upper-Int</option>
+                                <option value="advanced">Advanced</option>
+                            </select>
+                            <select class="form-select form-select-sm" id="difficultyFilter">
+                                <option value="">Difficulty</option>
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                            <button class="btn btn-outline-success btn-sm" id="supplementaryBtn">
+                                <i class="bi bi-plus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Scrollable Content -->
+                    <div class="flex-grow-1 overflow-auto p-2">
+                        <div id="podcastsGrid" class="lessons-grid">
                             <!-- Podcasts will be populated here -->
                         </div>
                     </div>
                 </div>
                 
-                <div id="podcastPlayerView" class="d-none">
-                    <!-- Back Button Row -->
-                    <div class="back-button-row">
-                        <button class="btn btn-sm btn-outline-secondary" id="backToPodcastsBtn">
-                            <i class="bi bi-arrow-left me-1"></i>Back
+                <div id="podcastPlayerView" class="d-none h-100 d-flex flex-column">
+                    <!-- Compact Header -->
+                    <div class="detail-header p-2 border-bottom bg-light d-flex align-items-center">
+                        <button class="btn btn-sm btn-outline-secondary me-2" id="backToPodcastsBtn">
+                            <i class="bi bi-arrow-left"></i>
                         </button>
-                        <div class="flex-grow-1">
-                            <h6 id="currentPodcastTitle" class="mb-0">Select a podcast</h6>
+                        <div class="flex-grow-1 min-w-0">
+                            <h6 id="currentPodcastTitle" class="mb-0 text-truncate">Select a podcast</h6>
                             <small class="text-muted">Podcast</small>
                         </div>
                     </div>
                     
-                    <!-- Fixed Player - 30% of viewport -->
-                    <div class="fixed-player">
+                    <!-- Player -->
+                    <div class="player-container bg-black">
                         <div id="podcastPlayer" class="video-player"></div>
                     </div>
                     
-                    <!-- Scrollable Podcast List - remaining viewport -->
-                    <div class="videos-scroll-container">
-                        <div class="videos-header">
-                            <h6 id="podcastTitle" class="mb-0"></h6>
+                    <!-- Episode List -->
+                    <div class="flex-grow-1 overflow-auto">
+                        <div class="p-2 border-bottom">
+                            <h6 id="podcastTitle" class="mb-1"></h6>
+                            <p class="text-muted small mb-1" id="podcastDescription"></p>
+                            <div class="d-flex gap-1">
+                                <span class="badge bg-secondary small" id="podcastLevel"></span>
+                                <span class="badge bg-info small" id="podcastDifficulty"></span>
+                                <span class="badge bg-warning text-dark small" id="podcastDuration"></span>
+                            </div>
                         </div>
-                        <div id="allPodcastsGrid" class="videos-list">
-                            <!-- All podcasts will be populated here -->
+                        <div id="allPodcastsGrid" class="video-list">
+                            <!-- Episodes will be populated here -->
                         </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modals -->
+            <div class="modal fade" id="learningPathsModal" tabindex="-1">
+                <div class="modal-dialog modal-fullscreen-sm-down">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title">Learning Paths</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-2" id="learningPathsContent"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="supplementaryModal" tabindex="-1">
+                <div class="modal-dialog modal-fullscreen-sm-down">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h6 class="modal-title">Extra Content</h6>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-2" id="supplementaryContent"></div>
                     </div>
                 </div>
             </div>

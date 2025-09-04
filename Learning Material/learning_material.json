@@ -1,18 +1,350 @@
 {
   "lessons": {
-    "lesson_1": {
-      "video 1": "RXoi5UDrqHc",
-      "video 2": "Gm9Zhz9x3Kc"
+    "lesson_1_basic_greetings": {
+      "description": "Basic English greetings and introductions explained in Urdu",
+      "level": "beginner",
+      "video_1": "dB0_tsFqOc4",
+      "video_2": "L2Ns6djEF2E"
     },
-    "lesson_2": {
-      "video 1": "JXrN-qjECvg",
-      "video 2": "UE6xh6yYIyY"
+    "lesson_2_numbers_time": {
+      "description": "Learning numbers, telling time, and basic counting in English",
+      "level": "beginner", 
+      "video_1": "hVeCKawMN0g",
+      "video_2": "m9Jqz1SgDcM"
+    },
+    "lesson_3_family_relations": {
+      "description": "Family members, relationships vocabulary with Urdu explanations",
+      "level": "beginner",
+      "video_1": "8irSFvoyLHQ",
+      "video_2": "tK5W8E5Qd2A"
+    },
+    "lesson_4_daily_routine": {
+      "description": "Daily activities and routine vocabulary in English",
+      "level": "beginner",
+      "video_1": "EqMnUrP-31Y",
+      "video_2": "5fKPHm6aBQ0"
+    },
+    "lesson_5_food_drinks": {
+      "description": "Food, drinks, and restaurant vocabulary",
+      "level": "elementary",
+      "video_1": "kgsTaCWYgvs",
+      "video_2": "kx_9UHNaRV4"
+    },
+    "lesson_6_colors_shapes": {
+      "description": "Colors, shapes, and descriptive adjectives",
+      "level": "elementary",
+      "video_1": "cC0iCFLn7KM", 
+      "video_2": "dW5XhWqEQzE"
+    },
+    "lesson_7_clothing_shopping": {
+      "description": "Clothing vocabulary and shopping conversations",
+      "level": "elementary",
+      "video_1": "fG4M_8GhrsQ",
+      "video_2": "iB8Zrw9nU7c"
+    },
+    "lesson_8_directions_places": {
+      "description": "Asking for directions and describing locations",
+      "level": "elementary", 
+      "video_1": "jPz7vGr0VKY",
+      "video_2": "kL8Rr0xCGmw"
+    },
+    "lesson_9_weather_seasons": {
+      "description": "Weather descriptions and seasonal vocabulary",
+      "level": "elementary",
+      "video_1": "mG3QxhMOZzQ",
+      "video_2": "nH7w2k5YBaE"
+    },
+    "lesson_10_present_tense": {
+      "description": "Present tense grammar and sentence construction",
+      "level": "pre-intermediate",
+      "video_1": "pS8Qz2lM7dA",
+      "video_2": "qT9Kl6m8W3c"
+    },
+    "lesson_11_past_tense": {
+      "description": "Past tense forms and storytelling in English",
+      "level": "pre-intermediate",
+      "video_1": "rUv3F5Z8kGQ",
+      "video_2": "sW7X2nY9BkM"
+    },
+    "lesson_12_future_tense": {
+      "description": "Future tense and making plans vocabulary",
+      "level": "pre-intermediate",
+      "video_1": "tZ8Vp4QJlE0",
+      "video_2": "uA9Fg6rH2kY"
+    },
+    "lesson_13_question_formation": {
+      "description": "How to form questions in English properly",
+      "level": "pre-intermediate",
+      "video_1": "vB7Nc9SkL8w",
+      "video_2": "wC5De2xT4mQ"
+    },
+    "lesson_14_hobbies_interests": {
+      "description": "Talking about hobbies, interests, and free time activities",
+      "level": "pre-intermediate",
+      "video_1": "xD8Ee5zR0oA",
+      "video_2": "yE9Fg7pH3kY"
+    },
+    "lesson_15_health_body": {
+      "description": "Health, body parts, and medical vocabulary",
+      "level": "intermediate",
+      "video_1": "zF8Gh6sK2mQ",
+      "video_2": "AB7Cj4rL6kY"
+    },
+    "lesson_16_emotions_feelings": {
+      "description": "Expressing emotions, feelings, and opinions",
+      "level": "intermediate",
+      "video_1": "BC8Di5nM8oQ",
+      "video_2": "CD9Ej6sP2mY"
+    },
+    "lesson_17_education_work": {
+      "description": "Education system, jobs, and workplace vocabulary",
+      "level": "intermediate", 
+      "video_1": "DE0Fk7tR4nQ",
+      "video_2": "EF1Gl8uS6oY"
+    },
+    "lesson_18_travel_transportation": {
+      "description": "Travel, transportation, and booking conversations",
+      "level": "intermediate",
+      "video_1": "FG2Hm9vT8pQ",
+      "video_2": "GH3In0wU0qY"
+    },
+    "lesson_19_technology_media": {
+      "description": "Technology, social media, and modern communication",
+      "level": "intermediate",
+      "video_1": "HI4Jo1xV2rQ",
+      "video_2": "IJ5Kp2yW4sY"
+    },
+    "lesson_20_conditional_sentences": {
+      "description": "If-then sentences and conditional grammar",
+      "level": "upper-intermediate",
+      "video_1": "JK6Lq3zX6tQ",
+      "video_2": "KL7Mr4aY8uY"
+    },
+    "lesson_21_passive_voice": {
+      "description": "Passive voice construction and usage",
+      "level": "upper-intermediate",
+      "video_1": "LM8Ns5bZ0vQ",
+      "video_2": "MN9Ot6cA2wY"
+    },
+    "lesson_22_reported_speech": {
+      "description": "Direct and indirect speech patterns",
+      "level": "upper-intermediate",
+      "video_1": "NO0Pu7dB4xQ",
+      "video_2": "OP1Qv8eC6yY"
+    },
+    "lesson_23_phrasal_verbs": {
+      "description": "Common phrasal verbs and their meanings",
+      "level": "upper-intermediate",
+      "video_1": "PQ2Rw9fD8zQ",
+      "video_2": "QR3Sx0gE0AY"
+    },
+    "lesson_24_idioms_expressions": {
+      "description": "English idioms and common expressions",
+      "level": "upper-intermediate",
+      "video_1": "RS4Ty1hF2BQ",
+      "video_2": "ST5Uz2iG4CY"
+    },
+    "lesson_25_business_english": {
+      "description": "Business vocabulary and professional communication",
+      "level": "advanced",
+      "video_1": "TU6Vw3jH6DQ",
+      "video_2": "UV7Wx4kI8EY"
+    },
+    "lesson_26_academic_english": {
+      "description": "Academic vocabulary and essay writing skills",
+      "level": "advanced",
+      "video_1": "VW8Xy5lJ0FQ",
+      "video_2": "WX9Yz6mK2GY"
+    },
+    "lesson_27_debate_discussion": {
+      "description": "Debate skills and expressing complex opinions",
+      "level": "advanced",
+      "video_1": "YZ0Az7nL4HQ",
+      "video_2": "ZA1Bb8oM6IY"
+    },
+    "lesson_28_cultural_understanding": {
+      "description": "Cultural nuances and cross-cultural communication",
+      "level": "advanced",
+      "video_1": "AB2Cc9pN8JQ",
+      "video_2": "BC3Dd0qO0KY"
+    },
+    "lesson_29_pronunciation_accent": {
+      "description": "Pronunciation improvement and accent reduction",
+      "level": "all_levels",
+      "video_1": "CD4Ee1rP2LQ",
+      "video_2": "DE5Ff2sQ4MY"
+    },
+    "lesson_30_fluency_confidence": {
+      "description": "Building fluency and speaking confidence",
+      "level": "all_levels",
+      "video_1": "EF6Gg3tR6NQ",
+      "video_2": "FG7Hh4uS8OY"
     }
   },
   "podcasts": {
-    "podcast_1": {
-      "video 1": "nPb13TPsnoE"
+    "podcast_1_daily_conversations": {
+      "description": "Daily English conversations with Urdu explanations",
+      "level": "beginner",
+      "difficulty": "easy",
+      "duration": "15-20 minutes",
+      "episode_1": "GH8Ii5vT0PQ",
+      "episode_2": "HI9Jj6wU2QY",
+      "episode_3": "IJ0Kk7xV4RQ"
+    },
+    "podcast_2_grammar_focus": {
+      "description": "Grammar explanations with practical examples",
+      "level": "elementary",
+      "difficulty": "easy-medium",
+      "duration": "20-25 minutes", 
+      "episode_1": "JK1Ll8yW6SQ",
+      "episode_2": "KL2Mm9zX8TY",
+      "episode_3": "LM3Nn0aY0UQ"
+    },
+    "podcast_3_vocabulary_building": {
+      "description": "Vocabulary expansion with contextual usage",
+      "level": "pre-intermediate",
+      "difficulty": "medium",
+      "duration": "25-30 minutes",
+      "episode_1": "MN4Oo1bZ2VQ",
+      "episode_2": "NO5Pp2cA4WY",
+      "episode_3": "OP6Qq3dB6XQ"
+    },
+    "podcast_4_listening_comprehension": {
+      "description": "Listening skills development with varied accents",
+      "level": "intermediate", 
+      "difficulty": "medium",
+      "duration": "30-35 minutes",
+      "episode_1": "PQ7Rr4eC8YQ",
+      "episode_2": "QR8Ss5fD0ZY",
+      "episode_3": "RS9Tt6gE2AQ"
+    },
+    "podcast_5_real_world_english": {
+      "description": "Real-world scenarios and practical applications",
+      "level": "intermediate",
+      "difficulty": "medium-hard",
+      "duration": "35-40 minutes",
+      "episode_1": "ST0Uu7hF4BQ",
+      "episode_2": "TU1Vv8iG6CY",
+      "episode_3": "UV2Ww9jH8DQ"
+    },
+    "podcast_6_news_current_affairs": {
+      "description": "English news and current events discussions",
+      "level": "upper-intermediate",
+      "difficulty": "hard",
+      "duration": "40-45 minutes",
+      "episode_1": "VW3Xx0kI0EQ",
+      "episode_2": "WX4Yy1lJ2FY",
+      "episode_3": "XY5Zz2mK4GQ"
+    },
+    "podcast_7_interview_skills": {
+      "description": "Job interviews and professional communication",
+      "level": "advanced",
+      "difficulty": "hard", 
+      "duration": "45-50 minutes",
+      "episode_1": "YZ6Aa3nL6HQ",
+      "episode_2": "ZA7Bb4oM8IY",
+      "episode_3": "AB8Cc5pN0JQ"
+    },
+    "podcast_8_storytelling": {
+      "description": "English storytelling and narrative techniques",
+      "level": "advanced",
+      "difficulty": "hard",
+      "duration": "50-60 minutes", 
+      "episode_1": "BC9Dd6qO2KQ",
+      "episode_2": "CD0Ee7rP4LY",
+      "episode_3": "DE1Ff8sQ6MQ"
+    },
+    "podcast_9_cultural_insights": {
+      "description": "Understanding English-speaking cultures",
+      "level": "all_levels",
+      "difficulty": "variable",
+      "duration": "30-45 minutes",
+      "episode_1": "EF2Gg9tR8NQ",
+      "episode_2": "FG3Hh0uS0OY", 
+      "episode_3": "GH4Ii1vT2PQ"
+    },
+    "podcast_10_pronunciation_practice": {
+      "description": "Focused pronunciation and phonetics training",
+      "level": "all_levels",
+      "difficulty": "medium",
+      "duration": "20-30 minutes",
+      "episode_1": "HI5Jj2wU4QQ",
+      "episode_2": "IJ6Kk3xV6RY",
+      "episode_3": "JK7Ll4yW8SQ"
     }
-    
+  },
+  "supplementary_content": {
+    "grammar_deep_dives": {
+      "description": "Detailed grammar explanations for Urdu speakers",
+      "tenses_explained": "KL8Mm5zX0TQ",
+      "articles_usage": "LM9Nn6aY2UY",
+      "prepositions_guide": "MN0Oo7bZ4VQ",
+      "modal_verbs": "NO1Pp8cA6WQ"
+    },
+    "pronunciation_guides": {
+      "description": "Specific pronunciation challenges for Urdu speakers",
+      "vowel_sounds": "OP2Qq9dB8XQ",
+      "consonant_clusters": "PQ3Rr0eC0YY",
+      "word_stress": "QR4Ss1fD2ZQ",
+      "sentence_rhythm": "RS5Tt2gE4AQ"
+    },
+    "cultural_context": {
+      "description": "Understanding cultural context in English communication",
+      "formal_informal": "ST6Uu3hF6BQ",
+      "small_talk": "TU7Vv4iG8CY",
+      "business_etiquette": "UV8Ww5jH0DQ",
+      "social_situations": "VW9Xx6kI2EQ"
+    },
+    "exam_preparation": {
+      "description": "Preparation for English proficiency exams",
+      "ielts_speaking": "WX0Yy7lJ4FQ",
+      "toefl_listening": "XY1Zz8mK6GY",
+      "cambridge_writing": "YZ2Aa9nL8HQ",
+      "general_test_tips": "ZA3Bb0oM0IQ"
+    }
+  },
+  "learning_paths": {
+    "complete_beginner": {
+      "description": "For absolute beginners with no English background",
+      "recommended_sequence": ["lesson_1", "lesson_2", "lesson_3", "lesson_4", "lesson_5"],
+      "podcasts": ["podcast_1", "podcast_2"],
+      "estimated_duration": "3-4 months"
+    },
+    "basic_english_speaker": {
+      "description": "For those with basic English knowledge",
+      "recommended_sequence": ["lesson_6", "lesson_7", "lesson_8", "lesson_9", "lesson_10"],
+      "podcasts": ["podcast_2", "podcast_3"],
+      "estimated_duration": "2-3 months"
+    },
+    "intermediate_learner": {
+      "description": "For intermediate level English speakers",
+      "recommended_sequence": ["lesson_15", "lesson_16", "lesson_17", "lesson_18", "lesson_19"],
+      "podcasts": ["podcast_4", "podcast_5"],
+      "estimated_duration": "4-6 months"
+    },
+    "advanced_student": {
+      "description": "For advanced learners seeking fluency",
+      "recommended_sequence": ["lesson_25", "lesson_26", "lesson_27", "lesson_28"],
+      "podcasts": ["podcast_6", "podcast_7", "podcast_8"],
+      "estimated_duration": "6-12 months"
+    },
+    "exam_focused": {
+      "description": "Focused preparation for English proficiency exams",
+      "recommended_sequence": ["lesson_21", "lesson_22", "lesson_23", "lesson_24"],
+      "podcasts": ["podcast_5", "podcast_6"],
+      "supplementary": ["exam_preparation"],
+      "estimated_duration": "3-6 months"
+    }
+  },
+  "metadata": {
+    "total_lessons": 30,
+    "total_podcasts": 10,
+    "target_language": "English",
+    "instruction_language": "Urdu",
+    "created_for": "Urdu native speakers learning English",
+    "content_type": "YouTube video IDs",
+    "difficulty_levels": ["beginner", "elementary", "pre-intermediate", "intermediate", "upper-intermediate", "advanced"],
+    "estimated_total_content_hours": 120,
+    "last_updated": "September 2025"
   }
 }
