@@ -63,8 +63,17 @@ class PWAUpdateManager {
                 // Check if there's already a waiting worker
                 if (this.registration.waiting) {
                     console.log('🔄 Update available immediately');
-                    this.setUpdateFlag();
-                    this.waitingWorker = this.registration.waiting;
+                    // Only set flag if this is a new update (not already notified)
+                    const lastNotified = localStorage.getItem('wordwave_update_timestamp');
+                    const currentTime = Date.now();
+                    
+                    if (!lastNotified || (currentTime - parseInt(lastNotified)) > 60000) { // 1 minute cooldown
+                        this.setUpdateFlag();
+                        this.waitingWorker = this.registration.waiting;
+                    } else {
+                        console.log('🔕 Update already notified recently, skipping banner');
+                        this.waitingWorker = this.registration.waiting;
+                    }
                 } else {
                     // Only clear flags if no update is waiting
                     this.clearUpdateFlag();
@@ -99,9 +108,10 @@ class PWAUpdateManager {
     }
 
     setUpdateFlag() {
+        const timestamp = Date.now().toString();
         localStorage.setItem('wordwave_update_available', 'true');
-        localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
-        console.log('🚩 Update flag SET');
+        localStorage.setItem('wordwave_update_timestamp', timestamp);
+        console.log('🚩 Update flag SET with timestamp:', timestamp);
     }
 
     clearUpdateFlag() {
