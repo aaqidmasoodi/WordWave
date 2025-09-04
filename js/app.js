@@ -1,3 +1,36 @@
+// Swipe-to-Go-Back Prevention (All Platforms)
+// Prevents browser back gesture by maintaining single history entry
+(function() {
+    // Replace current history entry immediately
+    const replaceCurrentState = () => {
+        window.history.replaceState({}, '', window.location.href);
+    };
+
+    replaceCurrentState();
+
+    // Hook into all link clicks
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a');
+        if (link && link.href && !link.target && !link.download) {
+            setTimeout(replaceCurrentState, 10);
+        }
+    });
+
+    // Convert pushState to replaceState to prevent history growth
+    const originalPushState = window.history.pushState;
+    window.history.pushState = (...args) => {
+        window.history.replaceState(...args);
+    };
+
+    // Handle edge cases
+    window.addEventListener('popstate', replaceCurrentState);
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) replaceCurrentState();
+    });
+
+    console.log('🔒 Browser back prevention enabled');
+})();
+
 // js/app.js
 class EnglishLearningApp {
     constructor() {
