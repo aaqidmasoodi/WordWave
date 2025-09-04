@@ -98,42 +98,15 @@ class SettingsManager {
         const btn = document.getElementById('checkUpdatesBtn');
         if (!btn) return;
 
-        // FORCE CLEAR update flags on page load - version check
-        const currentVersion = '6.2.7';
-        const storedVersion = localStorage.getItem('wordwave_update_version');
-        const pwaStoredVersion = localStorage.getItem('wordwave_app_version');
+        // Simple flag check - no version comparison
+        const hasUpdate = localStorage.getItem('wordwave_update_available') === 'true';
         
-        // If either stored version matches current, clear all update flags
-        if (storedVersion === currentVersion || pwaStoredVersion === currentVersion) {
-            console.log('🧹 Version matches current - clearing ALL update flags');
-            localStorage.removeItem('wordwave_update_available');
-            localStorage.removeItem('wordwave_update_version');
-            localStorage.removeItem('wordwave_update_timestamp');
-            // Ensure PWA version is also set correctly
-            localStorage.setItem('wordwave_app_version', currentVersion);
-        }
-
-        // Only show install mode if flag is set AND we don't have current version
-        const hasUpdateFlag = localStorage.getItem('wordwave_update_available') === 'true';
-        const isCurrentVersionStored = (pwaStoredVersion === currentVersion);
-        
-        if (hasUpdateFlag && !isCurrentVersionStored) {
-            // Install mode - but double check this is actually a newer version
-            const flaggedVersion = localStorage.getItem('wordwave_update_version');
-            if (flaggedVersion && this.isNewerVersion(flaggedVersion, currentVersion)) {
-                btn.innerHTML = '<i class="bi bi-download"></i> Install Update';
-                btn.classList.remove('btn-outline-primary');
-                btn.classList.add('btn-primary');
-                this.isInstallMode = true;
-            } else {
-                // False positive - clear flags and show check mode
-                localStorage.removeItem('wordwave_update_available');
-                localStorage.removeItem('wordwave_update_version');
-                btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Check for Updates';
-                btn.classList.remove('btn-primary');
-                btn.classList.add('btn-outline-primary');
-                this.isInstallMode = false;
-            }
+        if (hasUpdate) {
+            // Install mode
+            btn.innerHTML = '<i class="bi bi-download"></i> Install Update';
+            btn.classList.remove('btn-outline-primary');
+            btn.classList.add('btn-primary');
+            this.isInstallMode = true;
         } else {
             // Check mode
             btn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Check for Updates';

@@ -1,5 +1,5 @@
 // WordWave Service Worker with OneSignal Integration
-const CACHE_NAME = 'wordwave-v6.2.7';
+const CACHE_NAME = 'wordwave-v6.2.8';
 
 // Import OneSignal service worker functionality FIRST
 importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
@@ -49,23 +49,18 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => {
                 console.log('📦 Caching files...');
-                // Cache files individually to handle errors better
                 return Promise.all(
                     urlsToCache.map(url => {
                         return cache.add(url).catch(error => {
                             console.warn('⚠️ Failed to cache:', url, error);
-                            // Continue even if some files fail to cache
                             return Promise.resolve();
                         });
                     })
                 );
             })
             .then(() => {
-                console.log('✅ Service worker installed successfully');
-                // Don't skip waiting - let user decide when to update
-            })
-            .catch(error => {
-                console.error('❌ Service worker installation failed:', error);
+                console.log('✅ Service worker installed - staying in waiting state');
+                // DON'T call skipWaiting() - stay in waiting state until user approves
             })
     );
 });

@@ -1,4 +1,6 @@
-// PWA Install Prompt
+// PWA Installation and Update Management
+
+// PWA Installer
 class PWAInstaller {
     constructor() {
         this.deferredPrompt = null;
@@ -6,156 +8,78 @@ class PWAInstaller {
     }
 
     init() {
-        // Listen for the beforeinstallprompt event
+        // Listen for beforeinstallprompt event
         window.addEventListener('beforeinstallprompt', (e) => {
-            // Prevent the mini-infobar from appearing on mobile
             e.preventDefault();
-            // Stash the event so it can be triggered later
             this.deferredPrompt = e;
-            // Show install button
-            this.showInstallButton();
+            console.log('💾 Install prompt ready');
         });
 
-        // Listen for the app being installed
+        // Listen for app installed event
         window.addEventListener('appinstalled', () => {
-            console.log('PWA was installed');
-            this.hideInstallButton();
+            console.log('✅ PWA installed successfully');
+            this.deferredPrompt = null;
         });
     }
 
-    showInstallButton() {
-        // Create install button if it doesn't exist
-        if (!document.getElementById('pwaInstallBtn')) {
-            const installBtn = document.createElement('button');
-            installBtn.id = 'pwaInstallBtn';
-            installBtn.className = 'btn btn-primary btn-sm position-fixed';
-            installBtn.style.cssText = `
-                bottom: 80px;
-                right: 20px;
-                z-index: 9999;
-                border-radius: 25px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-            `;
-            installBtn.innerHTML = '<i class="bi bi-download me-1"></i>Install App';
-            
-            installBtn.addEventListener('click', () => {
-                this.installApp();
-            });
-            
-            document.body.appendChild(installBtn);
+    async install() {
+        if (this.deferredPrompt) {
+            this.deferredPrompt.prompt();
+            const { outcome } = await this.deferredPrompt.userChoice;
+            console.log('📱 Install outcome:', outcome);
+            this.deferredPrompt = null;
+            return outcome === 'accepted';
         }
+        return false;
     }
 
-    hideInstallButton() {
-        const installBtn = document.getElementById('pwaInstallBtn');
-        if (installBtn) {
-            installBtn.remove();
-        }
-    }
-
-    async installApp() {
-        if (!this.deferredPrompt) return;
-
-        // Show the install prompt
-        this.deferredPrompt.prompt();
-        
-        // Wait for the user to respond to the prompt
-        const { outcome } = await this.deferredPrompt.userChoice;
-        
-        console.log(`User response to the install prompt: ${outcome}`);
-        
-        // Clear the deferredPrompt
-        this.deferredPrompt = null;
-        
-        // Hide the install button
-        this.hideInstallButton();
-    }
-
-    // Check if app is already installed
     isInstalled() {
         return window.matchMedia('(display-mode: standalone)').matches || 
                window.navigator.standalone === true;
     }
 }
 
-// PWA Update Manager - Automatic update detection with flag system
+// PWA Update Manager - Simple flag-based system
 class PWAUpdateManager {
     constructor() {
         this.registration = null;
-        this.currentVersion = '6.2.7'; // Current app version
+        this.waitingWorker = null;
         this.init();
     }
 
-    init() {
+    async init() {
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(registration => {
-                    this.registration = registration;
-                    console.log('SW registered: ', registration);
-                    
-                    // FORCE CLEAR update flags on init if version matches
-                    this.checkVersionAndClearFlags();
-                    
-                    // Check if there's already a waiting service worker
-                    if (registration.waiting && !this.isCurrentVersion()) {
-                        console.log('🔄 Update available immediately');
-                        this.setUpdateFlag();
-                    }
-                    
-                    // Listen for new service worker installing
-                    registration.addEventListener('updatefound', () => {
-                        console.log('🔄 New service worker found');
-                        this.handleUpdateFound(registration);
-                    });
-                    
-                    // Listen for service worker state changes
-                    navigator.serviceWorker.addEventListener('controllerchange', () => {
-                        console.log('🔄 Controller changed - clearing flag and reloading');
-                        this.clearUpdateFlag();
-                        window.location.reload();
-                    });
-
-                    // DISABLED automatic checking - only manual checks
-                    // setInterval(() => {
-                    //     console.log('🔍 Auto-checking for updates...');
-                    //     registration.update();
-                    // }, 300000);
-                })
-                .catch(registrationError => {
-                    console.log('SW registration failed: ', registrationError);
+            try {
+                this.registration = await navigator.serviceWorker.register('/sw.js');
+                console.log('✅ SW registered');
+                
+                // Clear any existing flags on app start
+                this.clearUpdateFlag();
+                
+                // Listen for new service worker
+                this.registration.addEventListener('updatefound', () => {
+                    console.log('🔄 New service worker found');
+                    this.handleUpdateFound(this.registration);
                 });
+                
+                // Check if there's already a waiting worker
+                if (this.registration.waiting) {
+                    console.log('🔄 Update available immediately');
+                    this.setUpdateFlag();
+                    this.waitingWorker = this.registration.waiting;
+                }
+                
+                // Listen for controller change (update installed)
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    console.log('🔄 Controller changed - reloading');
+                    this.clearUpdateFlag();
+                    window.location.reload();
+                });
+                
+            } catch (error) {
+                console.error('❌ SW registration failed:', error);
+            }
         }
-    }
-
-    checkVersionAndClearFlags() {
-        const storedVersion = localStorage.getItem('wordwave_app_version');
-        const updateFlag = localStorage.getItem('wordwave_update_available');
-        
-        console.log('🔍 Version check:', {
-            current: this.currentVersion,
-            stored: storedVersion,
-            updateFlag: updateFlag
-        });
-        
-        // Always clear flags when app loads with current version
-        if (storedVersion === this.currentVersion || !storedVersion) {
-            console.log('🧹 Clearing ALL update flags - version matches or not set');
-            this.clearUpdateFlag();
-            // Also clear settings.js version flag
-            localStorage.removeItem('wordwave_update_version');
-            localStorage.setItem('wordwave_app_version', this.currentVersion);
-        } else {
-            // Version mismatch - update stored version and clear flags
-            console.log('📝 Version mismatch - updating stored version');
-            localStorage.setItem('wordwave_app_version', this.currentVersion);
-            this.clearUpdateFlag();
-            localStorage.removeItem('wordwave_update_version');
-        }
-    }
-
-    isCurrentVersion() {
-        const storedVersion = localStorage.getItem('wordwave_app_version');
-        return storedVersion === this.currentVersion;
     }
 
     handleUpdateFound(registration) {
@@ -163,14 +87,12 @@ class PWAUpdateManager {
         
         newWorker.addEventListener('statechange', () => {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Only set flag if it's actually a new version
-                if (!this.isCurrentVersion()) {
-                    console.log('✅ NEW VERSION available - setting flag');
-                    this.setUpdateFlag();
-                    window.dispatchEvent(new CustomEvent('updateAvailable'));
-                } else {
-                    console.log('✅ Same version - not setting flag');
-                }
+                console.log('✅ NEW UPDATE AVAILABLE - setting flag');
+                this.setUpdateFlag();
+                this.waitingWorker = newWorker;
+                
+                // Dispatch event for UI updates
+                window.dispatchEvent(new CustomEvent('updateAvailable'));
             }
         });
     }
@@ -178,26 +100,25 @@ class PWAUpdateManager {
     setUpdateFlag() {
         localStorage.setItem('wordwave_update_available', 'true');
         localStorage.setItem('wordwave_update_timestamp', Date.now().toString());
-        console.log('🚩 Update flag set to true');
+        console.log('🚩 Update flag SET');
     }
 
     clearUpdateFlag() {
         localStorage.removeItem('wordwave_update_available');
         localStorage.removeItem('wordwave_update_timestamp');
-        localStorage.removeItem('wordwave_update_version');
-        console.log('🚩 All update flags cleared');
+        console.log('🚩 Update flag CLEARED');
     }
 
-    // Static method to force clear all update flags
-    static forceCleanUpdateFlags() {
-        localStorage.removeItem('wordwave_update_available');
-        localStorage.removeItem('wordwave_update_timestamp');
-        localStorage.removeItem('wordwave_update_version');
-        localStorage.setItem('wordwave_app_version', '6.2.7');
-        console.log('🧹 FORCE CLEARED all update flags and set current version');
+    // Install the waiting update
+    installUpdate() {
+        if (this.waitingWorker) {
+            console.log('🔄 Installing update...');
+            this.clearUpdateFlag();
+            this.waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+        }
     }
 
-    // Static methods for other components to use
+    // Static methods for other components
     static isUpdateAvailable() {
         return localStorage.getItem('wordwave_update_available') === 'true';
     }
