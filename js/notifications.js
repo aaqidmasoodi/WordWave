@@ -122,7 +122,17 @@ class OneSignalNotificationManager {
             
             if (actualPermission === 'granted' || actualPermission === true || permission === true) {
                 console.log('✅ Permission granted, opting in...');
+                
+                // Check state before opting in
+                const beforeState = OneSignal.User.PushSubscription.optedIn;
+                console.log('📊 Before opt-in - optedIn:', beforeState);
+                
                 await OneSignal.User.PushSubscription.optIn();
+                
+                // Check state after opting in
+                const afterState = OneSignal.User.PushSubscription.optedIn;
+                console.log('📊 After opt-in - optedIn:', afterState);
+                
                 this.subscribed = true;
                 this.userId = OneSignal.User.onesignalId;
                 console.log('🆔 New User ID:', this.userId);
@@ -150,7 +160,21 @@ class OneSignalNotificationManager {
 
         try {
             console.log('📱 Unsubscribing from OneSignal...');
+            
+            // Check current state before unsubscribing
+            const beforeState = OneSignal.User.PushSubscription.optedIn;
+            console.log('📊 Before unsubscribe - optedIn:', beforeState);
+            
             await OneSignal.User.PushSubscription.optOut();
+            
+            // Check state after unsubscribing
+            const afterState = OneSignal.User.PushSubscription.optedIn;
+            console.log('📊 After unsubscribe - optedIn:', afterState);
+            
+            // Verify with OneSignal's permission state
+            const permissionState = await OneSignal.Notifications.permission;
+            console.log('📊 OneSignal permission state:', permissionState);
+            
             this.subscribed = false;
             this.saveState();
             console.log('✅ Successfully unsubscribed');
