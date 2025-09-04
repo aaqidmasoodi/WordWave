@@ -208,7 +208,7 @@ class OneSignalNotificationManager {
                 words_learned: userData?.learnedWords?.length || 0,
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
-                app_version: '6.2.4'
+                app_version: '6.2.5'
             };
 
             console.log('🏷️ Setting user tags:', tags);

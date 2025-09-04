@@ -19,14 +19,18 @@
             background-color: #f8f9fa;
             height: 100vh;
             overflow: hidden;
+            margin: 0;
+            padding: 0;
         }
         
         .install-container {
+            min-height: 100vh;
             height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            box-sizing: border-box;
         }
         
         .install-card {
@@ -163,7 +167,7 @@
                 <div class="platform-steps">
                     <div class="step">
                         <div class="step-number">1</div>
-                        <div>Tap <i class="bi bi-share"></i> Share button at the bottom</div>
+                        <div>Tap <i class="bi bi-box-arrow-up"></i> Share button at the bottom</div>
                     </div>
                     
                     <div class="step">
@@ -176,10 +180,6 @@
                         <div>Tap "Add" to confirm</div>
                     </div>
                 </div>
-                
-                <button class="btn btn-primary install-btn" onclick="continueToApp()">
-                    Continue to App
-                </button>
             </div>
             
             <!-- Android Instructions -->
@@ -202,10 +202,6 @@
                 
                 <button class="btn btn-primary install-btn" id="android-install-btn" onclick="installPWA()">
                     <i class="bi bi-download me-2"></i>Install App
-                </button>
-                
-                <button class="btn continue-btn install-btn" onclick="continueToApp()">
-                    Continue in Browser
                 </button>
             </div>
             
@@ -244,13 +240,19 @@
         function detectPlatform() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
             const isAndroid = /Android/.test(navigator.userAgent);
+            const isChrome = /Chrome/.test(navigator.userAgent) && !/Edge/.test(navigator.userAgent);
+            const isEdge = /Edge/.test(navigator.userAgent);
             
             if (isIOS) {
                 document.getElementById('ios-instructions').classList.remove('hidden');
             } else if (isAndroid) {
                 document.getElementById('android-instructions').classList.remove('hidden');
-            } else {
+            } else if (isChrome || isEdge) {
+                // Only show desktop instructions for Chrome/Edge (PWA-capable browsers)
                 document.getElementById('desktop-instructions').classList.remove('hidden');
+            } else {
+                // Safari desktop and other browsers - redirect to app
+                continueToApp();
             }
         }
         
