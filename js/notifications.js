@@ -53,8 +53,9 @@ class OneSignalNotificationManager {
                 this.saveState();
                 this.updateUI();
                 
+                // Only set tags after subscription is stable
                 if (this.subscribed) {
-                    this.setUserTags();
+                    setTimeout(() => this.setUserTags(), 3000);
                 }
             });
 
@@ -66,6 +67,11 @@ class OneSignalNotificationManager {
             this.saveState();
             this.updateConnectionStatus(true);
             this.updateUI();
+
+            // Set tags after initialization is complete and stable
+            if (this.subscribed) {
+                setTimeout(() => this.setUserTags(), 5000);
+            }
 
         } catch (error) {
             console.error('OneSignal init failed:', error);
@@ -132,12 +138,19 @@ class OneSignalNotificationManager {
                 words_learned: userData?.learnedWords?.length || 0,
                 streak_count: userData?.streakCount || 0,
                 device_type: /iPhone|iPad|iPod/.test(navigator.userAgent) ? 'iOS' : /Android/.test(navigator.userAgent) ? 'Android' : 'Web',
-                app_version: '6.0.4'
+                app_version: '6.0.5'
             };
 
-            OneSignal.User.addTags(tags);
+            // Add delay to avoid conflicts during initialization
+            setTimeout(() => {
+                OneSignal.User.addTags(tags).catch(error => {
+                    // Silent fail for tag conflicts - not critical
+                    console.debug('Tag update failed (non-critical):', error);
+                });
+            }, 2000);
         } catch (error) {
-            console.error('Failed to set user tags:', error);
+            // Silent fail for tag setting
+            console.debug('Failed to set user tags (non-critical):', error);
         }
     }
 
